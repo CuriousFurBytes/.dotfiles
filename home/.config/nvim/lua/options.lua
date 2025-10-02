@@ -1,0 +1,1 @@
+opt.whichwrap:append "<>[]hl"

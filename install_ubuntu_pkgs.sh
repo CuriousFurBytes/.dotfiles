@@ -45,8 +45,13 @@ nix-env -iA nixpkgs.zoxide
 # Bat
 nix-env -iA nixpkgs.bat
 
-# Wezterm
-nix-env -iA nixpkgs.wezterm
+# Kitty
+nix-env -iA nixpkgs.kitty
+ln -sf ~/.local/kitty.app/bin/kitty ~/.local/kitty.app/bin/kitten ~/.local/bin/
+cp ~/.local/kitty.app/share/applications/kitty.desktop ~/.local/share/applications/
+sed -i "s|Icon=kitty|Icon=$(readlink -f ~)/.local/kitty.app/share/icons/hicolor/256x256/apps/kitty.png|g" ~/.local/share/applications/kitty*.desktop
+sed -i "s|Exec=kitty|Exec=$(readlink -f ~)/.local/kitty.app/bin/kitty|g" ~/.local/share/applications/kitty*.desktop
+echo 'kitty.desktop' > ~/.config/xdg-terminals.list
 
 # Thunderbird
 nix-env -iA nixpkgs.thunderbird
@@ -85,3 +90,4 @@ sudo apt install proton-vpn-gnome-desktop
 
 # Bitwarden
 sudo snap install bitwarden
+

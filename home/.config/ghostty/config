@@ -1,0 +1,5 @@
+theme = catppuccin-mocha.conf
+font-family = "AtkynsonMono Nerd Font Mono"
+shell-integration = zsh
+cursor-style = block
+cursor-style-blink = false
