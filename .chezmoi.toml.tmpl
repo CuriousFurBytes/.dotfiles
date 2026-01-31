@@ -1,0 +1,19 @@
+{{- $email := promptStringOnce . "email" "Email address" -}}
+{{- $name := promptStringOnce . "name" "Full name" -}}
+{{- $github_username := promptStringOnce . "github_username" "GitHub username" -}}
+{{- $is_work := promptBoolOnce . "is_work" "Is this a work machine" -}}
+
+{{- $osid := .chezmoi.os -}}
+{{- if hasKey .chezmoi.osRelease "id" -}}
+{{-   $osid = printf "%s-%s" .chezmoi.os .chezmoi.osRelease.id -}}
+{{- end -}}
+
+[data]
+    email = {{ $email | quote }}
+    name = {{ $name | quote }}
+    github_username = {{ $github_username | quote }}
+    is_work = {{ $is_work }}
+    osid = {{ $osid | quote }}
+
+[bitwarden]
+    command = "bw"

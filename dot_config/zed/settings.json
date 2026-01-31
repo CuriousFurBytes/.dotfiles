@@ -1,0 +1,143 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
+{
+  "ui_font_family": "MonaspiceKr Nerd Font Mono",
+  "icon_theme": "Catppuccin Mocha",
+  "buffer_font_family": "MonaspiceAr Nerd Font Mono",
+  "ui_font_size": 13.0,
+  "buffer_font_size": 13.0,
+  "show_whitespaces": "trailing",
+  "hover_popover_enabled": true,
+  "edit_predictions": {
+    "mode": "eager",
+  },
+  "debugger": {
+    "button": true,
+  },
+  "search": {
+    "button": true,
+  },
+  "diagnostics": {
+    "button": true,
+  },
+  "terminal": {
+    "button": true,
+    "detect_venv": {
+      "on": {
+        "directories": [".venv", ".env", "venv", "env"],
+        "activate_script": "default",
+      },
+    },
+  },
+  "status_bar": {
+    "cursor_position_button": true,
+    "active_language_button": true,
+  },
+  "git_panel": {
+    "button": true,
+  },
+  "project_panel": {
+    "indent_size": 20.0,
+    "dock": "left",
+    "button": true,
+  },
+  "languages": {
+    "Python": {
+      "indent_guides": {
+        "background_coloring": "disabled",
+        "line_width": 1,
+      },
+      "soft_wrap": "none",
+      "language_servers": ["basedpyright", "pyright", "ruff"],
+      "formatter": {
+        "external": {
+          "command": "/.venv/bin/ruff",
+          "arguments": ["format", "-"],
+        },
+      },
+      "code_actions_on_format": {
+        "source.organizeImports.ruff": true,
+        "source.fixAll.ruff": true,
+      },
+    },
+    "TOML": {
+      "prettier": {
+        "allowed": false,
+      },
+    },
+  },
+  "lsp": {
+    "ruff": {
+      "binary": {
+        "env": {
+          "VIRTUAL_ENV": "${worktree}/.venv",
+        },
+      },
+    },
+  },
+  "prettier": {
+    "allowed": true,
+  },
+  "indent_guides": {
+    "background_coloring": "disabled",
+    "coloring": "fixed",
+  },
+  "auto_signature_help": false,
+  "use_system_window_tabs": false,
+  "bottom_dock_layout": "contained",
+  "tabs": {
+    "file_icons": true,
+    "git_status": true,
+  },
+  "title_bar": {
+    "show_branch_icon": true,
+  },
+  "inlay_hints": {
+    "show_background": true,
+    "enabled": false,
+  },
+  "tab_size": 4,
+  "toolbar": {
+    "code_actions": true,
+    "quick_actions": true,
+    "breadcrumbs": true,
+  },
+  "ui_font_weight": 600.0,
+  "on_last_window_closed": "quit_app",
+  "when_closing_with_no_tabs": "close_window",
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false,
+  },
+  "preview_tabs": {
+    "enabled": false,
+  },
+  "minimap": {
+    "current_line_highlight": "all",
+    "thumb_border": "full",
+    "thumb": "always",
+    "show": "always",
+  },
+  "autosave": {
+    "after_delay": {
+      "milliseconds": 1000,
+    },
+  },
+  "auto_indent_on_paste": true,
+  "ensure_final_newline_on_save": true,
+  "base_keymap": "VSCode",
+  "theme": {
+    "mode": "system",
+    "light": "One Light",
+    "dark": "Rosé Pine",
+  },
+  "features": {
+    "edit_prediction_provider": "zed",
+  },
+}

@@ -1,0 +1,6 @@
+theme = Rose Pine
+font-family = MonaspiceKr Nerd Font Mono
+font-feature = -calt, -liga, -dlig
+shell-integration = zsh
+cursor-style = block
+cursor-style-blink = false

@@ -1,0 +1,194 @@
+#!/bin/bash
+set -e
+
+# This script runs whenever packages.yaml changes
+# Hash: {{ include "packages.yml" | sha256sum }}
+
+echo "Installing packages..."
+
+{{ if eq .chezmoi.os "darwin" }}
+# macOS - Homebrew
+echo "Installing Homebrew packages..."
+
+{{ $packages := .chezmoi.sourceDir | printf "%s/packages.yml" | include | fromYaml }}
+
+# Add taps
+{{ range $packages.homebrew.taps }}
+brew tap {{ . | quote }}
+{{ end }}
+
+# Install formulae
+{{ range $packages.homebrew.formulae }}
+if brew list {{ . | quote }} &> /dev/null; then
+    echo "✓ {{ . }} already installed, skipping"
+else
+    echo "Installing {{ . }}..."
+    brew install {{ . | quote }} || echo "Warning: Failed to install {{ . }}"
+fi
+{{ end }}
+
+# Install casks
+{{ range $packages.homebrew.casks }}
+if brew list --cask {{ . | quote }} &> /dev/null; then
+    echo "✓ {{ . }} already installed, skipping"
+else
+    OUTPUT=$(brew install --cask {{ . | quote }} 2>&1) || {
+        if echo "$OUTPUT" | grep -q "It seems there is already an App at"; then
+            echo "✓ {{ . }} already exists in /Applications, skipping"
+        elif brew list --cask {{ . | quote }} &> /dev/null; then
+            echo "✓ {{ . }} installed successfully"
+        else
+            echo "Installing {{ . }}..."
+            echo "$OUTPUT"
+            echo "Warning: Failed to install {{ . }}"
+        fi
+    }
+fi
+{{ end }}
+
+{{ else if eq .chezmoi.os "linux" }}
+# Linux - apt, snap, flatpak, homebrew
+echo "Installing Linux packages..."
+
+{{ $packages := .chezmoi.sourceDir | printf "%s/packages.yml" | include | fromYaml }}
+
+# Update package lists
+sudo apt update
+
+# Install apt packages
+echo "Installing apt packages..."
+{{ range $packages.apt.packages }}
+if dpkg -l | grep -q "^ii  {{ . }} "; then
+    echo "✓ {{ . }} already installed, skipping"
+else
+    echo "Installing {{ . }}..."
+    sudo apt install -y {{ . }} || echo "Warning: Failed to install {{ . }}"
+fi
+{{ end }}
+
+# Install Homebrew packages on Linux
+echo "Installing Homebrew packages..."
+{{ range $packages.homebrew.formulae }}
+if brew list {{ . | quote }} &> /dev/null; then
+    echo "✓ {{ . }} already installed, skipping"
+else
+    echo "Installing {{ . }}..."
+    brew install {{ . | quote }} || echo "Warning: Failed to install {{ . }}"
+fi
+{{ end }}
+
+# Install snap packages
+echo "Installing snap packages..."
+{{ range $packages.snap.packages }}
+if snap list {{ .name }} &> /dev/null; then
+    echo "✓ {{ .name }} already installed, skipping"
+else
+    echo "Installing {{ .name }}..."
+{{ if .classic }}
+    sudo snap install {{ .name }} --classic || echo "Warning: Failed to install {{ .name }}"
+{{ else }}
+    sudo snap install {{ .name }} || echo "Warning: Failed to install {{ .name }}"
+{{ end }}
+fi
+{{ end }}
+
+# Install flatpak packages
+echo "Installing flatpak packages..."
+{{ range $packages.flatpak.packages }}
+if flatpak list | grep -q {{ . }}; then
+    echo "✓ {{ . }} already installed, skipping"
+else
+    echo "Installing {{ . }}..."
+    flatpak install -y flathub {{ . }} || echo "Warning: Failed to install {{ . }}"
+fi
+{{ end }}
+
+{{ end }}
+
+# Install uv tools (both OS)
+{{ $packages := .chezmoi.sourceDir | printf "%s/packages.yml" | include | fromYaml }}
+{{ if $packages.uv_tools }}
+echo "Installing uv tools..."
+{{ range $packages.uv_tools }}
+if uv tool list | grep -q "^{{ . }} "; then
+    echo "✓ {{ . }} already installed, skipping"
+else
+    echo "Installing {{ . }}..."
+    uv tool install {{ . }} || echo "Warning: Failed to install {{ . }}"
+fi
+{{ end }}
+{{ end }}
+
+# Install Go tools (both OS)
+{{ if $packages.go_tools }}
+echo "Installing Go tools..."
+{{ range $packages.go_tools }}
+# Extract binary name from package path
+{{ $pkgPath := . }}
+{{ $pkgName := $pkgPath | regexFind "[^/]+@" | trimSuffix "@" }}
+if command -v {{ $pkgName }} &> /dev/null; then
+    echo "✓ {{ $pkgName }} already installed, skipping"
+else
+    echo "Installing {{ $pkgName }}..."
+    go install {{ $pkgPath }} || echo "Warning: Failed to install {{ $pkgPath }}"
+fi
+{{ end }}
+{{ end }}
+
+# Install GitHub CLI extensions (both OS)
+{{ if $packages.gh_extensions }}
+echo "Installing GitHub CLI extensions..."
+{{ range $packages.gh_extensions }}
+{{ $extName := . | regexFind "[^/]+$" }}
+if gh extension list | grep -q {{ $extName | quote }}; then
+    echo "✓ {{ $extName }} already installed, skipping"
+else
+    echo "Installing {{ $extName }}..."
+    gh extension install {{ . }} || echo "Warning: Failed to install {{ . }}"
+fi
+{{ end }}
+{{ end }}
+
+# Install eget tools (both OS)
+{{ if $packages.eget_tools }}
+echo "Installing eget tools..."
+# Ensure ~/.local/bin exists
+mkdir -p ~/.local/bin
+{{ range $packages.eget_tools }}
+{{ $toolName := . | regexFind "[^/]+$" }}
+if command -v {{ $toolName }} &> /dev/null; then
+    echo "✓ {{ $toolName }} already installed, skipping"
+else
+    echo "Installing {{ $toolName }}..."
+    eget {{ . }} --to ~/.local/bin || echo "Warning: Failed to install {{ . }}"
+fi
+{{ end }}
+{{ end }}
+
+# Install yay packages (both OS - using topgrade via brew on macOS, yay on Linux)
+{{ if eq .chezmoi.os "linux" }}
+{{ if $packages.yay_packages }}
+# Install yay if not present
+if ! command -v yay &> /dev/null; then
+    echo "Installing yay..."
+    sudo pacman -S --needed --noconfirm git base-devel
+    git clone https://aur.archlinux.org/yay.git /tmp/yay
+    cd /tmp/yay
+    makepkg -si --noconfirm
+    cd -
+    rm -rf /tmp/yay
+fi
+
+echo "Installing yay packages..."
+{{ range $packages.yay_packages }}
+if yay -Qi {{ . }} &> /dev/null; then
+    echo "✓ {{ . }} already installed, skipping"
+else
+    echo "Installing {{ . }}..."
+    yay -S --noconfirm {{ . }} || echo "Warning: Failed to install {{ . }}"
+fi
+{{ end }}
+{{ end }}
+{{ end }}
+
+echo "Package installation complete!"

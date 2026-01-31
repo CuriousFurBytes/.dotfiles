@@ -1,0 +1,3 @@
+{{- if and (lookPath "bw") (env "BW_SESSION") -}}
+{{ (bitwarden "item" "SSH Key").sshKey.privateKey -}}
+{{- end -}}

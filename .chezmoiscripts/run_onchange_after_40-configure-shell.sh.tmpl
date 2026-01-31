@@ -1,0 +1,46 @@
+#!/bin/bash
+set -e
+
+echo "Configuring shell..."
+
+# Get the zsh path
+ZSH_PATH=$(which zsh)
+SYSTEM_ZSH="/bin/zsh"
+
+echo "Found zsh at: $ZSH_PATH"
+
+# Use system zsh if Homebrew zsh isn't in /etc/shells
+if [ "$ZSH_PATH" != "$SYSTEM_ZSH" ]; then
+    # Check if Homebrew zsh is in /etc/shells
+    if ! grep -q "^${ZSH_PATH}$" /etc/shells; then
+        echo "Adding $ZSH_PATH to /etc/shells..."
+        echo "$ZSH_PATH" | sudo tee -a /etc/shells
+    fi
+fi
+
+# Check current shell
+CURRENT_SHELL=$(dscl . -read ~/ UserShell | awk '{print $2}')
+
+if [ "$CURRENT_SHELL" != "$ZSH_PATH" ]; then
+    echo "Changing default shell to $ZSH_PATH..."
+    chsh -s "$ZSH_PATH"
+else
+    echo "✓ Shell is already set to $ZSH_PATH"
+fi
+
+# Install fzf keybindings
+if command -v fzf &> /dev/null; then
+    echo "Setting up fzf..."
+    {{ if eq .chezmoi.os "darwin" }}
+    if [ -f "$(brew --prefix)/opt/fzf/install" ]; then
+        "$(brew --prefix)/opt/fzf/install" --key-bindings --completion --no-update-rc --no-bash --no-fish 2>/dev/null || true
+    fi
+    {{ else }}
+    if [ -f /usr/share/doc/fzf/examples/install ]; then
+        /usr/share/doc/fzf/examples/install --key-bindings --completion --no-update-rc --no-bash --no-fish 2>/dev/null || true
+    fi
+    {{ end }}
+    echo "✓ fzf configured"
+fi
+
+echo "✓ Shell configuration complete"

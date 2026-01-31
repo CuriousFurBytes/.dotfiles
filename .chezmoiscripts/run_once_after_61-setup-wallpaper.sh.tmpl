@@ -1,0 +1,60 @@
+#!/bin/bash
+set -e
+
+# Copy wallpaper from assets
+WALLPAPER_SRC="{{ .chezmoi.sourceDir }}/assets/wallpaper.png"
+WALLPAPER_DEST="$HOME/.config/wallpaper.png"
+
+if [ -f "$WALLPAPER_SRC" ]; then
+    mkdir -p "$HOME/.config"
+    cp "$WALLPAPER_SRC" "$WALLPAPER_DEST"
+    echo "✓ Wallpaper copied to $WALLPAPER_DEST"
+else
+    echo "Warning: Wallpaper not found at $WALLPAPER_SRC"
+    exit 0
+fi
+
+{{ if eq .chezmoi.os "darwin" }}
+# macOS - Set desktop wallpaper
+if [ -f "$WALLPAPER_DEST" ]; then
+    echo "Setting macOS desktop wallpaper..."
+    osascript -e "tell application \"Finder\" to set desktop picture to POSIX file \"$WALLPAPER_DEST\""
+    echo "✓ macOS wallpaper set"
+fi
+{{ else if eq .chezmoi.os "linux" }}
+# Linux - Set desktop wallpaper (supports GNOME, KDE, XFCE, etc.)
+if [ -f "$WALLPAPER_DEST" ]; then
+    echo "Setting Linux desktop wallpaper..."
+
+    # Detect desktop environment and set wallpaper accordingly
+    if [ "$XDG_CURRENT_DESKTOP" = "GNOME" ] || [ "$DESKTOP_SESSION" = "gnome" ]; then
+        # GNOME
+        gsettings set org.gnome.desktop.background picture-uri "file://$WALLPAPER_DEST"
+        gsettings set org.gnome.desktop.background picture-uri-dark "file://$WALLPAPER_DEST"
+        echo "✓ GNOME wallpaper set"
+    elif [ "$XDG_CURRENT_DESKTOP" = "KDE" ] || [ "$DESKTOP_SESSION" = "plasma" ]; then
+        # KDE Plasma
+        qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "
+            var allDesktops = desktops();
+            for (i=0;i<allDesktops.length;i++) {
+                d = allDesktops[i];
+                d.wallpaperPlugin = 'org.kde.image';
+                d.currentConfigGroup = Array('Wallpaper', 'org.kde.image', 'General');
+                d.writeConfig('Image', 'file://$WALLPAPER_DEST');
+            }
+        " 2>/dev/null || true
+        echo "✓ KDE wallpaper set"
+    elif [ "$XDG_CURRENT_DESKTOP" = "XFCE" ]; then
+        # XFCE
+        xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/last-image -s "$WALLPAPER_DEST" 2>/dev/null || true
+        echo "✓ XFCE wallpaper set"
+    elif command -v feh &> /dev/null; then
+        # Fallback to feh (works with i3, dwm, etc.)
+        feh --bg-scale "$WALLPAPER_DEST"
+        echo "✓ Wallpaper set using feh"
+    else
+        echo "Warning: Could not detect desktop environment or feh not installed"
+        echo "Wallpaper saved to $WALLPAPER_DEST - set it manually"
+    fi
+fi
+{{ end }}

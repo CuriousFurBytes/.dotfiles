@@ -1,0 +1,43 @@
+#!/bin/bash
+set -e
+
+{{ if eq .chezmoi.os "darwin" }}
+# Install Homebrew
+if ! command -v brew &> /dev/null; then
+    echo "Installing Homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    
+    # Add Homebrew to PATH
+    if [[ $(uname -m) == "arm64" ]]; then
+        echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    else
+        echo 'eval "$(/usr/local/bin/brew shellenv)"' >> ~/.zprofile
+        eval "$(/usr/local/bin/brew shellenv)"
+    fi
+fi
+{{ else if eq .chezmoi.os "linux" }}
+# Update apt
+sudo apt update
+
+# Install snap if not present
+if ! command -v snap &> /dev/null; then
+    echo "Installing snapd..."
+    sudo apt install -y snapd
+fi
+
+# Install flatpak if not present
+if ! command -v flatpak &> /dev/null; then
+    echo "Installing flatpak..."
+    sudo apt install -y flatpak
+    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+fi
+
+# Install Homebrew on Linux (optional but useful)
+if ! command -v brew &> /dev/null; then
+    echo "Installing Homebrew on Linux..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.zprofile
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+fi
+{{ end }}

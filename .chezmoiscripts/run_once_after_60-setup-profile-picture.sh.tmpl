@@ -1,0 +1,44 @@
+#!/bin/bash
+set -e
+
+# Copy profile picture from assets
+PROFILE_SRC="{{ .chezmoi.sourceDir }}/assets/profile.png"
+PROFILE_DEST="$HOME/.config/profile-picture.png"
+
+if [ -f "$PROFILE_SRC" ]; then
+    mkdir -p "$HOME/.config"
+    cp "$PROFILE_SRC" "$PROFILE_DEST"
+    echo "✓ Profile picture copied to $PROFILE_DEST"
+else
+    echo "Warning: Profile picture not found at $PROFILE_SRC"
+fi
+
+{{ if eq .chezmoi.os "darwin" }}
+# macOS - Set user picture
+if [ -f "$PROFILE_DEST" ]; then
+    echo "Setting macOS user profile picture..."
+    sudo dscl . delete /Users/$(whoami) JPEGPhoto 2>/dev/null || true
+    sudo dscl . delete /Users/$(whoami) Picture 2>/dev/null || true
+    sudo dscl . create /Users/$(whoami) Picture "$PROFILE_DEST"
+    echo "✓ macOS profile picture set"
+fi
+{{ else if eq .chezmoi.os "linux" }}
+# Linux - Set user picture (works with GNOME and most desktop environments)
+if [ -f "$PROFILE_DEST" ]; then
+    echo "Setting Linux user profile picture..."
+    # Copy to standard location
+    mkdir -p "$HOME/.face"
+    cp "$PROFILE_DEST" "$HOME/.face"
+    cp "$PROFILE_DEST" "$HOME/.face.icon"
+
+    # Set via AccountsService if available (GNOME, etc.)
+    if command -v dbus-send &> /dev/null; then
+        dbus-send --system --print-reply \
+            --dest=org.freedesktop.Accounts \
+            /org/freedesktop/Accounts/User$(id -u) \
+            org.freedesktop.Accounts.User.SetIconFile \
+            string:"$PROFILE_DEST" 2>/dev/null || true
+    fi
+    echo "✓ Linux profile picture set"
+fi
+{{ end }}
