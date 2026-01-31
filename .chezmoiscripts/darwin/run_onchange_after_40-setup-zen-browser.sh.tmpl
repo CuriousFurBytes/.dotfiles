@@ -1,0 +1,116 @@
+#!/bin/bash
+# Zen Browser configuration setup
+# This script links Zen Browser config files from dotfiles to the active profile
+
+set -e
+
+echo "Setting up Zen Browser configuration..."
+
+ZEN_SUPPORT_DIR="$HOME/Library/Application Support/Zen"
+ZEN_PROFILES_INI="$ZEN_SUPPORT_DIR/profiles.ini"
+
+# Check if Zen Browser is installed
+if [ ! -d "$ZEN_SUPPORT_DIR" ]; then
+    echo "⚠️  Zen Browser not installed, skipping setup"
+    exit 0
+fi
+
+# Find the default profile path
+if [ -f "$ZEN_PROFILES_INI" ]; then
+    # Get the default profile path from profiles.ini
+    PROFILE_PATH=$(grep -A 2 "Default=1" "$ZEN_PROFILES_INI" | grep "Path=" | cut -d'=' -f2)
+
+    if [ -z "$PROFILE_PATH" ]; then
+        # Fallback: try to get the install default
+        PROFILE_PATH=$(grep "^Default=" "$ZEN_PROFILES_INI" | head -1 | cut -d'=' -f2)
+    fi
+
+    if [ -n "$PROFILE_PATH" ]; then
+        PROFILE_DIR="$ZEN_SUPPORT_DIR/$PROFILE_PATH"
+
+        if [ -d "$PROFILE_DIR" ]; then
+            echo "Found Zen Browser profile at: $PROFILE_DIR"
+
+            # Create chrome directory if it doesn't exist
+            mkdir -p "$PROFILE_DIR/chrome"
+
+            # Link or copy userChrome.css
+            if [ -f "$HOME/.config/zen-browser/chrome/userChrome.css" ]; then
+                echo "Installing userChrome.css..."
+                cp "$HOME/.config/zen-browser/chrome/userChrome.css" "$PROFILE_DIR/chrome/userChrome.css"
+            fi
+
+            # Copy user.js preferences
+            if [ -f "$HOME/.config/zen-browser/user.js" ]; then
+                echo "Installing user.js preferences..."
+                cp "$HOME/.config/zen-browser/user.js" "$PROFILE_DIR/user.js"
+            fi
+
+            # Install extensions using policies.json
+            if [ -f "$HOME/.config/zen-browser/extensions.json" ]; then
+                echo "Setting up extension auto-install..."
+
+                # Create distribution directory for policies
+                ZEN_APP_DIR="/Applications/Zen Browser.app"
+                if [ -d "$ZEN_APP_DIR" ]; then
+                    DIST_DIR="$ZEN_APP_DIR/Contents/Resources/distribution"
+
+                    # Need sudo to write to application directory
+                    if [ -w "$ZEN_APP_DIR/Contents/Resources" ] || sudo -n true 2>/dev/null; then
+                        sudo mkdir -p "$DIST_DIR"
+
+                        # Generate policies.json from extensions list
+                        echo "Generating policies.json..."
+
+                        # Start building the policies.json
+                        echo '{' | sudo tee "$DIST_DIR/policies.json" > /dev/null
+                        echo '  "policies": {' | sudo tee -a "$DIST_DIR/policies.json" > /dev/null
+                        echo '    "ExtensionSettings": {' | sudo tee -a "$DIST_DIR/policies.json" > /dev/null
+
+                        # Parse extensions.json and add each extension
+                        first=true
+                        while IFS= read -r line; do
+                            id=$(echo "$line" | grep -o '"id": "[^"]*"' | cut -d'"' -f4)
+                            url=$(echo "$line" | grep -o '"url": "[^"]*"' | cut -d'"' -f4)
+
+                            if [ -n "$id" ] && [ -n "$url" ]; then
+                                if [ "$first" = false ]; then
+                                    echo ',' | sudo tee -a "$DIST_DIR/policies.json" > /dev/null
+                                fi
+                                first=false
+
+                                cat << EOF | sudo tee -a "$DIST_DIR/policies.json" > /dev/null
+      "$id": {
+        "installation_mode": "normal_installed",
+        "install_url": "$url"
+      }
+EOF
+                            fi
+                        done < "$HOME/.config/zen-browser/extensions.json"
+
+                        # Close the JSON structure
+                        echo '    }' | sudo tee -a "$DIST_DIR/policies.json" > /dev/null
+                        echo '  }' | sudo tee -a "$DIST_DIR/policies.json" > /dev/null
+                        echo '}' | sudo tee -a "$DIST_DIR/policies.json" > /dev/null
+
+                        echo "✓ Extension policies installed"
+                    else
+                        echo "⚠️  Skipping extension auto-install (requires sudo access)"
+                        echo "   Run manually: sudo chezmoi apply --force"
+                    fi
+                else
+                    echo "⚠️  Zen Browser.app not found in /Applications"
+                fi
+            fi
+
+            echo "✓ Zen Browser configuration installed"
+            echo "  Restart Zen Browser to apply changes"
+        else
+            echo "⚠️  Profile directory not found: $PROFILE_DIR"
+        fi
+    else
+        echo "⚠️  Could not determine default profile from profiles.ini"
+    fi
+else
+    echo "⚠️  profiles.ini not found"
+fi

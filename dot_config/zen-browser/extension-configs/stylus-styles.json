@@ -1,0 +1,11 @@
+{
+  "info": "Export your Stylus styles from the extension and save them here",
+  "instructions": [
+    "1. Open Stylus extension",
+    "2. Click 'Manage' button",
+    "3. Click the three dots menu (⋮)",
+    "4. Select 'Export'",
+    "5. Replace this file with your exported styles"
+  ],
+  "styles": []
+}
