@@ -22,38 +22,57 @@ Personal dotfiles managed with [chezmoi](https://www.chezmoi.io/).
 
 ## Installation
 
-### Pre-Configuration
+### Quick Install
 
-Before running chezmoi, ensure you have:
+Run this single command to install everything:
 
-1. **Homebrew** installed:
+```bash
+curl -fsSL https://raw.githubusercontent.com/CuriousFurBytes/.dotfiles/main/install.sh | bash
+```
+
+This will automatically:
+- Install Homebrew (macOS) or required package managers
+- Install chezmoi
+- Install Bitwarden CLI
+- Clone and apply your dotfiles
+
+**Prerequisites:**
+- **Bitwarden** must be configured before running the script:
+  ```bash
+  bw login
+  export BW_SESSION="$(bw unlock --raw)"
+  ```
+
+- **Required Bitwarden Items** in your vault:
+
+  | Item | Type | Description |
+  |------|------|-------------|
+  | SSH Key | SSH Key | Private key in key field, public key in Notes |
+  | Git Signing Key | Login/Secure Note | GPG or signing key |
+
+### Manual Installation
+
+If you prefer to install manually:
+
+1. **Install Homebrew** (macOS):
    ```bash
    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
    ```
 
-2. **Bitwarden CLI** installed and authenticated:
+2. **Install Bitwarden CLI and authenticate**:
    ```bash
-   brew install bitwarden-cli
+   brew install bitwarden-cli  # or: npm install -g @bitwarden/cli
    bw login
-   bw unlock
-   export BW_SESSION="<your-session-key>"
+   export BW_SESSION="$(bw unlock --raw)"
    ```
 
-3. **Required Bitwarden Items** in your vault:
+3. **Initialize and apply dotfiles**:
+   ```bash
+   chezmoi init https://github.com/CuriousFurBytes/.dotfiles.git
+   chezmoi apply -v
+   ```
 
-   | Item | Type | Description |
-   |------|------|-------------|
-   | SSH Key | SSH Key | Private key in key field, public key in Notes |
-   | Git Signing Key | Login/Secure Note | GPG or signing key |
-
-### Initialize and Apply
-
-```bash
-chezmoi init <repo-url>
-chezmoi apply -v
-```
-
-This will:
+The installation will:
 - Install Homebrew packages from `packages.yml`
 - Set up Oh My Zsh with plugins
 - Install Pure prompt
