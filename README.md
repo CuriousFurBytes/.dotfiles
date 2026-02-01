@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="assets/header.svg" alt="Dotfiles Header" width="100%">
+</div>
+
 # Dotfiles
 
 Personal dotfiles managed with [chezmoi](https://www.chezmoi.io/).

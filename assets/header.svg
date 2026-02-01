@@ -1,0 +1,74 @@
+<svg width="1200" height="300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style type="text/css">
+      @font-face {
+        font-family: 'Monaspace Krypton';
+        src: url('fonts/MonaspaceKryptonNF-Regular.otf') format('opentype');
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'Monaspace Krypton';
+        src: url('fonts/MonaspaceKryptonNF-Bold.otf') format('opentype');
+        font-weight: bold;
+        font-style: normal;
+      }
+    </style>
+    
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#191724;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1f1d2e;stop-opacity:1" />
+    </linearGradient>
+
+    <linearGradient id="accent-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#31748f;stop-opacity:0.3" />
+      <stop offset="33%" style="stop-color:#9ccfd8;stop-opacity:0.3" />
+      <stop offset="66%" style="stop-color:#c4a7e7;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#eb6f92;stop-opacity:0.3" />
+    </linearGradient>
+
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="300" fill="url(#bg-gradient)"/>
+
+  <!-- Decorative circles -->
+  <circle cx="100" cy="50" r="80" fill="#31748f" opacity="0.1"/>
+  <circle cx="1100" cy="250" r="100" fill="#c4a7e7" opacity="0.1"/>
+  <circle cx="900" cy="80" r="60" fill="#9ccfd8" opacity="0.08"/>
+
+  <!-- Decorative wave pattern -->
+  <path d="M 0 150 Q 200 100, 400 150 T 800 150 T 1200 150" stroke="url(#accent-gradient)" stroke-width="2" fill="none" opacity="0.6"/>
+  <path d="M 0 170 Q 200 120, 400 170 T 800 170 T 1200 170" stroke="url(#accent-gradient)" stroke-width="2" fill="none" opacity="0.4"/>
+
+  <!-- Main title -->
+  <text x="600" y="120" font-family="'Monaspace Krypton', 'SF Mono', 'Monaco', 'Cascadia Code', 'Consolas', monospace" font-size="64" font-weight="bold" fill="#e0def4" text-anchor="middle" filter="url(#glow)">
+    ~ / . d o t f i l e s
+  </text>
+
+  <!-- Subtitle -->
+  <text x="600" y="160" font-family="'Monaspace Krypton', 'SF Mono', 'Monaco', 'Cascadia Code', 'Consolas', monospace" font-size="20" fill="#908caa" text-anchor="middle">
+    managed with chezmoi
+  </text>
+
+  <!-- Terminal-style decorative elements -->
+  <g opacity="0.6">
+    <!-- Left side terminal symbols -->
+    <text x="120" y="200" font-family="'Monaspace Krypton', 'SF Mono', 'Monaco', 'Cascadia Code', 'Consolas', monospace" font-size="16" fill="#31748f">$</text>
+    <text x="140" y="200" font-family="'Monaspace Krypton', 'SF Mono', 'Monaco', 'Cascadia Code', 'Consolas', monospace" font-size="16" fill="#6e6a86">chezmoi</text>
+
+    <!-- Right side terminal symbols -->
+    <text x="1020" y="200" font-family="'Monaspace Krypton', 'SF Mono', 'Monaco', 'Cascadia Code', 'Consolas', monospace" font-size="16" fill="#c4a7e7">~</text>
+    <text x="1040" y="200" font-family="'Monaspace Krypton', 'SF Mono', 'Monaco', 'Cascadia Code', 'Consolas', monospace" font-size="16" fill="#6e6a86">zsh</text>
+  </g>
+
+  <!-- Bottom accent line -->
+  <rect x="0" y="295" width="1200" height="5" fill="url(#accent-gradient)"/>
+</svg>
