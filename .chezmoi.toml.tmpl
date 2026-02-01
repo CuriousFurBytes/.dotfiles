@@ -2,6 +2,8 @@
 {{- $name := promptStringOnce . "name" "Full name" -}}
 {{- $github_username := promptStringOnce . "github_username" "GitHub username" -}}
 {{- $is_work := promptBoolOnce . "is_work" "Is this a work machine" -}}
+{{- $nextdns_id := promptStringOnce . "nextdns_id" "NextDNS ID" -}}
+{{- $nextdns_profile_name := promptStringOnce . "nextdns_profile_name" "NextDNS profile name" -}}
 
 {{- $osid := .chezmoi.os -}}
 {{- if hasKey .chezmoi.osRelease "id" -}}
@@ -14,6 +16,8 @@
     github_username = {{ $github_username | quote }}
     is_work = {{ $is_work }}
     osid = {{ $osid | quote }}
+    nextdns_id = {{ $nextdns_id | quote }}
+    nextdns_profile_name = {{ $nextdns_profile_name | quote }}
 
 [bitwarden]
     command = "bw"
