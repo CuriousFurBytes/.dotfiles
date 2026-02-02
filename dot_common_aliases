@@ -7,6 +7,8 @@ alias ls="eza --color=always --long --no-filesize --no-time --tree --no-permissi
 alias commit="git commit $@"
 alias cd="z"
 alias cat="bat $@"
+alias jqc="jq -C"  # jq with colors
+alias jqr="jq -r"  # jq raw output
 
 export HOMEBREW_NO_ENV_HINTS=true
 

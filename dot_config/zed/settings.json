@@ -28,6 +28,21 @@
     },
     "terminal": {
         "button": true,
+        "alternate_scroll": "off",
+        "blinking": "terminal_controlled",
+        "copy_on_select": false,
+        "dock": "bottom",
+        "default_width": 640,
+        "default_height": 320,
+        "font_family": "MonaspiceKr Nerd Font Mono",
+        "font_features": null,
+        "font_size": null,
+        "line_height": "comfortable",
+        "option_as_meta": false,
+        "shell": {
+            "program": "ghostty",
+        },
+        "working_directory": "current_project_directory",
         "detect_venv": {
             "on": {
                 "directories": [".venv", ".env", "venv", "env"],
@@ -153,5 +168,51 @@
         "env": true,
         "mcp-server-context7": true,
         "mcp-server-linear": true,
+    },
+    "assistant": {
+        "version": "2",
+        "default_model": {
+            "provider": "anthropic",
+            "model": "claude-sonnet-4-5-20250929",
+        },
+        "provider": "anthropic",
+        "accept_edits": true,
+        "prompt_library": {
+            "allow_creation": true,
+            "allow_custom": true,
+        },
+        "allowed_commands": [
+            {
+                "command": "git",
+                "args": ["diff", "*"],
+            },
+            {
+                "command": "git",
+                "args": ["status", "*"],
+            },
+            {
+                "command": "git",
+                "args": ["log", "*"],
+            },
+            {
+                "command": "git",
+                "args": ["show"],
+            },
+            {
+                "command": "read",
+            },
+            {
+                "command": "glob",
+            },
+            {
+                "command": "grep",
+            },
+            {
+                "command": "rg",
+            },
+            {
+                "command": "ls",
+            },
+        ],
     },
 }

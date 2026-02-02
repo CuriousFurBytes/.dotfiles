@@ -1,0 +1,20 @@
+# Custom jq functions
+# These functions will be available when using jq
+
+# Pretty print with colors
+def pretty: . ;
+
+# Get all keys from an object recursively
+def all_keys: [.. | keys? | select(. != null) | .[]] | unique;
+
+# Flatten nested arrays completely
+def flatten_all: [.. | select(type != "array" and type != "object")];
+
+# Convert string to uppercase
+def upper: ascii_upcase;
+
+# Convert string to lowercase
+def lower: ascii_downcase;
+
+# Check if value is null or empty
+def is_empty: . == null or . == "" or . == [] or . == {};

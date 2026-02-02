@@ -36,6 +36,15 @@ homebrew:
         - topgrade
         - jq
         - pre-commit
+        - ipython
+        - jupyter
+        - just
+        - make
+        - act
+        - fx
+        - httpie
+        - zola
+        - vhs
 
     casks:
         - ghostty
@@ -52,6 +61,8 @@ homebrew:
         - thunderbird
         - bitwarden
         - protonvpn
+        - httpie
+        - ente-auth
 
 apt:
     repositories: []
@@ -70,12 +81,29 @@ apt:
         - npm
         - golang-go
         - python3-pip
+        - python3-uv
         - build-essential
         - fonts-firacode
         - ripgrep
         - rust-hyperfine
         - jq
         - pre-commit
+        - ipython3
+        - jupyter-notebook
+        - just
+        - make
+        - httpie
+        - eza
+        - glow
+        - bottom
+        - zoxide
+        - lazygit
+        - rclone
+        - gh
+        - zola
+        - act
+        - fx
+        - zellij
 
 snap:
     packages:
@@ -84,7 +112,9 @@ snap:
         - name: code
           classic: true
         - name: bitwarden
+        - name: bitwarden-cli
         - name: thunderbird
+        - name: lazydocker
 
 flatpak:
     packages:
@@ -103,6 +133,10 @@ gh_extensions:
 eget_tools:
     - lasantosr/intelli-shell
     - glzr-io/zebar
+    - charmbracelet/gum
+    - charmbracelet/crush
+    - charmbracelet/vhs
+    - alexhallam/tv
 
 yay_packages:
     - topgrade

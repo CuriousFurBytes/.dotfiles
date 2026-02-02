@@ -1,0 +1,15 @@
+# Glow configuration
+# Style name or JSON path
+style: "dark"
+
+# Show local files only; no network (TUI-mode only)
+local: false
+
+# Mouse support (TUI-mode only)
+mouse: true
+
+# Use pager to display markdown
+pager: false
+
+# Word-wrap at width
+width: 80

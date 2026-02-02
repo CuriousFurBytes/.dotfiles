@@ -6,6 +6,11 @@
             "url": "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi"
         },
         {
+            "name": "Dark Reader",
+            "id": "addon@darkreader.org",
+            "url": "https://addons.mozilla.org/firefox/downloads/latest/darkreader/latest.xpi"
+        },
+        {
             "name": "Bitwarden",
             "id": "{446900e4-71c2-419f-a6a7-df9c091e268b}",
             "url": "https://addons.mozilla.org/firefox/downloads/latest/bitwarden-password-manager/latest.xpi"
@@ -14,6 +19,11 @@
             "name": "Obsidian Web Clipper",
             "id": "clipper@obsidian.md",
             "url": "https://addons.mozilla.org/firefox/downloads/latest/obsidian-web-clipper/latest.xpi"
+        },
+        {
+            "name": "Redirector",
+            "id": "redirector@einaregilsson.com",
+            "url": "https://addons.mozilla.org/firefox/downloads/latest/redirector/latest.xpi"
         },
         {
             "name": "Startpage Privacy Protection",
