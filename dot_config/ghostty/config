@@ -4,3 +4,7 @@ font-feature = -calt, -liga, -dlig
 shell-integration = zsh
 cursor-style = block
 cursor-style-blink = false
+bold-is-bright = true
+confirm-close-surface = false
+clipboard-trim-trailing-spaces = true
+quit-after-last-window-closed = true

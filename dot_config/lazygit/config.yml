@@ -1,4 +1,7 @@
+disableStartupPopups: true
+notARepository: "skip"
+promptToReturnFromSubprocess: false
 git:
     pagers:
-        - pager: delta --dark --line-numbers --paging=never
+        - pager: --paging=never --dark --line-numbers --hyperlinks --hyperlinks-file-link-format="lazygit-edit://{path}:{line}"
           colorArg: always
