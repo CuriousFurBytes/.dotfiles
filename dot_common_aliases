@@ -9,6 +9,7 @@ alias cd="z"
 alias cat="bat $@"
 alias jqc="jq -C"  # jq with colors
 alias jqr="jq -r"  # jq raw output
+alias go-linux="go run github.com/jtolio/tinyemu-go/temubox/example@2c8151233c2d"
 
 export HOMEBREW_NO_ENV_HINTS=true
 
