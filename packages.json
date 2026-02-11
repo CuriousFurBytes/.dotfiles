@@ -1,0 +1,812 @@
+{
+    "_brew_taps": ["sinelaw/fresh"],
+    "git": {
+        "description": "Distributed version control system",
+        "packages": {
+            "darwin": { "brew": "git" },
+            "ubuntu": { "apt": "git" },
+            "fedora": { "dnf": "git" },
+            "pop_os": { "apt": "git" }
+        }
+    },
+    "difftastic": {
+        "description": "Structural diff tool that understands syntax",
+        "packages": {
+            "darwin": { "brew": "difftastic" },
+            "ubuntu": { "brew": "difftastic" },
+            "fedora": { "brew": "difftastic" },
+            "pop_os": { "brew": "difftastic" }
+        }
+    },
+    "curl": {
+        "description": "Command-line tool for transferring data with URLs",
+        "packages": {
+            "darwin": { "brew": "curl" },
+            "ubuntu": { "apt": "curl" },
+            "fedora": { "dnf": "curl" },
+            "pop_os": { "apt": "curl" }
+        }
+    },
+    "zsh": {
+        "description": "UNIX shell and command language",
+        "packages": {
+            "darwin": { "brew": "zsh" },
+            "ubuntu": { "apt": "zsh" },
+            "fedora": { "dnf": "zsh" },
+            "pop_os": { "apt": "zsh" }
+        }
+    },
+    "neovim": {
+        "description": "Hyperextensible Vim-based text editor",
+        "packages": {
+            "darwin": { "brew": "neovim" },
+            "ubuntu": { "apt": "neovim" },
+            "fedora": { "dnf": "neovim" },
+            "pop_os": { "apt": "neovim" }
+        }
+    },
+    "helix": {
+        "description": "A post-modern modal text editor",
+        "packages": {
+            "darwin": { "brew": "helix" },
+            "ubuntu": { "apt": "helix" },
+            "fedora": { "dnf": "helix" },
+            "pop_os": { "apt": "helix" }
+        }
+    },
+    "fresh-editor": {
+        "description": "A fresh approach to text editing",
+        "packages": {
+            "darwin": { "brew": "fresh-editor" },
+            "ubuntu": {
+                "manual": {
+                    "url": "https://raw.githubusercontent.com/sinelaw/fresh/refs/heads/master/scripts/install.sh",
+                    "type": "script",
+                    "check_command": "fresh"
+                }
+            },
+            "fedora": {
+                "manual": {
+                    "url": "https://raw.githubusercontent.com/sinelaw/fresh/refs/heads/master/scripts/install.sh",
+                    "type": "script",
+                    "check_command": "fresh"
+                }
+            },
+            "pop_os": {
+                "manual": {
+                    "url": "https://raw.githubusercontent.com/sinelaw/fresh/refs/heads/master/scripts/install.sh",
+                    "type": "script",
+                    "check_command": "fresh"
+                }
+            }
+        }
+    },
+    "zellij": {
+        "description": "A terminal workspace with batteries included",
+        "packages": {
+            "darwin": { "brew": "zellij" },
+            "ubuntu": { "brew": "zellij" },
+            "fedora": { "brew": "zellij" },
+            "pop_os": { "brew": "zellij" }
+        }
+    },
+    "podman": {
+        "description": "Daemonless container engine",
+        "packages": {
+            "darwin": { "brew": "podman" },
+            "ubuntu": { "apt": "podman" },
+            "fedora": { "dnf": "podman" },
+            "pop_os": { "apt": "podman" }
+        }
+    },
+    "fzf": {
+        "description": "Command-line fuzzy finder",
+        "packages": {
+            "darwin": { "brew": "fzf" },
+            "ubuntu": { "apt": "fzf" },
+            "fedora": { "dnf": "fzf" },
+            "pop_os": { "apt": "fzf" }
+        }
+    },
+    "eza": {
+        "description": "Modern replacement for ls",
+        "packages": {
+            "darwin": { "brew": "eza" },
+            "ubuntu": { "brew": "eza" },
+            "fedora": { "brew": "eza" },
+            "pop_os": { "brew": "eza" }
+        }
+    },
+    "glow": {
+        "description": "Render markdown on the CLI",
+        "packages": {
+            "darwin": { "brew": "glow" },
+            "ubuntu": { "brew": "glow" },
+            "fedora": { "brew": "glow" },
+            "pop_os": { "brew": "glow" }
+        }
+    },
+    "bottom": {
+        "description": "Cross-platform graphical process/system monitor",
+        "packages": {
+            "darwin": { "brew": "bottom" },
+            "ubuntu": { "brew": "bottom" },
+            "fedora": { "brew": "bottom" },
+            "pop_os": { "brew": "bottom" }
+        }
+    },
+    "zoxide": {
+        "description": "Smarter cd command, inspired by z and autojump",
+        "packages": {
+            "darwin": { "brew": "zoxide" },
+            "ubuntu": { "brew": "zoxide" },
+            "fedora": { "brew": "zoxide" },
+            "pop_os": { "brew": "zoxide" }
+        }
+    },
+    "bat": {
+        "description": "Cat clone with syntax highlighting and Git integration",
+        "packages": {
+            "darwin": { "brew": "bat" },
+            "ubuntu": { "apt": "bat" },
+            "fedora": { "dnf": "bat" },
+            "pop_os": { "apt": "bat" }
+        }
+    },
+    "lazygit": {
+        "description": "Simple terminal UI for git commands",
+        "packages": {
+            "darwin": { "brew": "lazygit" },
+            "ubuntu": { "brew": "lazygit" },
+            "fedora": { "brew": "lazygit" },
+            "pop_os": { "brew": "lazygit" }
+        }
+    },
+    "lazydocker": {
+        "description": "Simple terminal UI for Docker and Docker Compose",
+        "packages": {
+            "darwin": { "brew": "lazydocker" },
+            "ubuntu": { "snap": { "name": "lazydocker" } },
+            "fedora": { "brew": "lazydocker" },
+            "pop_os": { "snap": { "name": "lazydocker" } }
+        }
+    },
+    "bitwarden-cli": {
+        "description": "CLI for Bitwarden password manager",
+        "packages": {
+            "darwin": { "brew": "bitwarden-cli" },
+            "ubuntu": { "snap": { "name": "bitwarden-cli" } },
+            "fedora": { "snap": { "name": "bitwarden-cli" } },
+            "pop_os": { "snap": { "name": "bitwarden-cli" } }
+        }
+    },
+    "rclone": {
+        "description": "Command-line cloud storage sync tool",
+        "packages": {
+            "darwin": { "brew": "rclone" },
+            "ubuntu": { "apt": "rclone" },
+            "fedora": { "dnf": "rclone" },
+            "pop_os": { "apt": "rclone" }
+        }
+    },
+    "node": {
+        "description": "JavaScript runtime built on V8",
+        "packages": {
+            "darwin": { "brew": "node" },
+            "ubuntu": { "apt": "nodejs" },
+            "fedora": { "dnf": "nodejs" },
+            "pop_os": { "apt": "nodejs" }
+        }
+    },
+    "npm": {
+        "description": "Node.js package manager",
+        "packages": {
+            "ubuntu": { "apt": "npm" },
+            "fedora": { "dnf": "npm" },
+            "pop_os": { "apt": "npm" }
+        }
+    },
+    "nvm": {
+        "description": "Node Version Manager",
+        "packages": {
+            "darwin": { "brew": "nvm" },
+            "ubuntu": {
+                "manual": {
+                    "url": "https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh",
+                    "type": "script",
+                    "check_dir": "$HOME/.nvm"
+                }
+            },
+            "fedora": {
+                "manual": {
+                    "url": "https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh",
+                    "type": "script",
+                    "check_dir": "$HOME/.nvm"
+                }
+            },
+            "pop_os": {
+                "manual": {
+                    "url": "https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh",
+                    "type": "script",
+                    "check_dir": "$HOME/.nvm"
+                }
+            }
+        }
+    },
+    "go": {
+        "description": "Go programming language",
+        "packages": {
+            "darwin": { "brew": "go" },
+            "ubuntu": { "apt": "golang-go" },
+            "fedora": { "dnf": "golang" },
+            "pop_os": { "apt": "golang-go" }
+        }
+    },
+    "uv": {
+        "description": "Extremely fast Python package installer and resolver",
+        "packages": {
+            "darwin": { "brew": "uv" },
+            "ubuntu": { "apt": "python3-uv" },
+            "fedora": { "brew": "uv" },
+            "pop_os": { "apt": "python3-uv" }
+        }
+    },
+    "gh": {
+        "description": "GitHub CLI",
+        "packages": {
+            "darwin": { "brew": "gh" },
+            "ubuntu": { "apt": "gh" },
+            "fedora": { "dnf": "gh" },
+            "pop_os": { "apt": "gh" }
+        }
+    },
+    "dockutil": {
+        "description": "Utility for managing macOS dock items",
+        "packages": {
+            "darwin": { "brew": "dockutil" }
+        }
+    },
+    "ripgrep": {
+        "description": "Recursively search directories for a regex pattern",
+        "packages": {
+            "darwin": { "brew": "ripgrep" },
+            "ubuntu": { "apt": "ripgrep" },
+            "fedora": { "dnf": "ripgrep" },
+            "pop_os": { "apt": "ripgrep" }
+        }
+    },
+    "television": {
+        "description": "A blazingly fast general purpose fuzzy finder TUI",
+        "packages": {
+            "darwin": { "brew": "television" },
+            "ubuntu": {
+                "manual": {
+                    "url": "https://alexpasmantier.github.io/television/install.sh",
+                    "type": "script",
+                    "check_command": "tv"
+                }
+            },
+            "fedora": {
+                "manual": {
+                    "url": "https://alexpasmantier.github.io/television/install.sh",
+                    "type": "script",
+                    "check_command": "tv"
+                }
+            },
+            "pop_os": {
+                "manual": {
+                    "url": "https://alexpasmantier.github.io/television/install.sh",
+                    "type": "script",
+                    "check_command": "tv"
+                }
+            }
+        }
+    },
+    "tuios": {
+        "description": "TUI for managing iOS simulators",
+        "packages": {
+            "darwin": { "brew": "tuios" }
+        }
+    },
+    "hyperfine": {
+        "description": "Command-line benchmarking tool",
+        "packages": {
+            "darwin": { "brew": "hyperfine" },
+            "ubuntu": { "apt": "rust-hyperfine" },
+            "fedora": { "dnf": "hyperfine" },
+            "pop_os": { "apt": "rust-hyperfine" }
+        }
+    },
+    "eget": {
+        "description": "Easily install prebuilt binaries from GitHub",
+        "packages": {
+            "darwin": { "brew": "eget" },
+            "ubuntu": { "brew": "eget" },
+            "fedora": { "brew": "eget" },
+            "pop_os": { "brew": "eget" }
+        }
+    },
+    "topgrade": {
+        "description": "Upgrade all your tools at once",
+        "packages": {
+            "darwin": { "brew": "topgrade" },
+            "ubuntu": { "brew": "topgrade" },
+            "fedora": { "brew": "topgrade" },
+            "pop_os": { "brew": "topgrade" }
+        }
+    },
+    "jq": {
+        "description": "Lightweight command-line JSON processor",
+        "packages": {
+            "darwin": { "brew": "jq" },
+            "ubuntu": { "apt": "jq" },
+            "fedora": { "dnf": "jq" },
+            "pop_os": { "apt": "jq" }
+        }
+    },
+    "pre-commit": {
+        "description": "Framework for managing multi-language pre-commit hooks",
+        "packages": {
+            "darwin": { "brew": "pre-commit" },
+            "ubuntu": { "apt": "pre-commit" },
+            "fedora": { "dnf": "pre-commit" },
+            "pop_os": { "apt": "pre-commit" }
+        }
+    },
+    "ipython": {
+        "description": "Enhanced interactive Python shell",
+        "packages": {
+            "darwin": { "brew": "ipython" },
+            "ubuntu": { "apt": "ipython3" },
+            "fedora": { "dnf": "ipython3" },
+            "pop_os": { "apt": "ipython3" }
+        }
+    },
+    "jupyter": {
+        "description": "Interactive computing notebooks",
+        "packages": {
+            "darwin": { "brew": "jupyter" },
+            "ubuntu": { "apt": "jupyter-notebook" },
+            "fedora": { "dnf": "python3-notebook" },
+            "pop_os": { "apt": "jupyter-notebook" }
+        }
+    },
+    "just": {
+        "description": "Handy way to save and run project-specific commands",
+        "packages": {
+            "darwin": { "brew": "just" },
+            "ubuntu": { "apt": "just" },
+            "fedora": { "dnf": "just" },
+            "pop_os": { "apt": "just" }
+        }
+    },
+    "make": {
+        "description": "Build automation tool",
+        "packages": {
+            "darwin": { "brew": "make" },
+            "ubuntu": { "apt": "make" },
+            "fedora": { "dnf": "make" },
+            "pop_os": { "apt": "make" }
+        }
+    },
+    "act": {
+        "description": "Run GitHub Actions locally",
+        "packages": {
+            "darwin": { "brew": "act" },
+            "ubuntu": { "brew": "act" },
+            "fedora": { "brew": "act" },
+            "pop_os": { "brew": "act" }
+        }
+    },
+    "fx": {
+        "description": "Terminal JSON viewer and processor",
+        "packages": {
+            "darwin": { "brew": "fx" },
+            "ubuntu": { "brew": "fx" },
+            "fedora": { "brew": "fx" },
+            "pop_os": { "brew": "fx" }
+        }
+    },
+    "httpie": {
+        "description": "User-friendly HTTP client for the API era",
+        "packages": {
+            "darwin": { "brew": "httpie" },
+            "ubuntu": { "apt": "httpie" },
+            "fedora": { "dnf": "httpie" },
+            "pop_os": { "apt": "httpie" }
+        }
+    },
+    "zola": {
+        "description": "Fast static site generator",
+        "packages": {
+            "darwin": { "brew": "zola" },
+            "ubuntu": { "brew": "zola" },
+            "fedora": { "brew": "zola" },
+            "pop_os": { "brew": "zola" }
+        }
+    },
+    "vhs": {
+        "description": "CLI tool for recording terminal GIFs",
+        "packages": {
+            "darwin": { "brew": "vhs" },
+            "ubuntu": { "brew": "vhs" },
+            "fedora": { "brew": "vhs" },
+            "pop_os": { "brew": "vhs" }
+        }
+    },
+    "biome": {
+        "description": "Toolchain for web projects (formatter, linter)",
+        "packages": {
+            "darwin": { "brew": "biome" },
+            "ubuntu": { "brew": "biome" },
+            "fedora": { "brew": "biome" },
+            "pop_os": { "brew": "biome" }
+        }
+    },
+    "rumdl": {
+        "description": "Markdown linter written in Rust",
+        "packages": {
+            "darwin": { "brew": "rumdl" },
+            "ubuntu": { "brew": "rumdl" },
+            "fedora": { "brew": "rumdl" },
+            "pop_os": { "brew": "rumdl" }
+        }
+    },
+    "build-essential": {
+        "description": "Essential compilation tools (gcc, g++, make, etc.)",
+        "packages": {
+            "ubuntu": { "apt": "build-essential" },
+            "fedora": { "dnf": "gcc gcc-c++ make" },
+            "pop_os": { "apt": "build-essential" }
+        }
+    },
+    "python3-pip": {
+        "description": "Python package installer",
+        "packages": {
+            "ubuntu": { "apt": "python3-pip" },
+            "fedora": { "dnf": "python3-pip" },
+            "pop_os": { "apt": "python3-pip" }
+        }
+    },
+    "ghostty": {
+        "description": "GPU-accelerated terminal emulator",
+        "packages": {
+            "darwin": { "cask": "ghostty" }
+        }
+    },
+    "zed": {
+        "description": "High-performance multiplayer code editor",
+        "packages": {
+            "darwin": { "cask": "zed" }
+        }
+    },
+    "visual-studio-code": {
+        "description": "Source-code editor by Microsoft",
+        "packages": {
+            "darwin": { "cask": "visual-studio-code" },
+            "ubuntu": { "snap": { "name": "code", "classic": true } },
+            "fedora": { "snap": { "name": "code", "classic": true } },
+            "pop_os": { "snap": { "name": "code", "classic": true } }
+        }
+    },
+    "zen-browser": {
+        "description": "Privacy-focused web browser",
+        "packages": {
+            "darwin": { "cask": "zen-browser" }
+        }
+    },
+    "claude": {
+        "description": "Claude desktop app by Anthropic",
+        "packages": {
+            "darwin": { "cask": "claude" }
+        }
+    },
+    "claude-code": {
+        "description": "Claude Code CLI tool",
+        "packages": {
+            "darwin": { "cask": "claude-code" }
+        }
+    },
+    "raycast": {
+        "description": "Productivity launcher for macOS",
+        "packages": {
+            "darwin": { "cask": "raycast" }
+        }
+    },
+    "alt-tab": {
+        "description": "Windows-style alt-tab for macOS",
+        "packages": {
+            "darwin": { "cask": "alt-tab" }
+        }
+    },
+    "logi-options-plus": {
+        "description": "Logitech device management software",
+        "packages": {
+            "darwin": { "cask": "logi-options-plus" }
+        }
+    },
+
+    "obsidian": {
+        "description": "Knowledge management and note-taking app",
+        "packages": {
+            "darwin": { "cask": "obsidian" },
+            "ubuntu": { "snap": { "name": "obsidian", "classic": true } },
+            "fedora": { "snap": { "name": "obsidian", "classic": true } },
+            "pop_os": { "snap": { "name": "obsidian", "classic": true } }
+        }
+    },
+    "thunderbird": {
+        "description": "Email client by Mozilla",
+        "packages": {
+            "darwin": { "cask": "thunderbird" },
+            "ubuntu": { "snap": { "name": "thunderbird" } },
+            "fedora": { "dnf": "thunderbird" },
+            "pop_os": { "snap": { "name": "thunderbird" } }
+        }
+    },
+    "bitwarden": {
+        "description": "Open-source password manager",
+        "packages": {
+            "darwin": { "cask": "bitwarden" },
+            "ubuntu": { "snap": { "name": "bitwarden" } },
+            "fedora": { "snap": { "name": "bitwarden" } },
+            "pop_os": { "snap": { "name": "bitwarden" } }
+        }
+    },
+    "protonvpn": {
+        "description": "VPN client by Proton",
+        "packages": {
+            "darwin": { "cask": "protonvpn" },
+            "ubuntu": { "flatpak": "com.protonvpn.www" },
+            "fedora": { "flatpak": "com.protonvpn.www" },
+            "pop_os": { "flatpak": "com.protonvpn.www" }
+        }
+    },
+    "httpie-desktop": {
+        "description": "HTTPie desktop app",
+        "packages": {
+            "darwin": { "cask": "httpie" }
+        }
+    },
+    "ente-auth": {
+        "description": "Ente authenticator app",
+        "packages": {
+            "darwin": { "cask": "ente-auth" }
+        }
+    },
+    "euporie": {
+        "description": "Jupyter notebooks in the terminal",
+        "packages": {
+            "darwin": { "uv_tool": "euporie" },
+            "ubuntu": { "uv_tool": "euporie" },
+            "fedora": { "uv_tool": "euporie" },
+            "pop_os": { "uv_tool": "euporie" }
+        }
+    },
+    "harlequin": {
+        "description": "Terminal-based SQL IDE",
+        "packages": {
+            "darwin": { "uv_tool": "harlequin" },
+            "ubuntu": { "uv_tool": "harlequin" },
+            "fedora": { "uv_tool": "harlequin" },
+            "pop_os": { "uv_tool": "harlequin" }
+        }
+    },
+    "djlint": {
+        "description": "HTML template linter and formatter",
+        "packages": {
+            "darwin": { "uv_tool": "djlint" },
+            "ubuntu": { "uv_tool": "djlint" },
+            "fedora": { "uv_tool": "djlint" },
+            "pop_os": { "uv_tool": "djlint" }
+        }
+    },
+    "gama": {
+        "description": "GitHub Actions manager in the terminal",
+        "packages": {
+            "darwin": { "go_tool": "github.com/termkit/gama@latest" },
+            "ubuntu": { "go_tool": "github.com/termkit/gama@latest" },
+            "fedora": { "go_tool": "github.com/termkit/gama@latest" },
+            "pop_os": { "go_tool": "github.com/termkit/gama@latest" }
+        }
+    },
+    "gh-dash": {
+        "description": "GitHub CLI dashboard extension",
+        "packages": {
+            "darwin": { "gh_extension": "dlvhdr/gh-dash" },
+            "ubuntu": { "gh_extension": "dlvhdr/gh-dash" },
+            "fedora": { "gh_extension": "dlvhdr/gh-dash" },
+            "pop_os": { "gh_extension": "dlvhdr/gh-dash" }
+        }
+    },
+    "intelli-shell": {
+        "description": "Like IntelliSense but for shell commands",
+        "packages": {
+            "darwin": { "eget": "lasantosr/intelli-shell" },
+            "ubuntu": { "eget": "lasantosr/intelli-shell" },
+            "fedora": { "eget": "lasantosr/intelli-shell" },
+            "pop_os": { "eget": "lasantosr/intelli-shell" }
+        }
+    },
+    "zebar": {
+        "description": "Customizable desktop bar",
+        "packages": {
+            "darwin": { "eget": "glzr-io/zebar" },
+            "ubuntu": { "eget": "glzr-io/zebar" },
+            "fedora": { "eget": "glzr-io/zebar" },
+            "pop_os": { "eget": "glzr-io/zebar" }
+        }
+    },
+    "gum": {
+        "description": "Tool for glamorous shell scripts",
+        "packages": {
+            "darwin": { "eget": "charmbracelet/gum" },
+            "ubuntu": { "eget": "charmbracelet/gum" },
+            "fedora": { "eget": "charmbracelet/gum" },
+            "pop_os": { "eget": "charmbracelet/gum" }
+        }
+    },
+    "crush": {
+        "description": "Charmbracelet image compression tool",
+        "packages": {
+            "darwin": { "eget": "charmbracelet/crush" },
+            "ubuntu": { "eget": "charmbracelet/crush" },
+            "fedora": { "eget": "charmbracelet/crush" },
+            "pop_os": { "eget": "charmbracelet/crush" }
+        }
+    },
+    "vhs-eget": {
+        "description": "VHS via eget (fallback binary)",
+        "packages": {
+            "darwin": { "eget": "charmbracelet/vhs" },
+            "ubuntu": { "eget": "charmbracelet/vhs" },
+            "fedora": { "eget": "charmbracelet/vhs" },
+            "pop_os": { "eget": "charmbracelet/vhs" }
+        }
+    },
+    "tv": {
+        "description": "CSV viewer for the terminal",
+        "packages": {
+            "darwin": { "eget": "alexhallam/tv" },
+            "ubuntu": { "eget": "alexhallam/tv" },
+            "fedora": { "eget": "alexhallam/tv" },
+            "pop_os": { "eget": "alexhallam/tv" }
+        }
+    },
+    "oh-my-zsh": {
+        "description": "Framework for managing zsh configuration",
+        "packages": {
+            "darwin": {
+                "manual": {
+                    "url": "https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh",
+                    "type": "script",
+                    "check_dir": "$HOME/.oh-my-zsh",
+                    "args": "--unattended"
+                }
+            },
+            "ubuntu": {
+                "manual": {
+                    "url": "https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh",
+                    "type": "script",
+                    "check_dir": "$HOME/.oh-my-zsh",
+                    "args": "--unattended"
+                }
+            },
+            "fedora": {
+                "manual": {
+                    "url": "https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh",
+                    "type": "script",
+                    "check_dir": "$HOME/.oh-my-zsh",
+                    "args": "--unattended"
+                }
+            },
+            "pop_os": {
+                "manual": {
+                    "url": "https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh",
+                    "type": "script",
+                    "check_dir": "$HOME/.oh-my-zsh",
+                    "args": "--unattended"
+                }
+            }
+        }
+    },
+    "zsh-autosuggestions": {
+        "description": "Fish-like autosuggestions for zsh",
+        "packages": {
+            "darwin": {
+                "manual": {
+                    "url": "https://github.com/zsh-users/zsh-autosuggestions",
+                    "type": "git_clone",
+                    "dest": "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
+                }
+            },
+            "ubuntu": {
+                "manual": {
+                    "url": "https://github.com/zsh-users/zsh-autosuggestions",
+                    "type": "git_clone",
+                    "dest": "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
+                }
+            },
+            "fedora": {
+                "manual": {
+                    "url": "https://github.com/zsh-users/zsh-autosuggestions",
+                    "type": "git_clone",
+                    "dest": "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
+                }
+            },
+            "pop_os": {
+                "manual": {
+                    "url": "https://github.com/zsh-users/zsh-autosuggestions",
+                    "type": "git_clone",
+                    "dest": "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
+                }
+            }
+        }
+    },
+    "zsh-syntax-highlighting": {
+        "description": "Fish-like syntax highlighting for zsh",
+        "packages": {
+            "darwin": {
+                "manual": {
+                    "url": "https://github.com/zsh-users/zsh-syntax-highlighting.git",
+                    "type": "git_clone",
+                    "dest": "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
+                }
+            },
+            "ubuntu": {
+                "manual": {
+                    "url": "https://github.com/zsh-users/zsh-syntax-highlighting.git",
+                    "type": "git_clone",
+                    "dest": "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
+                }
+            },
+            "fedora": {
+                "manual": {
+                    "url": "https://github.com/zsh-users/zsh-syntax-highlighting.git",
+                    "type": "git_clone",
+                    "dest": "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
+                }
+            },
+            "pop_os": {
+                "manual": {
+                    "url": "https://github.com/zsh-users/zsh-syntax-highlighting.git",
+                    "type": "git_clone",
+                    "dest": "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
+                }
+            }
+        }
+    },
+    "pure-prompt": {
+        "description": "Pretty, minimal and fast ZSH prompt",
+        "packages": {
+            "darwin": {
+                "manual": {
+                    "url": "https://github.com/sindresorhus/pure.git",
+                    "type": "git_clone",
+                    "dest": "$HOME/.zsh/pure"
+                }
+            },
+            "ubuntu": {
+                "manual": {
+                    "url": "https://github.com/sindresorhus/pure.git",
+                    "type": "git_clone",
+                    "dest": "$HOME/.zsh/pure"
+                }
+            },
+            "fedora": {
+                "manual": {
+                    "url": "https://github.com/sindresorhus/pure.git",
+                    "type": "git_clone",
+                    "dest": "$HOME/.zsh/pure"
+                }
+            },
+            "pop_os": {
+                "manual": {
+                    "url": "https://github.com/sindresorhus/pure.git",
+                    "type": "git_clone",
+                    "dest": "$HOME/.zsh/pure"
+                }
+            }
+        }
+    }
+}

@@ -3,5 +3,4 @@ notARepository: "skip"
 promptToReturnFromSubprocess: false
 git:
     pagers:
-        - pager: --paging=never --dark --line-numbers --hyperlinks --hyperlinks-file-link-format="lazygit-edit://{path}:{line}"
-          colorArg: always
+        - externalDiffCommand: difft --color=always

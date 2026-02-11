@@ -4,6 +4,14 @@
 
 - [ ] Use nix flakes for cross-OS installation #complex
 
+## Browser Configuration
+
+- [ ] Find out why Zen Browser has new tabs showing top-to-bottom instead of bottom-to-top on other MacBook #needs-clarifying #medium
+
+## macOS Configuration
+
+- [ ] Disable hot corners/quick corners #easy
+
 ## Zed Configuration
 
 ### Configure Zed's Claude Integration

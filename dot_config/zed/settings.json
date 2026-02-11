@@ -7,14 +7,25 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
-    "ui_font_family": "MonaspiceKr Nerd Font Mono",
+    "context_servers": {
+        "mcp-server-context7": {
+            "enabled": true,
+            "remote": false,
+            "settings": {},
+        },
+    },
+    "ui_font_family": "Monaspace Krypton Frozen",
     "icon_theme": "Phosphor Icons Theme",
-    "buffer_font_family": "MonaspiceAr Nerd Font Mono",
+    "buffer_font_family": "Monaspace Argon Frozen",
+    "buffer_font_features": {
+        "calt": true,
+    },
     "ui_font_size": 13.5,
     "buffer_font_size": 13.0,
     "show_whitespaces": "trailing",
     "hover_popover_enabled": true,
     "edit_predictions": {
+        "provider": "zed",
         "mode": "eager",
     },
     "debugger": {
@@ -34,14 +45,11 @@
         "dock": "bottom",
         "default_width": 640,
         "default_height": 320,
-        "font_family": "MonaspiceKr Nerd Font Mono",
+        "font_family": "Monaspace Krypton Frozen",
         "font_features": null,
         "font_size": null,
         "line_height": "comfortable",
         "option_as_meta": false,
-        "shell": {
-            "program": "ghostty",
-        },
         "working_directory": "current_project_directory",
         "detect_venv": {
             "on": {
@@ -141,7 +149,7 @@
     },
     "autosave": {
         "after_delay": {
-            "milliseconds": 1000,
+            "milliseconds": 2000,
         },
     },
     "auto_indent_on_paste": true,
@@ -151,9 +159,6 @@
         "mode": "system",
         "light": "One Light",
         "dark": "Rosé Pine",
-    },
-    "features": {
-        "edit_prediction_provider": "zed",
     },
     "auto_install_extensions": {
         "html": true,
@@ -168,51 +173,21 @@
         "env": true,
         "mcp-server-context7": true,
         "mcp-server-linear": true,
+        "jinja2": true,
     },
-    "assistant": {
-        "version": "2",
+    "agent": {
+        "commit_message_model": {
+            "provider": "copilot_chat",
+            "model": "gemini-3-flash-preview",
+        },
         "default_model": {
             "provider": "anthropic",
             "model": "claude-sonnet-4-5-20250929",
         },
-        "provider": "anthropic",
-        "accept_edits": true,
-        "prompt_library": {
-            "allow_creation": true,
-            "allow_custom": true,
+        "thread_summary_model": {
+            "provider": "copilot_chat",
+            "model": "gemini-3-flash-preview",
         },
-        "allowed_commands": [
-            {
-                "command": "git",
-                "args": ["diff", "*"],
-            },
-            {
-                "command": "git",
-                "args": ["status", "*"],
-            },
-            {
-                "command": "git",
-                "args": ["log", "*"],
-            },
-            {
-                "command": "git",
-                "args": ["show"],
-            },
-            {
-                "command": "read",
-            },
-            {
-                "command": "glob",
-            },
-            {
-                "command": "grep",
-            },
-            {
-                "command": "rg",
-            },
-            {
-                "command": "ls",
-            },
-        ],
+        "default_profile": "write",
     },
 }

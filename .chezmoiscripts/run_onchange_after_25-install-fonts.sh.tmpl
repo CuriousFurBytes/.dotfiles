@@ -1,0 +1,33 @@
+#!/bin/bash
+set -e
+
+# Hash: {{ output "find" (joinPath .chezmoi.sourceDir "assets/fonts") "-type" "f" "-name" "*.ttf" "-o" "-name" "*.otf" | sha256sum }}
+
+echo "Installing fonts from assets/fonts..."
+
+SOURCE_DIR="{{ .chezmoi.sourceDir }}/assets/fonts"
+
+{{ if eq .chezmoi.os "darwin" }}
+FONT_DIR="$HOME/Library/Fonts"
+{{ else }}
+FONT_DIR="$HOME/.local/share/fonts"
+{{ end }}
+
+mkdir -p "$FONT_DIR"
+
+find "$SOURCE_DIR" -type f \( -name "*.ttf" -o -name "*.otf" \) | while read -r font; do
+    basename="$(basename "$font")"
+    if [ -f "$FONT_DIR/$basename" ]; then
+        echo "  [ok] $basename"
+    else
+        cp "$font" "$FONT_DIR/$basename"
+        echo "  Installed $basename"
+    fi
+done
+
+{{ if ne .chezmoi.os "darwin" }}
+echo "Refreshing font cache..."
+fc-cache -f
+{{ end }}
+
+echo "Font installation complete!"

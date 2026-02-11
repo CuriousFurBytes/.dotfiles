@@ -129,3 +129,25 @@ defaults write -g NSUserDictionaryReplacementItems '()'
 
 ## Disable spell correction on web
 defaults write -g WebAutomaticSpellingCorrectionEnabled -int 0
+
+# Hot Corners
+
+## Disable all hot corners
+## Top left corner (0 = disabled)
+defaults write com.apple.dock wvous-tl-corner -int 0
+defaults write com.apple.dock wvous-tl-modifier -int 0
+
+## Top right corner (0 = disabled)
+defaults write com.apple.dock wvous-tr-corner -int 0
+defaults write com.apple.dock wvous-tr-modifier -int 0
+
+## Bottom left corner (0 = disabled)
+defaults write com.apple.dock wvous-bl-corner -int 0
+defaults write com.apple.dock wvous-bl-modifier -int 0
+
+## Bottom right corner (0 = disabled)
+defaults write com.apple.dock wvous-br-corner -int 0
+defaults write com.apple.dock wvous-br-modifier -int 0
+
+## Apply changes
+killall Dock || true
