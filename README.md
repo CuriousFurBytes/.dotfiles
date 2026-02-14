@@ -17,7 +17,7 @@ Personal dotfiles managed with [chezmoi](https://www.chezmoi.io/).
 
 ## Prerequisites
 
-- [Bitwarden CLI](https://bitwarden.com/help/cli/) for secrets management
+- [Proton Pass CLI](https://protonpass.github.io/pass-cli/) for secrets management
 - macOS (uses Homebrew for package installation)
 
 ## Installation
@@ -33,17 +33,16 @@ curl -fsSL https://raw.githubusercontent.com/CuriousFurBytes/.dotfiles/main/inst
 This will automatically:
 - Install Homebrew (macOS) or required package managers
 - Install chezmoi
-- Install Bitwarden CLI
+- Install Proton Pass CLI
 - Clone and apply your dotfiles
 
 **Prerequisites:**
-- **Bitwarden** must be configured before running the script:
+- **Proton Pass CLI** must be authenticated before running the script:
   ```bash
-  bw login
-  export BW_SESSION="$(bw unlock --raw)"
+  pass-cli login
   ```
 
-- **Required Bitwarden Items** in your vault:
+- **Required Proton Pass Items** in your vault:
 
   | Item | Type | Description |
   |------|------|-------------|
@@ -59,11 +58,17 @@ If you prefer to install manually:
    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
    ```
 
-2. **Install Bitwarden CLI and authenticate**:
+2. **Install Proton Pass CLI and authenticate**:
    ```bash
-   brew install bitwarden-cli  # or: npm install -g @bitwarden/cli
-   bw login
-   export BW_SESSION="$(bw unlock --raw)"
+   # macOS
+   brew tap protonpass/tap
+   brew install protonpass/tap/pass-cli
+
+   # Linux
+   curl -fsSL https://proton.me/download/pass-cli/install.sh | bash
+
+   # Authenticate
+   pass-cli login
    ```
 
 3. **Initialize and apply dotfiles**:
@@ -73,7 +78,7 @@ If you prefer to install manually:
    ```
 
 The installation will:
-- Install Homebrew packages from `packages.yml`
+- Install Homebrew packages from `packages.json`
 - Set up Oh My Zsh with plugins
 - Install Pure prompt
 - Configure SSH keys and Git

@@ -1,13 +1,5 @@
 # To-Do List
 
-## Package Management & Installation
-
-- [ ] Use nix flakes for cross-OS installation #complex
-
-## Browser Configuration
-
-- [ ] Find out why Zen Browser has new tabs showing top-to-bottom instead of bottom-to-top on other MacBook #needs-clarifying #medium
-
 ## macOS Configuration
 
 - [ ] Disable hot corners/quick corners #easy
@@ -86,6 +78,11 @@
 ### Configure Proton VPN
 - [ ] Install/configure Proton VPN #medium
 - [ ] Enable auto-start #easy
+
+### Proton Pass
+- [ ] Install Proton Pass #easy
+- [ ] Install Proton Pass CLI #easy
+- [ ] Migrate SSH keys to Proton Pass #medium
 
 - [ ] Add ente auth to the list of installs #easy
 

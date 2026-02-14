@@ -94,9 +94,6 @@ defaults write -g AppleLocale -string "en_BR"
 ## Set languages
 defaults write -g AppleLanguages -array "en-BR" "pt-BR"
 
-## Disable natural movement from trackpad
-defaults write -g com.apple.swipescrolldirection -int 0
-
 ## Disable auto-capitalization
 defaults write -g NSAutomaticCapitalizationEnabled -int 0
 

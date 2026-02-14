@@ -1,5 +1,5 @@
 {
-    "_brew_taps": ["sinelaw/fresh"],
+    "_brew_taps": ["sinelaw/fresh", "protonpass/tap"],
     "git": {
         "description": "Distributed version control system",
         "packages": {
@@ -171,15 +171,6 @@
             "pop_os": { "snap": { "name": "lazydocker" } }
         }
     },
-    "bitwarden-cli": {
-        "description": "CLI for Bitwarden password manager",
-        "packages": {
-            "darwin": { "brew": "bitwarden-cli" },
-            "ubuntu": { "snap": { "name": "bitwarden-cli" } },
-            "fedora": { "snap": { "name": "bitwarden-cli" } },
-            "pop_os": { "snap": { "name": "bitwarden-cli" } }
-        }
-    },
     "rclone": {
         "description": "Command-line cloud storage sync tool",
         "packages": {
@@ -300,12 +291,6 @@
                     "check_command": "tv"
                 }
             }
-        }
-    },
-    "tuios": {
-        "description": "TUI for managing iOS simulators",
-        "packages": {
-            "darwin": { "brew": "tuios" }
         }
     },
     "hyperfine": {
@@ -562,6 +547,15 @@
             "pop_os": { "flatpak": "com.protonvpn.www" }
         }
     },
+    "localsend": {
+        "description": "Open-source cross-platform file sharing",
+        "packages": {
+            "darwin": { "cask": "localsend" },
+            "ubuntu": { "flatpak": "org.localsend.localsend_app" },
+            "fedora": { "flatpak": "org.localsend.localsend_app" },
+            "pop_os": { "flatpak": "org.localsend.localsend_app" }
+        }
+    },
     "httpie-desktop": {
         "description": "HTTPie desktop app",
         "packages": {
@@ -571,7 +565,46 @@
     "ente-auth": {
         "description": "Ente authenticator app",
         "packages": {
-            "darwin": { "cask": "ente-auth" }
+            "darwin": { "cask": "ente-auth" },
+            "ubuntu": { "flatpak": "io.ente.auth" },
+            "fedora": { "flatpak": "io.ente.auth" },
+            "pop_os": { "flatpak": "io.ente.auth" }
+        }
+    },
+    "proton-pass": {
+        "description": "Password manager by Proton",
+        "packages": {
+            "darwin": { "cask": "proton-pass" },
+            "ubuntu": { "snap": { "name": "proton-pass" } },
+            "fedora": { "snap": { "name": "proton-pass" } },
+            "pop_os": { "snap": { "name": "proton-pass" } }
+        }
+    },
+    "proton-pass-cli": {
+        "description": "CLI for Proton Pass password manager",
+        "packages": {
+            "darwin": { "brew": "protonpass/tap/pass-cli" },
+            "ubuntu": {
+                "manual": {
+                    "url": "https://proton.me/download/pass-cli/install.sh",
+                    "type": "script",
+                    "check_command": "pass-cli"
+                }
+            },
+            "fedora": {
+                "manual": {
+                    "url": "https://proton.me/download/pass-cli/install.sh",
+                    "type": "script",
+                    "check_command": "pass-cli"
+                }
+            },
+            "pop_os": {
+                "manual": {
+                    "url": "https://proton.me/download/pass-cli/install.sh",
+                    "type": "script",
+                    "check_command": "pass-cli"
+                }
+            }
         }
     },
     "euporie": {

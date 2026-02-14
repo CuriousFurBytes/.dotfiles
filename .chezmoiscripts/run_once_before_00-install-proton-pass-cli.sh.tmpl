@@ -1,0 +1,18 @@
+#!/bin/bash
+set -e
+
+echo "Installing Proton Pass CLI..."
+
+if command -v pass-cli &> /dev/null; then
+    echo "Proton Pass CLI already installed"
+    exit 0
+fi
+
+{{ if eq .chezmoi.os "darwin" }}
+brew tap protonpass/tap
+brew install protonpass/tap/pass-cli
+{{ else if eq .chezmoi.os "linux" }}
+curl -fsSL https://proton.me/download/pass-cli/install.sh | bash
+{{ end }}
+
+echo "Proton Pass CLI installed. Please run 'pass-cli login' to authenticate."

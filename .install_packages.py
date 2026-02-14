@@ -7,7 +7,35 @@ import platform
 import shutil
 import subprocess
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+
+
+# Ensure rich is available — re-exec in a venv if needed
+def _ensure_rich() -> None:
+    try:
+        import rich  # noqa: F401
+        return
+    except ImportError:
+        pass
+
+    venv_dir = Path.home() / ".cache" / "dotfiles-venv"
+    venv_python = venv_dir / "bin" / "python3"
+
+    if not venv_python.exists():
+        print("Creating temporary venv for rich...")
+        subprocess.run([sys.executable, "-m", "venv", str(venv_dir)], check=True)
+        subprocess.run([str(venv_python), "-m", "pip", "install", "rich", "-q"], check=True)
+
+    # Re-exec this script under the venv python
+    os.execv(str(venv_python), [str(venv_python), "-B"] + sys.argv)
+
+_ensure_rich()
+
+from rich.console import Console  # noqa: E402
+from rich.panel import Panel  # noqa: E402
+
+console = Console()
 
 # ── Install method priority for phase ordering ──────────────────────
 SYSTEM_METHODS = ("brew", "cask", "apt", "dnf")
@@ -47,71 +75,126 @@ def detect_target() -> str:
     return "linux"
 
 
+def print_status(name: str, status: str) -> None:
+    """Print a package status line with consistent formatting."""
+    if status == "ok":
+        console.print(f"  [green]\\[ok][/green] {name}")
+    elif status == "done":
+        console.print(f"  [blue]\\[done][/blue] {name}")
+    elif status == "skip":
+        console.print(f"  [yellow]\\[skip][/yellow] {name}")
+    elif status == "fail":
+        console.print(f"  [red]\\[fail][/red] {name}")
+
+
+def print_section(title: str) -> None:
+    """Print a section header."""
+    console.print()
+    console.rule(f"[bold]{title}[/bold]")
+    console.print()
+
+
+# ── Installed caches (populated once, checked many times) ───────────
+
+_cache: dict[str, set[str]] = {}
+
+
+def _get_cached(key: str, cmd: str, parse=None) -> set[str]:
+    """Run a command once and cache the parsed output as a set."""
+    if key not in _cache:
+        result = run(cmd, capture=True)
+        if result.returncode != 0:
+            _cache[key] = set()
+        elif parse:
+            _cache[key] = parse(result.stdout)
+        else:
+            _cache[key] = set(result.stdout.split())
+        # Also cache installed app names from /Applications
+        if key == "cask":
+            apps = set()
+            for app_dir in (Path("/Applications"), Path.home() / "Applications"):
+                if app_dir.exists():
+                    for entry in app_dir.iterdir():
+                        apps.add(entry.stem.lower().replace(" ", "-"))
+            _cache["cask_apps"] = apps
+    return _cache[key]
+
+
+def _parse_lines(stdout: str) -> set[str]:
+    return {line.strip() for line in stdout.splitlines() if line.strip()}
+
+
+def _parse_pkg_names(stdout: str) -> set[str]:
+    """Parse output where package name is the first word on each line."""
+    return {line.split()[0] for line in stdout.splitlines() if line.strip()}
+
+
 # ── Installed checks ────────────────────────────────────────────────
 
 def is_brew_installed(pkg: str) -> bool:
-    return run(f"brew list {pkg}", capture=True).returncode == 0
+    installed = _get_cached("brew", "brew list --formula -1", _parse_lines)
+    return pkg in installed
 
 
 def is_cask_installed(pkg: str) -> bool:
-    if run(f"brew list --cask {pkg}", capture=True).returncode == 0:
+    installed = _get_cached("cask", "brew list --cask -1", _parse_lines)
+    if pkg in installed:
         return True
-    # Check /Applications for apps that don't show in brew list
-    app_name = pkg.replace("-", " ")
-    for app_dir in (Path("/Applications"), Path.home() / "Applications"):
-        if app_dir.exists():
-            for entry in app_dir.iterdir():
-                if app_name.lower() in entry.name.lower():
-                    return True
-    return False
+    return pkg.lower() in _cache.get("cask_apps", set())
 
 
 def is_apt_installed(pkg: str) -> bool:
-    result = run(f"dpkg -l {pkg} 2>/dev/null", capture=True)
-    return any(line.startswith("ii") for line in result.stdout.splitlines())
+    installed = _get_cached(
+        "apt",
+        "dpkg-query -W -f='${Package}\n' 2>/dev/null",
+        _parse_lines,
+    )
+    return pkg in installed
 
 
 def is_dnf_installed(pkg: str) -> bool:
-    # pkg may be space-separated for groups like "gcc gcc-c++ make"
-    for p in pkg.split():
-        if run(f"rpm -q {p}", capture=True).returncode != 0:
-            return False
-    return True
+    installed = _get_cached("dnf", "rpm -qa --qf '%{NAME}\n'", _parse_lines)
+    return all(p in installed for p in pkg.split())
 
 
 def is_uv_tool_installed(pkg: str) -> bool:
-    result = run("uv tool list", capture=True)
-    return any(line.startswith(f"{pkg} ") for line in result.stdout.splitlines())
+    installed = _get_cached("uv_tool", "uv tool list", _parse_pkg_names)
+    return pkg in installed
 
 
 def is_cargo_installed(pkg: str) -> bool:
-    result = run("cargo install --list", capture=True)
-    return any(line.startswith(f"{pkg} ") for line in result.stdout.splitlines())
+    installed = _get_cached("cargo", "cargo install --list", _parse_pkg_names)
+    return pkg in installed
 
 
 def is_go_tool_installed(pkg: str) -> bool:
-    # Extract binary name: github.com/foo/bar@latest -> bar
     bin_name = pkg.rsplit("/", 1)[-1].split("@")[0]
     return command_exists(bin_name)
 
 
 def is_snap_installed(name: str) -> bool:
-    return run(f"snap list {name}", capture=True).returncode == 0
+    installed = _get_cached("snap", "snap list 2>/dev/null", _parse_pkg_names)
+    return name in installed
 
 
 def is_flatpak_installed(app_id: str) -> bool:
-    result = run("flatpak list", capture=True)
-    return app_id in result.stdout
+    installed = _get_cached(
+        "flatpak",
+        "flatpak list --columns=application 2>/dev/null",
+        _parse_lines,
+    )
+    return app_id in installed
 
 
 def is_yay_installed(pkg: str) -> bool:
-    return run(f"yay -Qi {pkg}", capture=True).returncode == 0
+    installed = _get_cached("yay", "yay -Qq 2>/dev/null", _parse_lines)
+    return pkg in installed
 
 
 def is_gh_extension_installed(repo: str) -> bool:
     ext_name = repo.rsplit("/", 1)[-1]
-    result = run("gh extension list", capture=True)
-    return ext_name in result.stdout
+    installed = _get_cached("gh_ext", "gh extension list 2>/dev/null", _parse_lines)
+    return any(ext_name in entry for entry in installed)
 
 
 def is_eget_installed(repo: str) -> bool:
@@ -164,51 +247,63 @@ def is_installed(pkg_name: str, method: str, value) -> bool:
 # ── Installers ──────────────────────────────────────────────────────
 
 def install_brew(pkg_name: str, formula: str) -> None:
-    print(f"  Installing {pkg_name} (brew)...")
-    if run(f"brew install {formula}").returncode != 0:
-        print(f"  Warning: Failed to install {pkg_name}")
+    with console.status(f"Installing [bold]{pkg_name}[/bold] (brew)..."):
+        if run(f"zb install {formula}", capture=True).returncode != 0:
+            print_status(pkg_name, "fail")
+        else:
+            print_status(pkg_name, "done")
 
 
 def install_cask(pkg_name: str, cask: str) -> None:
-    print(f"  Installing {pkg_name} (cask)...")
-    result = run(f"brew install --cask {cask}", capture=True)
+    with console.status(f"Installing [bold]{pkg_name}[/bold] (cask)..."):
+        result = run(f"zb install --cask {cask}", capture=True)
     if result.returncode != 0:
         if "It seems there is already an App at" in (result.stderr + result.stdout):
-            print(f"  {pkg_name} already exists in /Applications, skipping")
+            print_status(pkg_name, "skip")
         else:
-            print(result.stdout)
-            print(result.stderr)
-            print(f"  Warning: Failed to install {pkg_name}")
+            print_status(pkg_name, "fail")
+    else:
+        print_status(pkg_name, "done")
 
 
 def install_apt(pkg_name: str, pkg: str) -> None:
-    print(f"  Installing {pkg_name} (apt)...")
-    if run(f"sudo apt install -y {pkg}").returncode != 0:
-        print(f"  Warning: Failed to install {pkg_name}")
+    with console.status(f"Installing [bold]{pkg_name}[/bold] (apt)..."):
+        if run(f"sudo apt install -y {pkg}", capture=True).returncode != 0:
+            print_status(pkg_name, "fail")
+        else:
+            print_status(pkg_name, "done")
 
 
 def install_dnf(pkg_name: str, pkg: str) -> None:
-    print(f"  Installing {pkg_name} (dnf)...")
-    if run(f"sudo dnf install -y {pkg}").returncode != 0:
-        print(f"  Warning: Failed to install {pkg_name}")
+    with console.status(f"Installing [bold]{pkg_name}[/bold] (dnf)..."):
+        if run(f"sudo dnf install -y {pkg}", capture=True).returncode != 0:
+            print_status(pkg_name, "fail")
+        else:
+            print_status(pkg_name, "done")
 
 
 def install_uv_tool(pkg_name: str, tool: str) -> None:
-    print(f"  Installing {pkg_name} (uv tool)...")
-    if run(f"uv tool install {tool}").returncode != 0:
-        print(f"  Warning: Failed to install {pkg_name}")
+    with console.status(f"Installing [bold]{pkg_name}[/bold] (uv tool)..."):
+        if run(f"uv tool install {tool}", capture=True).returncode != 0:
+            print_status(pkg_name, "fail")
+        else:
+            print_status(pkg_name, "done")
 
 
 def install_cargo(pkg_name: str, crate: str) -> None:
-    print(f"  Installing {pkg_name} (cargo)...")
-    if run(f"cargo install {crate}").returncode != 0:
-        print(f"  Warning: Failed to install {pkg_name}")
+    with console.status(f"Installing [bold]{pkg_name}[/bold] (cargo)..."):
+        if run(f"cargo install {crate}", capture=True).returncode != 0:
+            print_status(pkg_name, "fail")
+        else:
+            print_status(pkg_name, "done")
 
 
 def install_go_tool(pkg_name: str, pkg_path: str) -> None:
-    print(f"  Installing {pkg_name} (go install)...")
-    if run(f"go install {pkg_path}").returncode != 0:
-        print(f"  Warning: Failed to install {pkg_name}")
+    with console.status(f"Installing [bold]{pkg_name}[/bold] (go install)..."):
+        if run(f"go install {pkg_path}", capture=True).returncode != 0:
+            print_status(pkg_name, "fail")
+        else:
+            print_status(pkg_name, "done")
 
 
 def install_snap(pkg_name: str, snap_spec) -> None:
@@ -218,38 +313,48 @@ def install_snap(pkg_name: str, snap_spec) -> None:
     else:
         name = snap_spec
         classic = False
-    print(f"  Installing {pkg_name} (snap)...")
     flag = " --classic" if classic else ""
-    if run(f"sudo snap install {name}{flag}").returncode != 0:
-        print(f"  Warning: Failed to install {pkg_name}")
+    with console.status(f"Installing [bold]{pkg_name}[/bold] (snap)..."):
+        if run(f"sudo snap install {name}{flag}", capture=True).returncode != 0:
+            print_status(pkg_name, "fail")
+        else:
+            print_status(pkg_name, "done")
 
 
 def install_flatpak(pkg_name: str, app_id: str) -> None:
-    print(f"  Installing {pkg_name} (flatpak)...")
-    if run(f"flatpak install -y flathub {app_id}").returncode != 0:
-        print(f"  Warning: Failed to install {pkg_name}")
+    with console.status(f"Installing [bold]{pkg_name}[/bold] (flatpak)..."):
+        if run(f"flatpak install -y flathub {app_id}", capture=True).returncode != 0:
+            print_status(pkg_name, "fail")
+        else:
+            print_status(pkg_name, "done")
 
 
 def install_yay(pkg_name: str, pkg: str) -> None:
-    print(f"  Installing {pkg_name} (yay)...")
-    if run(f"yay -S --noconfirm {pkg}").returncode != 0:
-        print(f"  Warning: Failed to install {pkg_name}")
+    with console.status(f"Installing [bold]{pkg_name}[/bold] (yay)..."):
+        if run(f"yay -S --noconfirm {pkg}", capture=True).returncode != 0:
+            print_status(pkg_name, "fail")
+        else:
+            print_status(pkg_name, "done")
 
 
 def install_gh_extension(pkg_name: str, repo: str) -> None:
     if run("gh auth status", capture=True).returncode != 0:
-        print(f"  Skipping {pkg_name} (gh not authenticated, run 'gh auth login' first)")
+        print_status(f"{pkg_name} (gh not authenticated)", "skip")
         return
-    print(f"  Installing {pkg_name} (gh extension)...")
-    if run(f"gh extension install {repo}").returncode != 0:
-        print(f"  Warning: Failed to install {pkg_name}")
+    with console.status(f"Installing [bold]{pkg_name}[/bold] (gh extension)..."):
+        if run(f"gh extension install {repo}", capture=True).returncode != 0:
+            print_status(pkg_name, "fail")
+        else:
+            print_status(pkg_name, "done")
 
 
 def install_eget(pkg_name: str, repo: str) -> None:
-    print(f"  Installing {pkg_name} (eget)...")
     Path.home().joinpath(".local", "bin").mkdir(parents=True, exist_ok=True)
-    if run(f"eget {repo} --to ~/.local/bin").returncode != 0:
-        print(f"  Warning: Failed to install {pkg_name}")
+    with console.status(f"Installing [bold]{pkg_name}[/bold] (eget)..."):
+        if run(f"eget {repo} --to ~/.local/bin", capture=True).returncode != 0:
+            print_status(pkg_name, "fail")
+        else:
+            print_status(pkg_name, "done")
 
 
 def install_manual(pkg_name: str, manual: dict) -> None:
@@ -258,21 +363,24 @@ def install_manual(pkg_name: str, manual: dict) -> None:
 
     if install_type == "script":
         args = manual.get("args", "")
-        print(f"  Installing {pkg_name} (manual script)...")
         if args:
             cmd = f'sh -c "$(curl -fsSL {url})" "" {args}'
         else:
             cmd = f"curl -fsSL {url} | bash"
-        if run(cmd).returncode != 0:
-            print(f"  Warning: Failed to install {pkg_name}")
+        with console.status(f"Installing [bold]{pkg_name}[/bold] (script)..."):
+            if run(cmd, capture=True).returncode != 0:
+                print_status(pkg_name, "fail")
+            else:
+                print_status(pkg_name, "done")
 
     elif install_type == "git_clone":
         dest = shell_expand(manual["dest"])
-        print(f"  Installing {pkg_name} (git clone)...")
         Path(dest).parent.mkdir(parents=True, exist_ok=True)
-        if run(f"git clone {url} {dest}").returncode != 0:
-            print(f"  Warning: Failed to install {pkg_name}")
-
+        with console.status(f"Installing [bold]{pkg_name}[/bold] (git clone)..."):
+            if run(f"git clone {url} {dest}", capture=True).returncode != 0:
+                print_status(pkg_name, "fail")
+            else:
+                print_status(pkg_name, "done")
 
 
 INSTALLERS = {
@@ -294,6 +402,34 @@ INSTALLERS = {
 
 # ── Main ────────────────────────────────────────────────────────────
 
+def ensure_zerobrew() -> None:
+    """Install zerobrew if not already available."""
+    if command_exists("zb"):
+        print_status("zerobrew", "ok")
+        return
+    with console.status("Installing [bold]zerobrew[/bold]..."):
+        if run("curl -fsSL https://zerobrew.rs/install | bash", capture=True).returncode != 0:
+            print_status("zerobrew", "fail")
+        else:
+            print_status("zerobrew", "done")
+
+
+def install_package(name: str, target_config: dict, methods: tuple) -> tuple[str, str]:
+    """Install a single package. Returns (name, status)."""
+    for method in methods:
+        if method in target_config:
+            value = target_config[method]
+            if is_installed(name, method, value):
+                return (name, "ok")
+            else:
+                INSTALLERS[method](name, value)
+                return (name, "done")
+    return (name, "skip")
+
+
+MAX_PARALLEL = 4
+
+
 def main() -> None:
     target = sys.argv[1] if len(sys.argv) > 1 else detect_target()
     packages_path = Path(__file__).parent / "packages.json"
@@ -301,26 +437,35 @@ def main() -> None:
     with open(packages_path) as f:
         packages = json.load(f)
 
-    print(f"Installing packages for target: {target}")
-    print()
+    console.print(
+        Panel(
+            f"[bold]Target:[/bold] {target}",
+            title="[bold blue]Package Installer[/bold blue]",
+            border_style="blue",
+        )
+    )
+
+    # Phase 0: Ensure zerobrew is available (darwin only)
+    if target == "darwin" and command_exists("brew"):
+        print_section("Zerobrew")
+        ensure_zerobrew()
 
     # Phase 1: Brew taps
     taps = packages.get("_brew_taps", [])
     if taps and command_exists("brew"):
-        print("=== Adding Homebrew taps ===")
+        print_section("Homebrew Taps")
         for tap in taps:
-            if run(f"brew tap {tap}", capture=True).returncode != 0:
-                print(f"  Warning: Failed to tap {tap}")
-            else:
-                print(f"  {tap}")
-        print()
+            with console.status(f"Tapping [bold]{tap}[/bold]..."):
+                if run(f"brew tap {tap}", capture=True).returncode != 0:
+                    print_status(tap, "fail")
+                else:
+                    print_status(tap, "ok")
 
     # Update package lists for Linux
     if target not in ("darwin",):
         if target in ("ubuntu", "pop"):
-            print("Updating apt package lists...")
-            run("sudo apt update")
-            print()
+            with console.status("Updating apt package lists..."):
+                run("sudo apt update", capture=True)
         elif target == "fedora":
             run("sudo dnf check-update", capture=True)
 
@@ -336,36 +481,100 @@ def main() -> None:
             continue
         pkg_items.append((name, target_config))
 
-    # Phase 2: System packages (brew, cask, apt, dnf)
-    print("=== Installing system packages ===")
-    for name, target_config in pkg_items:
-        for method in SYSTEM_METHODS:
-            if method in target_config:
-                value = target_config[method]
-                if is_installed(name, method, value):
-                    print(f"  [ok] {name}")
-                else:
-                    INSTALLERS[method](name, value)
-                break
-    print()
+    # Phase 2: System packages — batch by method into single commands
+    print_section("System Packages")
+    system_items = [
+        (name, tc) for name, tc in pkg_items
+        if any(m in tc for m in SYSTEM_METHODS)
+    ]
 
-    # Phase 3: Secondary packages (uv_tool, cargo, go_tool, snap, flatpak, yay, gh_extension, eget, manual)
-    print("=== Installing secondary packages ===")
-    for name, target_config in pkg_items:
-        # Skip if already handled in phase 2
-        if any(m in target_config for m in SYSTEM_METHODS):
-            continue
-        for method in SECONDARY_METHODS:
-            if method in target_config:
-                value = target_config[method]
-                if is_installed(name, method, value):
-                    print(f"  [ok] {name}")
-                else:
-                    INSTALLERS[method](name, value)
-                break
-    print()
+    # Separate already-installed from to-install, grouped by method
+    brew_to_install = []
+    cask_to_install = []
+    apt_to_install = []
+    dnf_to_install = []
 
-    print("Package installation complete!")
+    with console.status("Checking installed packages..."):
+        for name, tc in system_items:
+            for method in SYSTEM_METHODS:
+                if method in tc:
+                    value = tc[method]
+                    if is_installed(name, method, value):
+                        print_status(name, "ok")
+                    elif method == "brew":
+                        brew_to_install.append((name, value))
+                    elif method == "cask":
+                        cask_to_install.append((name, value))
+                    elif method == "apt":
+                        apt_to_install.append((name, value))
+                    elif method == "dnf":
+                        dnf_to_install.append((name, value))
+                    break
+
+    if brew_to_install:
+        formulas = " ".join(v for _, v in brew_to_install)
+        names = ", ".join(f"[bold]{n}[/bold]" for n, _ in brew_to_install)
+        with console.status(f"Installing brew packages: {names}"):
+            if run(f"zb install {formulas}", capture=True).returncode != 0:
+                console.print("  [red]Warning: Failed to install some brew packages[/red]")
+            else:
+                for n, _ in brew_to_install:
+                    print_status(n, "done")
+
+    if cask_to_install:
+        casks = " ".join(v for _, v in cask_to_install)
+        names = ", ".join(f"[bold]{n}[/bold]" for n, _ in cask_to_install)
+        with console.status(f"Installing cask packages: {names}"):
+            if run(f"zb install --cask {casks}", capture=True).returncode != 0:
+                console.print("  [red]Warning: Failed to install some cask packages[/red]")
+            else:
+                for n, _ in cask_to_install:
+                    print_status(n, "done")
+
+    if apt_to_install:
+        pkgs = " ".join(v for _, v in apt_to_install)
+        names = ", ".join(f"[bold]{n}[/bold]" for n, _ in apt_to_install)
+        with console.status(f"Installing apt packages: {names}"):
+            if run(f"sudo apt install -y {pkgs}", capture=True).returncode != 0:
+                console.print("  [red]Warning: Failed to install some apt packages[/red]")
+            else:
+                for n, _ in apt_to_install:
+                    print_status(n, "done")
+
+    if dnf_to_install:
+        pkgs = " ".join(v for _, v in dnf_to_install)
+        names = ", ".join(f"[bold]{n}[/bold]" for n, _ in dnf_to_install)
+        with console.status(f"Installing dnf packages: {names}"):
+            if run(f"sudo dnf install -y {pkgs}", capture=True).returncode != 0:
+                console.print("  [red]Warning: Failed to install some dnf packages[/red]")
+            else:
+                for n, _ in dnf_to_install:
+                    print_status(n, "done")
+
+    # Phase 3: Secondary packages — parallel
+    print_section("Secondary Packages")
+    secondary_items = [
+        (name, tc) for name, tc in pkg_items
+        if not any(m in tc for m in SYSTEM_METHODS)
+    ]
+    with ThreadPoolExecutor(max_workers=MAX_PARALLEL) as pool:
+        futures = {
+            pool.submit(install_package, name, tc, SECONDARY_METHODS): name
+            for name, tc in secondary_items
+        }
+        for future in as_completed(futures):
+            pass  # status printed by install_package -> INSTALLERS
+
+    # Summary
+    total = len(pkg_items)
+    console.print()
+    console.print(
+        Panel(
+            f"[bold green]Processed {total} packages[/bold green]",
+            title="[bold blue]Complete[/bold blue]",
+            border_style="green",
+        )
+    )
 
 
 if __name__ == "__main__":
