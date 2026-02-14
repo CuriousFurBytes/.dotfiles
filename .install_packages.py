@@ -256,7 +256,7 @@ def install_brew(pkg_name: str, formula: str) -> None:
 
 def install_cask(pkg_name: str, cask: str) -> None:
     with console.status(f"Installing [bold]{pkg_name}[/bold] (cask)..."):
-        result = run(f"zb install --cask {cask}", capture=True)
+        result = run(f"brew install --cask {cask}", capture=True)
     if result.returncode != 0:
         if "It seems there is already an App at" in (result.stderr + result.stdout):
             print_status(pkg_name, "skip")
@@ -525,7 +525,7 @@ def main() -> None:
         casks = " ".join(v for _, v in cask_to_install)
         names = ", ".join(f"[bold]{n}[/bold]" for n, _ in cask_to_install)
         with console.status(f"Installing cask packages: {names}"):
-            if run(f"zb install --cask {casks}", capture=True).returncode != 0:
+            if run(f"brew install --cask {casks}", capture=True).returncode != 0:
                 console.print("  [red]Warning: Failed to install some cask packages[/red]")
             else:
                 for n, _ in cask_to_install:
