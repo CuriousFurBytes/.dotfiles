@@ -21,3 +21,7 @@ function dsa() {
     docker volume prune -f
     docker image prune -f
 }
+
+function removebg() {
+  uvx --python 3.9 backgroundremover -i "$1" -o "$2"
+}
