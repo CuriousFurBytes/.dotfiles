@@ -809,6 +809,15 @@
             }
         }
     },
+    "gimp": {
+        "description": "GNU Image Manipulation Program",
+        "packages": {
+            "darwin": { "cask": "gimp" },
+            "ubuntu": { "apt": "gimp" },
+            "fedora": { "dnf": "gimp" },
+            "pop_os": { "apt": "gimp" }
+        }
+    },
     "pure-prompt": {
         "description": "Pretty, minimal and fast ZSH prompt",
         "packages": {
