@@ -39,9 +39,9 @@ Stylus stores styles in browser's IndexedDB. To backup/restore:
 
 Configuration is synced via Obsidian Sync or stored locally in the extension.
 
-## Bitwarden
+## Proton Pass
 
-Settings are synced via Bitwarden account.
+Settings are synced via Proton Pass account.
 
 ## Startpage
 

@@ -1,8 +1,8 @@
 [user]
     name = {{ .name }}
     email = {{ .email }}
-{{- if and (lookPath "bw") (env "BW_SESSION") }}
-    signingkey = {{ (bitwarden "item" "SSH Key").sshKey.publicKey }}
+{{- if and (lookPath "pass-cli") .proton_pass_ssh_item }}
+    signingkey = {{ protonPass (printf "%s/public_key" .proton_pass_ssh_item) }}
 {{- end }}
 
 [core]
@@ -48,7 +48,7 @@
 [credential]
     helper = {{ if eq .chezmoi.os "darwin" }}osxkeychain{{ else }}store{{ end }}
 
-{{- if and (lookPath "bw") (env "BW_SESSION") }}
+{{- if and (lookPath "pass-cli") .proton_pass_ssh_item }}
 
 [gpg]
     format = ssh

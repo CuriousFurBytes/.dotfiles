@@ -4,6 +4,7 @@
 {{- $is_work := promptBoolOnce . "is_work" "Is this a work machine" -}}
 {{- $nextdns_id := promptStringOnce . "nextdns_id" "NextDNS ID" -}}
 {{- $nextdns_profile_name := promptStringOnce . "nextdns_profile_name" "NextDNS profile name" -}}
+{{- $proton_pass_ssh_item := promptStringOnce . "proton_pass_ssh_item" "Proton Pass SSH Key URI (pass://SHARE_ID/ITEM_ID)" -}}
 
 {{- $osid := .chezmoi.os -}}
 {{- if hasKey .chezmoi.osRelease "id" -}}
@@ -18,3 +19,4 @@
     osid = {{ $osid | quote }}
     nextdns_id = {{ $nextdns_id | quote }}
     nextdns_profile_name = {{ $nextdns_profile_name | quote }}
+    proton_pass_ssh_item = {{ $proton_pass_ssh_item | quote }}

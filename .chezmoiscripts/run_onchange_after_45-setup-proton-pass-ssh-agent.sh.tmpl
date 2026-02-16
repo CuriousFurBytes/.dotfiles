@@ -1,0 +1,47 @@
+#!/bin/bash
+set -e
+
+if ! command -v pass-cli &> /dev/null; then
+    echo "pass-cli not found, skipping SSH agent setup"
+    exit 0
+fi
+
+{{ if eq .chezmoi.os "darwin" }}
+PLIST_SRC="{{ .chezmoi.homeDir }}/.config/proton-pass/ssh-agent.plist"
+PLIST_DST="{{ .chezmoi.homeDir }}/Library/LaunchAgents/me.proton.pass.ssh-agent.plist"
+
+mkdir -p "{{ .chezmoi.homeDir }}/Library/LaunchAgents"
+mkdir -p "{{ .chezmoi.homeDir }}/.local/state"
+
+# Unload old version if present
+launchctl bootout "gui/$(id -u)/me.proton.pass.ssh-agent" 2>/dev/null || true
+
+cp "$PLIST_SRC" "$PLIST_DST"
+
+launchctl bootstrap "gui/$(id -u)" "$PLIST_DST"
+echo "✓ Proton Pass SSH Agent registered with launchd (runs at login)"
+
+{{ else if eq .chezmoi.os "linux" }}
+SYSTEMD_DIR="{{ .chezmoi.homeDir }}/.config/systemd/user"
+mkdir -p "$SYSTEMD_DIR"
+mkdir -p "{{ .chezmoi.homeDir }}/.local/state"
+
+cat > "$SYSTEMD_DIR/proton-pass-ssh-agent.service" << 'EOF'
+[Unit]
+Description=Proton Pass SSH Agent
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart={{ lookPath "pass-cli" }} ssh-agent start --vault-name SSH --socket-path %h/.ssh/proton-pass-agent.sock
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
+EOF
+
+systemctl --user daemon-reload
+systemctl --user enable --now proton-pass-ssh-agent.service
+echo "✓ Proton Pass SSH Agent registered with systemd (runs at login)"
+{{ end }}

@@ -48,6 +48,14 @@ eval "$(zoxide init zsh)"
 
 export PATH="$PATH:$HOME/.local/bin"
 
+# Proton Pass SSH Agent
+if command -v pass-cli &> /dev/null; then
+    PROTON_AGENT_SOCK="$HOME/.ssh/proton-pass-agent.sock"
+    if [ -S "$PROTON_AGENT_SOCK" ]; then
+        export SSH_AUTH_SOCK="$PROTON_AGENT_SOCK"
+    fi
+fi
+
 # NPM
 NPM_PACKAGES="${HOME}/.npm-packages"
 

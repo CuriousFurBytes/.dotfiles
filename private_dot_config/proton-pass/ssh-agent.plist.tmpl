@@ -1,0 +1,28 @@
+{{- if eq .chezmoi.os "darwin" -}}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>me.proton.pass.ssh-agent</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>{{ lookPath "pass-cli" }}</string>
+        <string>ssh-agent</string>
+        <string>start</string>
+        <string>--vault-name</string>
+        <string>SSH</string>
+        <string>--socket-path</string>
+        <string>{{ .chezmoi.homeDir }}/.ssh/proton-pass-agent.sock</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>{{ .chezmoi.homeDir }}/.local/state/proton-pass-ssh-agent.log</string>
+    <key>StandardErrorPath</key>
+    <string>{{ .chezmoi.homeDir }}/.local/state/proton-pass-ssh-agent.log</string>
+</dict>
+</plist>
+{{- end -}}

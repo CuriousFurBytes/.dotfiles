@@ -4,61 +4,61 @@
 
 # Dotfiles
 
-Personal dotfiles managed with [chezmoi](https://www.chezmoi.io/).
+Personal dotfiles managed with [chezmoi](https://www.chezmoi.io/), with a Go-based TUI installer built on [Charm](https://charm.sh/) libraries.
 
 ## What's Included
 
-- **Zsh** configuration with [Pure](https://github.com/sindresorhus/pure) prompt
-- **Git** configuration with signing support
-- **SSH** configuration
-- **Zen Browser** custom styles and preferences
-- Common aliases
-- Tool configurations (fzf, zoxide, nvm, etc.)
+- **Shell** &mdash; Zsh with [Oh My Zsh](https://ohmyz.sh/), [Pure](https://github.com/sindresorhus/pure) prompt, syntax highlighting, autosuggestions
+- **Git** &mdash; Delta diffs, commit signing via Proton Pass SSH keys
+- **SSH** &mdash; [Proton Pass SSH Agent](https://protonpass.github.io/pass-cli/) as a system service (launchd / systemd)
+- **Editors** &mdash; Helix, Neovim, VS Code, Zed
+- **Terminal** &mdash; Ghostty, Zellij, fzf, zoxide, eza, bat, lazygit
+- **Browser** &mdash; Zen Browser with custom styles, preferences, and extensions
+- **Packages** &mdash; 100+ tools defined in `packages.json`, installed via brew, apt, dnf, snap, flatpak, cargo, uv, go, eget, and more
+- **macOS** &mdash; System defaults, dock configuration, screenshots, keyboard settings
+- **Secrets** &mdash; [Proton Pass CLI](https://protonpass.github.io/pass-cli/) for SSH keys, Git signing keys, and credentials
 
 ## Prerequisites
 
-- [Proton Pass CLI](https://protonpass.github.io/pass-cli/) for secrets management
-- macOS (uses Homebrew for package installation)
+- macOS or Linux (Ubuntu, Fedora, Pop!_OS)
+- Internet connection
+- A [Proton Pass](https://proton.me/pass) account with:
+  - An **SSH** vault containing your SSH key(s)
+  - The SSH key's `pass://` URI (used during `chezmoi init`)
 
 ## Installation
 
 ### Quick Install
 
-Run this single command to install everything:
-
 ```bash
 curl -fsSL https://raw.githubusercontent.com/CuriousFurBytes/.dotfiles/main/install.sh | bash
 ```
 
-This will automatically:
-- Install Homebrew (macOS) or required package managers
-- Install chezmoi
-- Install Proton Pass CLI
-- Clone and apply your dotfiles
+The bootstrap script will:
 
-**Prerequisites:**
-- **Proton Pass CLI** must be authenticated before running the script:
-  ```bash
-  pass-cli login
-  ```
+1. Install prerequisites (Homebrew, zerobrew, Go, Cargo, uv; + Snap on Linux)
+2. Build and launch the **TUI installer** which guides you through:
+   - Selecting packages to install (multi-select form)
+   - Installing chezmoi
+   - Installing Proton Pass + CLI
+   - Authenticating with `pass-cli login`
+   - Starting the Proton Pass SSH Agent as a system service
+   - Running `chezmoi init` and `chezmoi apply`
+   - Authenticating with `gh auth login`
+   - Installing gh-dash and all selected packages
 
-- **Required Proton Pass Items** in your vault:
-
-  | Item | Type | Description |
-  |------|------|-------------|
-  | SSH Key | SSH Key | Private key in key field, public key in Notes |
-  | Git Signing Key | Login/Secure Note | GPG or signing key |
+Every step prompts for confirmation before running.
 
 ### Manual Installation
 
-If you prefer to install manually:
+1. **Install Homebrew**:
 
-1. **Install Homebrew** (macOS):
    ```bash
    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
    ```
 
 2. **Install Proton Pass CLI and authenticate**:
+
    ```bash
    # macOS
    brew tap protonpass/tap
@@ -71,91 +71,113 @@ If you prefer to install manually:
    pass-cli login
    ```
 
-3. **Initialize and apply dotfiles**:
+3. **Start the SSH Agent**:
+
    ```bash
+   # Start as a background service (macOS)
+   pass-cli ssh-agent start --vault-name SSH --socket-path ~/.ssh/proton-pass-agent.sock
+
+   # Or register as a launchd service (persists across reboots)
+   # See .chezmoiscripts/run_onchange_after_45-setup-proton-pass-ssh-agent.sh.tmpl
+   ```
+
+4. **Install and apply dotfiles**:
+
+   ```bash
+   brew install chezmoi
    chezmoi init https://github.com/CuriousFurBytes/.dotfiles.git
    chezmoi apply -v
    ```
 
-The installation will:
-- Install Homebrew packages from `packages.json`
-- Set up Oh My Zsh with plugins
-- Install Pure prompt
-- Configure SSH keys and Git
+   During `chezmoi init`, you'll be prompted for:
 
-### Post-Configuration
+   | Prompt | Example |
+   |--------|---------|
+   | Email address | `you@example.com` |
+   | Full name | `Your Name` |
+   | GitHub username | `yourusername` |
+   | Is this a work machine | `false` |
+   | NextDNS ID | `abc123` |
+   | NextDNS profile name | `My Profile` |
+   | Proton Pass SSH Key URI | `pass://SHARE_ID/ITEM_ID` |
 
-After applying chezmoi:
+5. **Verify**:
 
-1. **Restart your shell** or source the configuration:
    ```bash
-   exec zsh
-   # or
-   source ~/.zshrc
+   exec $SHELL
+   ssh-add -l                # Should show your key from Proton Pass
+   ssh -T git@github.com     # Should greet you
+   git config --list         # Check signing config
    ```
 
-2. **Verify installations**:
-   ```bash
-   # Check zsh prompt
-   echo $PROMPT
-   
-   # Check git config
-   git config --list
-   
-   # Verify SSH key
-   ssh-add -l
-   ```
+## SSH Agent
 
-3. **Optional**: Set up Git signing if configured:
-   ```bash
-   git config --global commit.gpgsign true
-   ```
+The Proton Pass SSH Agent replaces traditional SSH key files. Instead of storing keys on disk, the agent loads them from your Proton Pass **SSH** vault.
 
-4. **Zen Browser** (if installed):
-   - Custom styles and preferences are automatically copied to your active profile
-   - Extensions are auto-installed via `policies.json` (requires sudo)
-   - Restart Zen Browser to apply changes
+- **macOS**: Registered as a launchd service (`me.proton.pass.ssh-agent`), starts at login
+- **Linux**: Registered as a systemd user service (`proton-pass-ssh-agent`), starts at login
+- **Socket**: `~/.ssh/proton-pass-agent.sock`
+- **Shell**: The zshrc sets `SSH_AUTH_SOCK` automatically when the socket exists
+- **SSH config**: `IdentityAgent` points to the Proton Pass socket
 
-## Customization
-
-### Zen Browser
-
-Edit your Zen Browser configuration:
+### Troubleshooting
 
 ```bash
-# Custom UI styles
-chezmoi edit ~/.config/zen-browser/chrome/userChrome.css
+# Check if the agent is running
+ls -la ~/.ssh/proton-pass-agent.sock
 
-# Browser preferences
-chezmoi edit ~/.config/zen-browser/user.js
+# Check loaded keys
+SSH_AUTH_SOCK=~/.ssh/proton-pass-agent.sock ssh-add -l
 
-# Extension list
-chezmoi edit ~/.config/zen-browser/extensions.json
+# View agent logs (macOS)
+cat ~/.local/state/proton-pass-ssh-agent.log
+
+# Restart the agent (macOS)
+launchctl kickstart -k "gui/$(id -u)/me.proton.pass.ssh-agent"
+
+# Restart the agent (Linux)
+systemctl --user restart proton-pass-ssh-agent
 ```
 
-**Adding extensions:**
+## Project Structure
 
-1. Find the extension on [addons.mozilla.org](https://addons.mozilla.org)
-2. Get the extension ID from `about:debugging` in Zen Browser
-3. Add to `extensions.json`:
-   ```json
-   {
-     "name": "Extension Name",
-     "id": "extension-id@example.com",
-     "url": "https://addons.mozilla.org/firefox/downloads/latest/extension-name/latest.xpi"
-   }
-   ```
-4. Run `chezmoi apply -v` (may require sudo for policies.json)
-
-**Extension configurations:**
-
-Extension settings are stored in `~/.config/zen-browser/extension-configs/`:
-
-- **uBlock Origin**: Import `ublock-backup.txt` via Settings → Backup/Restore
-- **Stylus**: Export your styles from the extension and save to `stylus-styles.json`
-  - To restore: Import the JSON file via Stylus → Manage → Import
-
-See `~/.config/zen-browser/extension-configs/README.md` for detailed instructions.
+```
+.
+├── install.sh                    # Bootstrap script (installs Go, builds TUI)
+├── installer/                    # Go TUI installer (Huh + BubbleTea + Lipgloss)
+│   ├── main.go                   #   Entry point
+│   ├── app.go                    #   State machine (11 steps)
+│   ├── forms.go                  #   Huh forms (package selection, confirms)
+│   ├── terminal.go               #   BubbleTea terminal window for subprocesses
+│   ├── packages.go               #   packages.json parser
+│   ├── installer.go              #   Package install logic (13 methods)
+│   ├── styles.go                 #   Lipgloss styles (Catppuccin Mocha)
+│   └── detect.go                 #   OS detection
+├── packages.json                 # Package definitions (100+ packages)
+├── .chezmoi.toml.tmpl            # Chezmoi config (prompted values)
+├── dot_zshrc                     # Zsh configuration
+├── dot_gitconfig.tmpl            # Git config with Proton Pass signing
+├── dot_common_aliases            # Shell aliases
+├── private_dot_ssh/              # SSH config + key templates
+├── dot_config/                   # App configurations
+│   ├── ghostty/                  #   Terminal emulator
+│   ├── helix/                    #   Text editor
+│   ├── lazygit/                  #   Git TUI
+│   ├── zen-browser/              #   Browser (styles, extensions, prefs)
+│   ├── bat/                      #   Syntax highlighting
+│   ├── bottom/                   #   System monitor
+│   └── ...
+├── .chezmoiscripts/              # Chezmoi automation scripts
+│   ├── run_onchange_after_25-*   #   Font installation
+│   ├── run_onchange_after_40-*   #   Shell configuration
+│   ├── run_onchange_after_45-*   #   Proton Pass SSH Agent service
+│   ├── run_onchange_after_50-*   #   VS Code extensions
+│   ├── run_once_after_60-*       #   Profile picture
+│   ├── run_once_after_61-*       #   Wallpaper
+│   └── darwin/                   #   macOS defaults, dock, Zen Browser
+├── assets/                       # Fonts, images, styles
+└── android/                      # Android app configs and install list
+```
 
 ## Usage
 
@@ -175,3 +197,33 @@ chezmoi update -v
 # Add a new dotfile
 chezmoi add ~/.config/app/config
 ```
+
+## Customization
+
+### Adding Packages
+
+Edit `packages.json` to add a new package:
+
+```json
+"my-tool": {
+    "description": "Description of the tool",
+    "packages": {
+        "darwin": { "brew": "my-tool" },
+        "ubuntu": { "apt": "my-tool" },
+        "fedora": { "dnf": "my-tool" },
+        "pop_os": { "apt": "my-tool" }
+    }
+}
+```
+
+Then run `chezmoi apply -v` to trigger the package installer.
+
+### Zen Browser
+
+```bash
+chezmoi edit ~/.config/zen-browser/chrome/userChrome.css   # Custom UI styles
+chezmoi edit ~/.config/zen-browser/user.js                 # Browser preferences
+chezmoi edit ~/.config/zen-browser/extensions.json         # Extension list
+```
+
+Extension settings are documented in `~/.config/zen-browser/extension-configs/README.md`.

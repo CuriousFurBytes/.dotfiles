@@ -529,15 +529,6 @@
             "pop_os": { "snap": { "name": "thunderbird" } }
         }
     },
-    "bitwarden": {
-        "description": "Open-source password manager",
-        "packages": {
-            "darwin": { "cask": "bitwarden" },
-            "ubuntu": { "snap": { "name": "bitwarden" } },
-            "fedora": { "snap": { "name": "bitwarden" } },
-            "pop_os": { "snap": { "name": "bitwarden" } }
-        }
-    },
     "protonvpn": {
         "description": "VPN client by Proton",
         "packages": {
@@ -816,6 +807,15 @@
             "ubuntu": { "apt": "gimp" },
             "fedora": { "dnf": "gimp" },
             "pop_os": { "apt": "gimp" }
+        }
+    },
+    "flameshot": {
+        "description": "Powerful yet simple screenshot tool",
+        "packages": {
+            "darwin": { "cask": "flameshot" },
+            "ubuntu": { "apt": "flameshot" },
+            "fedora": { "dnf": "flameshot" },
+            "pop_os": { "apt": "flameshot" }
         }
     },
     "pure-prompt": {

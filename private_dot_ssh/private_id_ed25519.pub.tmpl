@@ -1,3 +1,3 @@
-{{- if and (lookPath "bw") (env "BW_SESSION") -}}
-{{ (bitwarden "item" "SSH Key").sshKey.publicKey -}}
+{{- if and (lookPath "pass-cli") .proton_pass_ssh_item -}}
+{{ protonPass (printf "%s/public_key" .proton_pass_ssh_item) -}}
 {{- end -}}

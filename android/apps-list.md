@@ -15,8 +15,8 @@
 ## Productivity
 - [ ] **Obsidian** - Note-taking app
   - Source: Google Play Store
-- [ ] **Bitwarden** - Password manager
-  - Source: Google Play Store / F-Droid
+- [ ] **Proton Pass** - Password manager
+  - Source: Google Play Store
 - [ ] **Ente Auth** - 2FA authenticator
   - Source: Google Play Store / F-Droid
   - URL: https://ente.io/auth
