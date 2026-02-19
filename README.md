@@ -159,7 +159,7 @@ systemctl --user restart proton-pass-ssh-agent
 ├── dot_gitconfig.tmpl            # Git config with Proton Pass signing
 ├── dot_common_aliases            # Shell aliases
 ├── private_dot_ssh/              # SSH config + key templates
-├── dot_config/                   # App configurations
+├── private_dot_config/            # App configurations (private)
 │   ├── ghostty/                  #   Terminal emulator
 │   ├── helix/                    #   Text editor
 │   ├── lazygit/                  #   Git TUI
