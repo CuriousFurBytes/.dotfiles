@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# post-push git hook: triggers fireworks shader in Ghostty for ~8 seconds
+
+GHOSTTY_CONFIG="$HOME/.config/ghostty/config"
+FIREWORKS_SHADER="shaders/fireworks.glsl"
+NORMAL_SHADER="shaders/cursor_blaze.glsl"
+DURATION=8
+
+# Only run if Ghostty is running
+GHOSTTY_PID=$(pgrep -x ghostty 2>/dev/null || pgrep -f "Ghostty.app/Contents/MacOS/ghostty" 2>/dev/null | head -1)
+if [ -z "$GHOSTTY_PID" ]; then
+    exit 0
+fi
+
+# Run the fireworks effect in the background so it doesn't block the push
+(
+    # Swap to fireworks shader
+    sed -i '' "s|custom-shader = ${NORMAL_SHADER}|custom-shader = ${FIREWORKS_SHADER}|g" "$GHOSTTY_CONFIG"
+
+    # Reload Ghostty config (SIGUSR2 triggers reload on macOS)
+    kill -SIGUSR2 "$GHOSTTY_PID" 2>/dev/null
+
+    # Wait for fireworks to play
+    sleep "$DURATION"
+
+    # Restore normal shader
+    sed -i '' "s|custom-shader = ${FIREWORKS_SHADER}|custom-shader = ${NORMAL_SHADER}|g" "$GHOSTTY_CONFIG"
+
+    # Reload again to restore
+    kill -SIGUSR2 "$GHOSTTY_PID" 2>/dev/null
+) &
+
+exit 0
