@@ -6,7 +6,7 @@ FIREWORKS_SHADER="shaders/fireworks.glsl"
 NORMAL_SHADER="shaders/cursor_blaze.glsl"
 DURATION="${1:-8}"
 
-GHOSTTY_PROC_PID=$(ps -ax -o pid,comm | grep -i ghostty | grep -v grep | awk '{print $1}' | head -1)
+GHOSTTY_PROC_PID=$(pgrep -f "Applications/Ghostty.app" | head -1)
 
 # Swap to fireworks shader and reload
 sed -i '' "s|custom-shader = ${NORMAL_SHADER}|custom-shader = ${FIREWORKS_SHADER}|g" "$GHOSTTY_CONFIG"
