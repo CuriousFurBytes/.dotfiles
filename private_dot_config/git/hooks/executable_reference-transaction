@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Implements a post-push hook via reference-transaction.
+# Fires ghostty-fireworks when any remote tracking branch is successfully updated after a push.
+
+while read oldvalue newvalue refname; do
+    if [[ "$1" == "committed" && "$refname" == refs/remotes/* ]]; then
+        ghostty-fireworks &
+        break
+    fi
+done
