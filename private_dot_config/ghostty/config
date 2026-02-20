@@ -10,6 +10,5 @@ clipboard-trim-trailing-spaces = true
 quit-after-last-window-closed = true
 
 # Shaders
-# fireworks shader is activated temporarily on git push via ~/.config/git/hooks/pre-push
 
 custom-shader = shaders/cursor_blaze.glsl
