@@ -4,7 +4,7 @@
 
 while read oldvalue newvalue refname; do
     if [[ "$1" == "committed" && "$refname" == refs/remotes/* ]]; then
-        ghostty-fireworks &
+        "$HOME/.local/bin/ghostty-fireworks" &
         break
     fi
 done
