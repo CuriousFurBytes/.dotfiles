@@ -12,7 +12,6 @@ GHOSTTY_PROC_PID=$(ps -ax -o pid,comm | grep -i ghostty | grep -v grep | awk '{p
 sed -i '' "s|custom-shader = ${NORMAL_SHADER}|custom-shader = ${FIREWORKS_SHADER}|g" "$GHOSTTY_CONFIG"
 kill -USR2 "$GHOSTTY_PROC_PID"
 
-echo "Fireworks! Restoring in ${DURATION}s..."
 
 RESTORE_SCRIPT=$(mktemp -t ghostty-restore)
 cat > "$RESTORE_SCRIPT" << SCRIPT
