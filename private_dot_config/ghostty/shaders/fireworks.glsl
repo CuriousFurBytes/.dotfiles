@@ -6,7 +6,6 @@
 
 // Rose Pine palette applied by Claude
 
-#define BLACK_BLEND_THRESHOLD .4
 #define PI 3.141592653589793238
 #define TWOPI 6.283185307179586
 #define S(x,y,z) smoothstep(x,y,z)
@@ -116,8 +115,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     vec2 termUV = fragCoord.xy / iResolution.xy;
     vec4 terminalColor = texture(iChannel0, termUV);
 
-    float alpha = step(length(terminalColor.rgb), BLACK_BLEND_THRESHOLD);
-    vec3 blendedColor = mix(terminalColor.rgb * 1.0, c.rgb * 0.3, alpha);
+    // Add fireworks on top of terminal — theme background shows through
+    vec3 blendedColor = terminalColor.rgb + c.rgb * 0.3;
 
     fragColor = vec4(blendedColor, terminalColor.a);
 }

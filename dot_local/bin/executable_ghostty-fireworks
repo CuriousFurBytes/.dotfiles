@@ -1,14 +1,19 @@
 #!/usr/bin/env bash
-# post-push git hook: triggers fireworks shader in Ghostty for ~8 seconds
+# Test/trigger the Ghostty fireworks shader for a set duration
 
 GHOSTTY_CONFIG="$HOME/.config/ghostty/config"
 FIREWORKS_SHADER="shaders/fireworks.glsl"
 NORMAL_SHADER="shaders/cursor_blaze.glsl"
-DURATION=8
+DURATION="${1:-8}"
 
 GHOSTTY_PROC_PID=$(ps -ax -o pid,comm | grep -i ghostty | grep -v grep | awk '{print $1}' | head -1)
 
-# Write a self-contained restore script and run it detached via nohup
+# Swap to fireworks shader and reload
+sed -i '' "s|custom-shader = ${NORMAL_SHADER}|custom-shader = ${FIREWORKS_SHADER}|g" "$GHOSTTY_CONFIG"
+kill -USR2 "$GHOSTTY_PROC_PID"
+
+echo "Fireworks! Restoring in ${DURATION}s..."
+
 RESTORE_SCRIPT=$(mktemp -t ghostty-restore)
 cat > "$RESTORE_SCRIPT" << SCRIPT
 #!/usr/bin/env bash
@@ -18,11 +23,4 @@ rm -f "\$0"
 SCRIPT
 chmod +x "$RESTORE_SCRIPT"
 
-# Swap to fireworks shader and reload
-sed -i '' "s|custom-shader = ${NORMAL_SHADER}|custom-shader = ${FIREWORKS_SHADER}|g" "$GHOSTTY_CONFIG"
-kill -USR2 "$GHOSTTY_PROC_PID" 2>/dev/null
-
-# Schedule restore via nohup after DURATION seconds — survives git process exit
 nohup bash -c "sleep ${DURATION} && bash ${RESTORE_SCRIPT}" >/dev/null 2>&1 &
-
-exit 0
