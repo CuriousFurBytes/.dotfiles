@@ -3,35 +3,35 @@
 ## Zed Configuration
 
 ### Configure Zed's Claude Integration
-- [ ] Configure to accept edits
-- [ ] Configure to accept commands:
-  - [ ] `git diff *`
-  - [ ] `git status *`
-  - [ ] `git log *`
-  - [ ] `git show`
-  - [ ] `read`
-  - [ ] `glob`
-  - [ ] `grep`/`ripgrep`
-  - [ ] `ls`
+- [x] Configure to accept edits
+- [x] Configure to accept commands:
+  - [x] `git diff *`
+  - [x] `git status *`
+  - [x] `git log *`
+  - [x] `git show`
+  - [x] `read`
+  - [x] `glob`
+  - [x] `grep`/`ripgrep`
+  - [x] `ls`
 
 ## CLI Tools Configuration
 
-- [ ] Configure Claude CLI
-- [ ] Configure eza
-  - [ ] Configure eza theme
-- [ ] Configure zebar
-- [ ] Configure bat
-  - [ ] Configure bat theme
-- [ ] Configure gh
-- [ ] Configure television
+- [x] Configure Claude CLI
+- [x] Configure eza
+  - [x] Configure eza theme
+- ~~Configure zebar~~ (uninstalled)
+- [x] Configure bat
+  - [x] Configure bat theme
+- [x] Configure gh
+- ~~Configure television~~ (uninstalled)
 - [ ] Configure raycast (if possible)
-- [ ] Configure iPython
-- [ ] Configure Jupyter Notebooks
-- [ ] Configure gh-dash
+- [x] Configure iPython
+- [x] Configure gh-dash
 
 ### Configure rclone
 - [ ] Add settings for Proton Drive
 - [ ] Configure auto-mount on a folder
+- [x] Install rclone-ui
 
 ### System Configuration
 - [ ] Configure DNS for the entire machine
@@ -50,8 +50,7 @@
 
 - [ ] Research automation possibilities for Android app installation
 
-## Claude Agent Configuration
+## Backups
 
-- [ ] Add `claude/agent.md` files
-  - [ ] Add instructions
-  - [ ] Add commands
+- [ ] Install and configure restic
+  - [ ] Install and configure backrest

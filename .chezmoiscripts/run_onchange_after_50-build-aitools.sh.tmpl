@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Rebuilt whenever source files change.
+# hash: {{ output "sh" "-c" (printf "find %s -type f | sort | xargs sha256sum | sha256sum" (joinPath .chezmoi.sourceDir "dot_local/share/aitools")) }}
+set -euo pipefail
+
+SRC="{{ .chezmoi.homeDir }}/.local/share/aitools"
+BIN="{{ .chezmoi.homeDir }}/.local/bin"
+
+cd "$SRC"
+
+echo "==> Installing aitools Go dependencies…"
+go mod tidy
+
+echo "==> Building aicommit…"
+go build -o "$BIN/aicommit" ./cmd/aicommit
+
+echo "==> Building aipr…"
+go build -o "$BIN/aipr" ./cmd/aipr
+
+echo "==> aitools built successfully"

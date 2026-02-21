@@ -10,8 +10,6 @@ alias cat="bat $@"
 alias jqc="jq -C"  # jq with colors
 alias jqr="jq -r"  # jq raw output
 alias go-linux="go run github.com/jtolio/tinyemu-go/temubox/example@2c8151233c2d"
-alias aicommit="git diff --staged | claude -p 'Generate a conventional commit message for my staged changes: <type>(<scope>): <subject> (<=72ch). Types: feat|fix|docs|style|refactor|perf|test|chore|build. Use imperative mood. Use list format for body (<=72ch, max 5 items, start each with -). Do not include the string Co-Authored-By. Output only the raw commit message, with no markdown, no code blocks, no backticks, no explanations.' --model haiku --output-format text | pbcopy"
-alias aipr='template=$([ -f .github/pull_request_template.md ] && cat .github/pull_request_template.md || echo ""); commits=$(git log origin/main..HEAD --oneline 2>/dev/null); changes=$(git diff origin/main...HEAD 2>/dev/null); claude -p "Generate a pull request description based on the commits and diff below.${template:+\n\n---TEMPLATE---\n$template\n---END TEMPLATE---}\n\n---COMMITS---\n$commits\n---END COMMITS---\n\n---DIFF---\n$changes\n---END DIFF---" | pbcopy'
 alias git-clean='git branch | grep -vE "^\*main|develop" | xargs git branch -d'
 alias pp="pass-cli $@"
 

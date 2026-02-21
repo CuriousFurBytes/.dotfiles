@@ -189,5 +189,24 @@
             "model": "gemini-3-flash-preview",
         },
         "default_profile": "write",
+        "tool_permissions": {
+            "default": "allow",
+            "tools": {
+                "edit_file": {
+                    "default": "allow",
+                },
+                "terminal": {
+                    "default": "confirm",
+                    "always_allow": [
+                        { "pattern": "^git\\s+(diff|status|log|show)" },
+                        { "pattern": "^read\\b" },
+                        { "pattern": "^glob\\b" },
+                        { "pattern": "^grep\\b" },
+                        { "pattern": "^rg\\b" },
+                        { "pattern": "^ls\\b" },
+                    ],
+                },
+            },
+        },
     },
 }

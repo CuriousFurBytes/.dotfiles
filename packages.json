@@ -180,6 +180,33 @@
             "pop_os": { "apt": "rclone" }
         }
     },
+    "rclone-ui": {
+        "description": "GUI for rclone cloud storage management",
+        "packages": {
+            "darwin": { "brew": "rclone-ui" },
+            "ubuntu": {
+                "manual": {
+                    "repo": "rclone-ui/rclone-ui",
+                    "type": "deb",
+                    "asset_pattern": "amd64.deb"
+                }
+            },
+            "fedora": {
+                "manual": {
+                    "repo": "rclone-ui/rclone-ui",
+                    "type": "rpm",
+                    "asset_pattern": "x86_64.rpm"
+                }
+            },
+            "pop_os": {
+                "manual": {
+                    "repo": "rclone-ui/rclone-ui",
+                    "type": "deb",
+                    "asset_pattern": "amd64.deb"
+                }
+            }
+        }
+    },
     "node": {
         "description": "JavaScript runtime built on V8",
         "packages": {
@@ -266,31 +293,13 @@
             "pop_os": { "apt": "ripgrep" }
         }
     },
-    "television": {
-        "description": "A blazingly fast general purpose fuzzy finder TUI",
+    "yazi": {
+        "description": "Blazing fast terminal file manager written in Rust",
         "packages": {
-            "darwin": { "brew": "television" },
-            "ubuntu": {
-                "manual": {
-                    "url": "https://alexpasmantier.github.io/television/install.sh",
-                    "type": "script",
-                    "check_command": "tv"
-                }
-            },
-            "fedora": {
-                "manual": {
-                    "url": "https://alexpasmantier.github.io/television/install.sh",
-                    "type": "script",
-                    "check_command": "tv"
-                }
-            },
-            "pop_os": {
-                "manual": {
-                    "url": "https://alexpasmantier.github.io/television/install.sh",
-                    "type": "script",
-                    "check_command": "tv"
-                }
-            }
+            "darwin": { "brew": "yazi" },
+            "ubuntu": { "apt": "yazi" },
+            "fedora": { "dnf": "yazi" },
+            "pop_os": { "apt": "yazi" }
         }
     },
     "hyperfine": {
@@ -650,15 +659,6 @@
             "ubuntu": { "eget": "lasantosr/intelli-shell" },
             "fedora": { "eget": "lasantosr/intelli-shell" },
             "pop_os": { "eget": "lasantosr/intelli-shell" }
-        }
-    },
-    "zebar": {
-        "description": "Customizable desktop bar",
-        "packages": {
-            "darwin": { "eget": "glzr-io/zebar" },
-            "ubuntu": { "eget": "glzr-io/zebar" },
-            "fedora": { "eget": "glzr-io/zebar" },
-            "pop_os": { "eget": "glzr-io/zebar" }
         }
     },
     "gum": {

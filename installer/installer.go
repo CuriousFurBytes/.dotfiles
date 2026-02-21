@@ -197,8 +197,21 @@ func (pi *PackageInstaller) isManualInstalled(name string, manual *ManualSpec) b
 	if manual.Dest != "" {
 		expanded, _ := runShellSilent(fmt.Sprintf("echo %s", manual.Dest))
 		expanded = strings.TrimSpace(expanded)
-		if info, err := os.Stat(expanded); err == nil && info.IsDir() {
+		if info, err := os.Stat(expanded); err == nil {
+			_ = info
 			return true
+		}
+	}
+	// For dmg installs, check /Applications for any .app containing the package name
+	if manual.Type == "dmg" {
+		for _, appDir := range []string{"/Applications", filepath.Join(os.Getenv("HOME"), "Applications")} {
+			entries, _ := os.ReadDir(appDir)
+			for _, e := range entries {
+				if strings.HasSuffix(e.Name(), ".app") &&
+					strings.Contains(strings.ToLower(e.Name()), strings.ToLower(name)) {
+					return true
+				}
+			}
 		}
 	}
 	return commandExists(name)
@@ -281,8 +294,117 @@ func (pi *PackageInstaller) installManual(name string, manual *ManualSpec) error
 		os.MkdirAll(filepath.Dir(dest), 0o755)
 		_, err := runShellSilent(fmt.Sprintf("git clone %s %s", manual.URL, dest))
 		return err
+	case "dmg":
+		return pi.installDmg(manual)
+	case "deb":
+		return pi.installDeb(manual)
+	case "rpm":
+		return pi.installRpm(manual)
+	case "appimage":
+		return pi.installAppImage(manual)
 	}
 	return fmt.Errorf("unknown manual type: %s", manual.Type)
+}
+
+// resolveGhAssetURL returns a temp-downloaded path for a GitHub release asset matching the pattern.
+func resolveGhAssetURL(repo, assetPattern string) (string, error) {
+	// Use gh to find the matching asset URL from the latest release
+	out, err := runShellSilent(fmt.Sprintf(
+		`gh release view --repo %s --json assets -q '.assets[] | select(.name | endswith("%s")) | .url'`,
+		repo, assetPattern,
+	))
+	if err != nil {
+		return "", fmt.Errorf("gh release view: %w", err)
+	}
+	url := strings.TrimSpace(out)
+	if url == "" {
+		return "", fmt.Errorf("no asset matching %q in %s", assetPattern, repo)
+	}
+	return url, nil
+}
+
+func (pi *PackageInstaller) installDmg(manual *ManualSpec) error {
+	url, err := resolveGhAssetURL(manual.Repo, manual.AssetPattern)
+	if err != nil {
+		return err
+	}
+	tmpFile := filepath.Join(os.TempDir(), "zebar-install.dmg")
+	if _, err := runShellSilent(fmt.Sprintf("curl -fsSL -o %s %s", tmpFile, url)); err != nil {
+		return fmt.Errorf("download dmg: %w", err)
+	}
+	mountOut, err := runShellSilent(fmt.Sprintf("hdiutil attach -nobrowse -quiet %s", tmpFile))
+	if err != nil {
+		return fmt.Errorf("mount dmg: %w", err)
+	}
+	// Find the mount point (last line of hdiutil output)
+	var mountPoint string
+	for _, line := range strings.Split(strings.TrimSpace(mountOut), "\n") {
+		if strings.Contains(line, "/Volumes/") {
+			parts := strings.Fields(line)
+			mountPoint = parts[len(parts)-1]
+		}
+	}
+	if mountPoint == "" {
+		return fmt.Errorf("could not determine dmg mount point")
+	}
+	defer runShellSilent(fmt.Sprintf("hdiutil detach -quiet %s", mountPoint)) //nolint:errcheck
+
+	// Copy .app to /Applications
+	entries, _ := os.ReadDir(mountPoint)
+	for _, e := range entries {
+		if strings.HasSuffix(e.Name(), ".app") {
+			dest := filepath.Join("/Applications", e.Name())
+			if _, err := runShellSilent(fmt.Sprintf("cp -R %s %s", filepath.Join(mountPoint, e.Name()), dest)); err != nil {
+				return fmt.Errorf("copy app: %w", err)
+			}
+			return nil
+		}
+	}
+	return fmt.Errorf("no .app found in dmg")
+}
+
+func (pi *PackageInstaller) installDeb(manual *ManualSpec) error {
+	url, err := resolveGhAssetURL(manual.Repo, manual.AssetPattern)
+	if err != nil {
+		return err
+	}
+	tmpFile := filepath.Join(os.TempDir(), "install.deb")
+	if _, err := runShellSilent(fmt.Sprintf("curl -fsSL -o %s %s", tmpFile, url)); err != nil {
+		return fmt.Errorf("download deb: %w", err)
+	}
+	_, err = runShellSilent(fmt.Sprintf("sudo dpkg -i %s", tmpFile))
+	return err
+}
+
+func (pi *PackageInstaller) installRpm(manual *ManualSpec) error {
+	url, err := resolveGhAssetURL(manual.Repo, manual.AssetPattern)
+	if err != nil {
+		return err
+	}
+	tmpFile := filepath.Join(os.TempDir(), "install.rpm")
+	if _, err := runShellSilent(fmt.Sprintf("curl -fsSL -o %s %s", tmpFile, url)); err != nil {
+		return fmt.Errorf("download rpm: %w", err)
+	}
+	_, err = runShellSilent(fmt.Sprintf("sudo dnf install -y %s", tmpFile))
+	return err
+}
+
+func (pi *PackageInstaller) installAppImage(manual *ManualSpec) error {
+	url, err := resolveGhAssetURL(manual.Repo, manual.AssetPattern)
+	if err != nil {
+		return err
+	}
+	expanded, _ := runShellSilent(fmt.Sprintf("echo %s", manual.Dest))
+	dest := strings.TrimSpace(expanded)
+	if dest == "" {
+		dest = filepath.Join(os.Getenv("HOME"), ".local", "bin", manual.Repo[strings.LastIndex(manual.Repo, "/")+1:])
+	}
+	os.MkdirAll(filepath.Dir(dest), 0o755)
+	if _, err := runShellSilent(fmt.Sprintf("curl -fsSL -o %s %s", dest, url)); err != nil {
+		return fmt.Errorf("download appimage: %w", err)
+	}
+	_, err = runShellSilent(fmt.Sprintf("chmod +x %s", dest))
+	return err
 }
 
 // BatchInstallBrew installs multiple brew formulas at once

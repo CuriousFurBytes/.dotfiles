@@ -60,10 +60,12 @@ func (s *SnapSpec) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// ManualSpec for manual installation (script or git_clone)
+// ManualSpec for manual installation (script, git_clone, dmg, deb, appimage)
 type ManualSpec struct {
-	URL          string `json:"url"`
-	Type         string `json:"type"` // "script" or "git_clone"
+	URL          string `json:"url,omitempty"`
+	Repo         string `json:"repo,omitempty"`         // GitHub repo "owner/name" for gh release download
+	AssetPattern string `json:"asset_pattern,omitempty"` // suffix to match release asset filename
+	Type         string `json:"type"`                   // "script", "git_clone", "dmg", "deb", "rpm", "appimage"
 	Dest         string `json:"dest,omitempty"`
 	CheckCommand string `json:"check_command,omitempty"`
 	CheckDir     string `json:"check_dir,omitempty"`
@@ -161,11 +163,11 @@ var categoryMap = map[string]string{
 	"zsh-syntax-highlighting": "Shell & Prompt", "pure-prompt": "Shell & Prompt",
 
 	// Utilities
-	"rclone": "Utilities", "topgrade": "Utilities", "httpie": "Utilities",
+	"rclone": "Utilities", "rclone-ui": "Utilities", "topgrade": "Utilities", "httpie": "Utilities",
 	"vhs": "Utilities", "gum": "Utilities", "hyperfine": "Utilities",
 	"fx": "Utilities", "zola": "Utilities", "vhs-eget": "Utilities",
 	"tv": "Utilities", "crush": "Utilities", "eget": "Utilities",
-	"intelli-shell": "Utilities", "zebar": "Utilities", "dockutil": "Utilities",
+	"intelli-shell": "Utilities", "dockutil": "Utilities",
 
 	// GitHub
 	"gh": "GitHub", "gh-dash": "GitHub", "gama": "GitHub",

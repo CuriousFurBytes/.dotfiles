@@ -1,0 +1,10 @@
+version: 1
+git_protocol: ssh
+editor: hx
+prompt: enabled
+prefer_editor_prompt: disabled
+pager: bat
+aliases:
+    co: pr checkout
+color_labels: enabled
+spinner: enabled
