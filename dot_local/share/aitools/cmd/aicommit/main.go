@@ -8,8 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"aitools/internal/shader"
-
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -96,10 +94,9 @@ type model struct {
 	err     error
 	elapsed time.Duration
 	start   time.Time
-	shader  *shader.Session
 }
 
-func newModel(ss *shader.Session) model {
+func newModel() model {
 	sp := spinner.New()
 	sp.Spinner = spinner.Points
 	sp.Style = lipgloss.NewStyle().Foreground(accent)
@@ -107,7 +104,6 @@ func newModel(ss *shader.Session) model {
 		spinner: sp,
 		phase:   phaseGenerating,
 		start:   time.Now(),
-		shader:  ss,
 	}
 }
 
@@ -138,7 +134,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.err != nil {
 			m.phase = phaseError
 			m.err = msg.err
-			m.shader.Stop()
 		} else {
 			m.commit = msg.commit
 			m.phase = phaseReady
@@ -174,7 +169,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case phaseReady:
 			switch msg.String() {
 			case "q", "ctrl+c":
-				m.shader.Stop()
 				return m, tea.Quit
 			case "r":
 				m.phase = phaseGenerating
@@ -205,14 +199,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.phase = phaseReady
 				return m, nil
 			case "q":
-				m.shader.Stop()
 				return m, tea.Quit
 			}
 
 		case phaseResult:
 			switch msg.String() {
 			case "q", "ctrl+c":
-				m.shader.Stop()
 				return m, tea.Quit
 			case "P":
 				m.action = actionPush
@@ -222,7 +214,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case phaseError:
 			if msg.String() == "q" || msg.String() == "ctrl+c" {
-				m.shader.Stop()
 				return m, tea.Quit
 			}
 		}
@@ -393,14 +384,8 @@ func currentBranch() (string, error) {
 // ── main ──────────────────────────────────────────────────────────────────────
 
 func main() {
-	ss, err := shader.Start()
-	if err != nil {
-		ss = &shader.Session{}
-	}
-
-	p := tea.NewProgram(newModel(ss), tea.WithAltScreen())
+	p := tea.NewProgram(newModel(), tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
-		ss.Stop()
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
