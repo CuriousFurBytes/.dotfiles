@@ -233,7 +233,7 @@ func (pi *PackageInstaller) Install(pkg Package) InstallResult {
 	var err error
 	switch methodName {
 	case "brew":
-		_, err = runShellSilent(fmt.Sprintf("zb install %s", method.Brew))
+		_, err = runShellSilent(fmt.Sprintf("brew install %s", method.Brew))
 	case "cask":
 		_, err = runShellSilent(fmt.Sprintf("brew install --cask %s", method.Cask))
 	case "apt":
@@ -412,7 +412,7 @@ func (pi *PackageInstaller) BatchInstallBrew(formulas []string) error {
 	if len(formulas) == 0 {
 		return nil
 	}
-	_, err := runShellSilent(fmt.Sprintf("zb install %s", strings.Join(formulas, " ")))
+	_, err := runShellSilent(fmt.Sprintf("brew install %s", strings.Join(formulas, " ")))
 	return err
 }
 

@@ -665,43 +665,41 @@ func (a *App) stepInstallPackages() error {
 		fmt.Println(statusOK(pkg.Name))
 	}
 
-	// Batch install brew formulas
-	if len(brewFormulas) > 0 {
+	// Install brew formulas individually so one failure doesn't cascade
+	for i, formula := range brewFormulas {
+		name := brewNames[i]
 		var installErr error
 		_ = spinner.New().
-			Title(fmt.Sprintf("Installing %d brew formulas...", len(brewFormulas))).
+			Title(fmt.Sprintf("Installing %s...", name)).
 			Action(func() {
-				installErr = a.installer.BatchInstallBrew(brewFormulas)
+				_, installErr = runShellSilent(fmt.Sprintf("brew install %s", formula))
 			}).
 			Run()
-		for _, name := range brewNames {
-			if installErr != nil {
-				fmt.Println(statusFail(name))
-				a.results = append(a.results, InstallResult{Name: name, Method: "brew", Status: "fail"})
-			} else {
-				fmt.Println(statusDone(name))
-				a.results = append(a.results, InstallResult{Name: name, Method: "brew", Status: "done"})
-			}
+		if installErr != nil {
+			fmt.Println(statusFail(name))
+			a.results = append(a.results, InstallResult{Name: name, Method: "brew", Status: "fail"})
+		} else {
+			fmt.Println(statusDone(name))
+			a.results = append(a.results, InstallResult{Name: name, Method: "brew", Status: "done"})
 		}
 	}
 
-	// Batch install casks
-	if len(casks) > 0 {
+	// Install casks individually so one failure doesn't cascade
+	for i, cask := range casks {
+		name := caskNames[i]
 		var installErr error
 		_ = spinner.New().
-			Title(fmt.Sprintf("Installing %d cask packages...", len(casks))).
+			Title(fmt.Sprintf("Installing %s...", name)).
 			Action(func() {
-				installErr = a.installer.BatchInstallCask(casks)
+				_, installErr = runShellSilent(fmt.Sprintf("brew install --cask %s", cask))
 			}).
 			Run()
-		for _, name := range caskNames {
-			if installErr != nil {
-				fmt.Println(statusFail(name))
-				a.results = append(a.results, InstallResult{Name: name, Method: "cask", Status: "fail"})
-			} else {
-				fmt.Println(statusDone(name))
-				a.results = append(a.results, InstallResult{Name: name, Method: "cask", Status: "done"})
-			}
+		if installErr != nil {
+			fmt.Println(statusFail(name))
+			a.results = append(a.results, InstallResult{Name: name, Method: "cask", Status: "fail"})
+		} else {
+			fmt.Println(statusDone(name))
+			a.results = append(a.results, InstallResult{Name: name, Method: "cask", Status: "done"})
 		}
 	}
 

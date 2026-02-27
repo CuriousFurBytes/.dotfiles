@@ -183,7 +183,7 @@
     "rclone-ui": {
         "description": "GUI for rclone cloud storage management",
         "packages": {
-            "darwin": { "brew": "rclone-ui" },
+            "darwin": { "cask": "rclone-ui" },
             "ubuntu": {
                 "manual": {
                     "repo": "rclone-ui/rclone-ui",
@@ -359,7 +359,7 @@
     "jupyter": {
         "description": "Interactive computing notebooks",
         "packages": {
-            "darwin": { "brew": "jupyter" },
+            "darwin": { "brew": "jupyterlab" },
             "ubuntu": { "apt": "jupyter-notebook" },
             "fedora": { "dnf": "python3-notebook" },
             "pop_os": { "apt": "jupyter-notebook" }
