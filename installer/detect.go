@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"os/user"
@@ -95,4 +96,12 @@ func runShellSilent(command string) (string, error) {
 	cmd := exec.Command("sh", "-c", command)
 	out, err := cmd.CombinedOutput()
 	return string(out), err
+}
+
+// debugLog prints a message only when Verbose is true
+func debugLog(format string, args ...interface{}) {
+	if Verbose {
+		msg := fmt.Sprintf(format, args...)
+		fmt.Println(dimStyle.Render("  [debug] " + msg))
+	}
 }

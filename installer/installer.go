@@ -73,6 +73,35 @@ func NewPackageInstaller(target string) *PackageInstaller {
 	}
 }
 
+// run executes a shell command. In verbose mode it streams output to the terminal;
+// otherwise it runs silently. Use this for install commands where output is not needed.
+func (pi *PackageInstaller) run(cmd string) error {
+	debugLog("$ %s", cmd)
+	if Verbose {
+		err := runShell(cmd)
+		if err != nil {
+			debugLog("command failed: %v", err)
+		}
+		return err
+	}
+	_, err := runShellSilent(cmd)
+	if err != nil {
+		debugLog("command failed: %v", err)
+	}
+	return err
+}
+
+// runCapture executes a shell command and always returns its output (needed for parsing).
+// It logs the command when verbose.
+func (pi *PackageInstaller) runCapture(cmd string) (string, error) {
+	debugLog("$ %s", cmd)
+	out, err := runShellSilent(cmd)
+	if err != nil {
+		debugLog("command failed: %v", err)
+	}
+	return out, err
+}
+
 // IsInstalled checks if a package is already installed
 func (pi *PackageInstaller) IsInstalled(name string, method InstallMethod) bool {
 	m := method.MethodName()
@@ -82,7 +111,12 @@ func (pi *PackageInstaller) IsInstalled(name string, method InstallMethod) bool 
 			out, _ := runShellSilent("brew list --formula -1")
 			return parseLines(out)
 		})
-		return installed[method.Brew]
+		// Tap-qualified formulas like "owner/repo/name" appear as just "name" in brew list
+		formula := method.Brew
+		if idx := strings.LastIndex(formula, "/"); idx >= 0 {
+			formula = formula[idx+1:]
+		}
+		return installed[formula] || installed[method.Brew]
 	case "cask":
 		installed := pi.cache.get("cask", func() map[string]bool {
 			out, _ := runShellSilent("brew list --cask -1")
@@ -202,8 +236,8 @@ func (pi *PackageInstaller) isManualInstalled(name string, manual *ManualSpec) b
 			return true
 		}
 	}
-	// For dmg installs, check /Applications for any .app containing the package name
-	if manual.Type == "dmg" {
+	// For dmg/tar_gz installs, check /Applications for any .app containing the package name
+	if manual.Type == "dmg" || manual.Type == "tar_gz" {
 		for _, appDir := range []string{"/Applications", filepath.Join(os.Getenv("HOME"), "Applications")} {
 			entries, _ := os.ReadDir(appDir)
 			for _, e := range entries {
@@ -230,40 +264,45 @@ func (pi *PackageInstaller) Install(pkg Package) InstallResult {
 		return InstallResult{Name: pkg.Name, Method: methodName, Status: "ok"}
 	}
 
+	debugLog("installing %s via %s", pkg.Name, methodName)
+
 	var err error
 	switch methodName {
 	case "brew":
-		_, err = runShellSilent(fmt.Sprintf("brew install %s", method.Brew))
+		err = pi.run(fmt.Sprintf("brew install %s", method.Brew))
 	case "cask":
-		_, err = runShellSilent(fmt.Sprintf("brew install --cask %s", method.Cask))
+		err = pi.run(fmt.Sprintf("brew install --cask %s", method.Cask))
 	case "apt":
-		_, err = runShellSilent(fmt.Sprintf("sudo apt install -y %s", method.Apt))
+		err = pi.run(fmt.Sprintf("sudo apt install -y %s", method.Apt))
 	case "dnf":
-		_, err = runShellSilent(fmt.Sprintf("sudo dnf install -y %s", method.Dnf))
+		err = pi.run(fmt.Sprintf("sudo dnf install -y %s", method.Dnf))
 	case "uv_tool":
-		_, err = runShellSilent(fmt.Sprintf("uv tool install %s", method.UvTool))
+		err = pi.run(fmt.Sprintf("uv tool install %s", method.UvTool))
 	case "cargo":
-		_, err = runShellSilent(fmt.Sprintf("cargo install %s", method.Cargo))
+		err = pi.run(fmt.Sprintf("cargo install %s", method.Cargo))
 	case "go_tool":
-		_, err = runShellSilent(fmt.Sprintf("go install %s", method.GoTool))
+		err = pi.run(fmt.Sprintf("go install %s", method.GoTool))
 	case "snap":
-		flag := ""
+		snapFlags := ""
 		if method.Snap.Classic {
-			flag = " --classic"
+			snapFlags += " --classic"
 		}
-		_, err = runShellSilent(fmt.Sprintf("sudo snap install %s%s", method.Snap.Name, flag))
+		if method.Snap.Channel != "" {
+			snapFlags += fmt.Sprintf(" --channel %s", method.Snap.Channel)
+		}
+		err = pi.run(fmt.Sprintf("sudo snap install %s%s", method.Snap.Name, snapFlags))
 	case "flatpak":
-		_, err = runShellSilent(fmt.Sprintf("flatpak install -y flathub %s", method.Flatpak))
+		err = pi.run(fmt.Sprintf("flatpak install -y flathub %s", method.Flatpak))
 	case "yay":
-		_, err = runShellSilent(fmt.Sprintf("yay -S --noconfirm %s", method.Yay))
+		err = pi.run(fmt.Sprintf("yay -S --noconfirm %s", method.Yay))
 	case "gh_extension":
 		if _, ghErr := runShellSilent("gh auth status"); ghErr != nil {
 			return InstallResult{Name: pkg.Name, Method: methodName, Status: "skip", Error: "gh not authenticated"}
 		}
-		_, err = runShellSilent(fmt.Sprintf("gh extension install %s", method.GhExtension))
+		err = pi.run(fmt.Sprintf("gh extension install %s", method.GhExtension))
 	case "eget":
 		os.MkdirAll(filepath.Join(os.Getenv("HOME"), ".local", "bin"), 0o755)
-		_, err = runShellSilent(fmt.Sprintf("eget %s --to ~/.local/bin", method.Eget))
+		err = pi.run(fmt.Sprintf("eget %s --to ~/.local/bin", method.Eget))
 	case "manual":
 		err = pi.installManual(pkg.Name, method.Manual)
 	default:
@@ -286,16 +325,18 @@ func (pi *PackageInstaller) installManual(name string, manual *ManualSpec) error
 		} else {
 			cmd = fmt.Sprintf("curl -fsSL %s | bash", manual.URL)
 		}
-		_, err := runShellSilent(cmd)
-		return err
+		return pi.run(cmd)
 	case "git_clone":
 		expanded, _ := runShellSilent(fmt.Sprintf("echo %s", manual.Dest))
 		dest := strings.TrimSpace(expanded)
 		os.MkdirAll(filepath.Dir(dest), 0o755)
-		_, err := runShellSilent(fmt.Sprintf("git clone %s %s", manual.URL, dest))
-		return err
+		return pi.run(fmt.Sprintf("git clone %s %s", manual.URL, dest))
 	case "dmg":
 		return pi.installDmg(manual)
+	case "zip":
+		return pi.installZip(manual)
+	case "tar_gz":
+		return pi.installTarGz(manual)
 	case "deb":
 		return pi.installDeb(manual)
 	case "rpm":
@@ -306,15 +347,23 @@ func (pi *PackageInstaller) installManual(name string, manual *ManualSpec) error
 	return fmt.Errorf("unknown manual type: %s", manual.Type)
 }
 
-// resolveGhAssetURL returns a temp-downloaded path for a GitHub release asset matching the pattern.
+// resolveGhAssetURL returns the download URL for a GitHub release asset matching
+// assetPattern. Supports multiple "|"-separated substrings that must ALL be present
+// in the asset name (AND logic). Searches all releases including pre-releases.
 func resolveGhAssetURL(repo, assetPattern string) (string, error) {
-	// Use gh to find the matching asset URL from the latest release
+	parts := strings.Split(assetPattern, "|")
+	conditions := make([]string, len(parts))
+	for i, p := range parts {
+		conditions[i] = fmt.Sprintf(`(.name | contains("%s"))`, strings.TrimSpace(p))
+	}
+	jqSelect := strings.Join(conditions, " and ")
+
 	out, err := runShellSilent(fmt.Sprintf(
-		`gh release view --repo %s --json assets -q '.assets[] | select(.name | endswith("%s")) | .url'`,
-		repo, assetPattern,
+		`gh api repos/%s/releases --jq '.[].assets[] | select(%s) | .browser_download_url' | head -1`,
+		repo, jqSelect,
 	))
 	if err != nil {
-		return "", fmt.Errorf("gh release view: %w", err)
+		return "", fmt.Errorf("gh api releases: %w", err)
 	}
 	url := strings.TrimSpace(out)
 	if url == "" {
@@ -328,39 +377,129 @@ func (pi *PackageInstaller) installDmg(manual *ManualSpec) error {
 	if err != nil {
 		return err
 	}
-	tmpFile := filepath.Join(os.TempDir(), "zebar-install.dmg")
-	if _, err := runShellSilent(fmt.Sprintf("curl -fsSL -o %s %s", tmpFile, url)); err != nil {
+	tmpF, err := os.CreateTemp("", "install-*.dmg")
+	if err != nil {
+		return fmt.Errorf("create temp file: %w", err)
+	}
+	tmpFile := tmpF.Name()
+	tmpF.Close()
+	defer os.Remove(tmpFile)
+	if err := pi.run(fmt.Sprintf("curl -fsSL -o %s %s", tmpFile, url)); err != nil {
 		return fmt.Errorf("download dmg: %w", err)
 	}
-	mountOut, err := runShellSilent(fmt.Sprintf("hdiutil attach -nobrowse -quiet %s", tmpFile))
+	mountPoint, err := os.MkdirTemp("", "dmg-mount-*")
 	if err != nil {
+		return fmt.Errorf("create mount dir: %w", err)
+	}
+	if err := pi.run(fmt.Sprintf("hdiutil attach -nobrowse -mountpoint %s %s", mountPoint, tmpFile)); err != nil {
+		os.RemoveAll(mountPoint)
 		return fmt.Errorf("mount dmg: %w", err)
 	}
-	// Find the mount point (last line of hdiutil output)
-	var mountPoint string
-	for _, line := range strings.Split(strings.TrimSpace(mountOut), "\n") {
-		if strings.Contains(line, "/Volumes/") {
-			parts := strings.Fields(line)
-			mountPoint = parts[len(parts)-1]
-		}
-	}
-	if mountPoint == "" {
-		return fmt.Errorf("could not determine dmg mount point")
-	}
-	defer runShellSilent(fmt.Sprintf("hdiutil detach -quiet %s", mountPoint)) //nolint:errcheck
+	defer func() {
+		pi.run(fmt.Sprintf("hdiutil detach -quiet %s", mountPoint)) //nolint:errcheck
+		os.RemoveAll(mountPoint)
+	}()
 
-	// Copy .app to /Applications
-	entries, _ := os.ReadDir(mountPoint)
+	// Find .app bundle (may be nested) and copy to /Applications
+	var appPath string
+	_ = filepath.Walk(mountPoint, func(path string, info os.FileInfo, err error) error {
+		if err != nil || appPath != "" {
+			return nil
+		}
+		if info.IsDir() && strings.HasSuffix(info.Name(), ".app") {
+			appPath = path
+		}
+		return nil
+	})
+	if appPath == "" {
+		return fmt.Errorf("no .app found in dmg")
+	}
+	dest := filepath.Join("/Applications", filepath.Base(appPath))
+	if err := pi.run(fmt.Sprintf("cp -R %s %s", appPath, dest)); err != nil {
+		return fmt.Errorf("copy app: %w", err)
+	}
+	return nil
+}
+
+func (pi *PackageInstaller) installZip(manual *ManualSpec) error {
+	url, err := resolveGhAssetURL(manual.Repo, manual.AssetPattern)
+	if err != nil {
+		return err
+	}
+	tmpF, err := os.CreateTemp("", "install-*.zip")
+	if err != nil {
+		return fmt.Errorf("create temp file: %w", err)
+	}
+	tmpFile := tmpF.Name()
+	tmpF.Close()
+	defer os.Remove(tmpFile)
+	if err := pi.run(fmt.Sprintf("curl -fsSL -o %s %s", tmpFile, url)); err != nil {
+		return fmt.Errorf("download zip: %w", err)
+	}
+	tmpDir := filepath.Join(os.TempDir(), "zip-extract")
+	os.RemoveAll(tmpDir)
+	os.MkdirAll(tmpDir, 0o755)
+	defer os.RemoveAll(tmpDir)
+	if err := pi.run(fmt.Sprintf("unzip -o %s -d %s", tmpFile, tmpDir)); err != nil {
+		return fmt.Errorf("extract zip: %w", err)
+	}
+	// Find .app bundle and copy to /Applications
+	entries, _ := os.ReadDir(tmpDir)
 	for _, e := range entries {
 		if strings.HasSuffix(e.Name(), ".app") {
 			dest := filepath.Join("/Applications", e.Name())
-			if _, err := runShellSilent(fmt.Sprintf("cp -R %s %s", filepath.Join(mountPoint, e.Name()), dest)); err != nil {
+			if err := pi.run(fmt.Sprintf("cp -R %s %s", filepath.Join(tmpDir, e.Name()), dest)); err != nil {
 				return fmt.Errorf("copy app: %w", err)
 			}
 			return nil
 		}
 	}
-	return fmt.Errorf("no .app found in dmg")
+	return fmt.Errorf("no .app found in zip")
+}
+
+func (pi *PackageInstaller) installTarGz(manual *ManualSpec) error {
+	url, err := resolveGhAssetURL(manual.Repo, manual.AssetPattern)
+	if err != nil {
+		return err
+	}
+	tmpF, err := os.CreateTemp("", "install-*.tar.gz")
+	if err != nil {
+		return fmt.Errorf("create temp file: %w", err)
+	}
+	tmpFile := tmpF.Name()
+	tmpF.Close()
+	defer os.Remove(tmpFile)
+	if err := pi.run(fmt.Sprintf("curl -fsSL -o %s %s", tmpFile, url)); err != nil {
+		return fmt.Errorf("download tar.gz: %w", err)
+	}
+	tmpDir := filepath.Join(os.TempDir(), "targz-extract")
+	os.RemoveAll(tmpDir)
+	os.MkdirAll(tmpDir, 0o755)
+	defer os.RemoveAll(tmpDir)
+	if err := pi.run(fmt.Sprintf("tar -xzf %s -C %s", tmpFile, tmpDir)); err != nil {
+		return fmt.Errorf("extract tar.gz: %w", err)
+	}
+	// Find .app bundle and copy to /Applications
+	var appName string
+	_ = filepath.Walk(tmpDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil || appName != "" {
+			return nil
+		}
+		if info.IsDir() && strings.HasSuffix(info.Name(), ".app") {
+			appName = path
+		}
+		return nil
+	})
+	if appName == "" {
+		return fmt.Errorf("no .app found in tar.gz")
+	}
+	dest := filepath.Join("/Applications", filepath.Base(appName))
+	if err := pi.run(fmt.Sprintf("cp -R %s %s", appName, dest)); err != nil {
+		return fmt.Errorf("copy app: %w", err)
+	}
+	// Remove quarantine attribute so macOS Gatekeeper doesn't block it
+	_ = pi.run(fmt.Sprintf("xattr -cr %s", dest))
+	return nil
 }
 
 func (pi *PackageInstaller) installDeb(manual *ManualSpec) error {
@@ -368,12 +507,17 @@ func (pi *PackageInstaller) installDeb(manual *ManualSpec) error {
 	if err != nil {
 		return err
 	}
-	tmpFile := filepath.Join(os.TempDir(), "install.deb")
-	if _, err := runShellSilent(fmt.Sprintf("curl -fsSL -o %s %s", tmpFile, url)); err != nil {
+	tmpF, err := os.CreateTemp("", "install-*.deb")
+	if err != nil {
+		return fmt.Errorf("create temp file: %w", err)
+	}
+	tmpFile := tmpF.Name()
+	tmpF.Close()
+	defer os.Remove(tmpFile)
+	if err := pi.run(fmt.Sprintf("curl -fsSL -o %s %s", tmpFile, url)); err != nil {
 		return fmt.Errorf("download deb: %w", err)
 	}
-	_, err = runShellSilent(fmt.Sprintf("sudo dpkg -i %s", tmpFile))
-	return err
+	return pi.run(fmt.Sprintf("sudo dpkg -i %s", tmpFile))
 }
 
 func (pi *PackageInstaller) installRpm(manual *ManualSpec) error {
@@ -381,12 +525,17 @@ func (pi *PackageInstaller) installRpm(manual *ManualSpec) error {
 	if err != nil {
 		return err
 	}
-	tmpFile := filepath.Join(os.TempDir(), "install.rpm")
-	if _, err := runShellSilent(fmt.Sprintf("curl -fsSL -o %s %s", tmpFile, url)); err != nil {
+	tmpF, err := os.CreateTemp("", "install-*.rpm")
+	if err != nil {
+		return fmt.Errorf("create temp file: %w", err)
+	}
+	tmpFile := tmpF.Name()
+	tmpF.Close()
+	defer os.Remove(tmpFile)
+	if err := pi.run(fmt.Sprintf("curl -fsSL -o %s %s", tmpFile, url)); err != nil {
 		return fmt.Errorf("download rpm: %w", err)
 	}
-	_, err = runShellSilent(fmt.Sprintf("sudo dnf install -y %s", tmpFile))
-	return err
+	return pi.run(fmt.Sprintf("sudo dnf install -y %s", tmpFile))
 }
 
 func (pi *PackageInstaller) installAppImage(manual *ManualSpec) error {
@@ -400,11 +549,10 @@ func (pi *PackageInstaller) installAppImage(manual *ManualSpec) error {
 		dest = filepath.Join(os.Getenv("HOME"), ".local", "bin", manual.Repo[strings.LastIndex(manual.Repo, "/")+1:])
 	}
 	os.MkdirAll(filepath.Dir(dest), 0o755)
-	if _, err := runShellSilent(fmt.Sprintf("curl -fsSL -o %s %s", dest, url)); err != nil {
+	if err := pi.run(fmt.Sprintf("curl -fsSL -o %s %s", dest, url)); err != nil {
 		return fmt.Errorf("download appimage: %w", err)
 	}
-	_, err = runShellSilent(fmt.Sprintf("chmod +x %s", dest))
-	return err
+	return pi.run(fmt.Sprintf("chmod +x %s", dest))
 }
 
 // BatchInstallBrew installs multiple brew formulas at once

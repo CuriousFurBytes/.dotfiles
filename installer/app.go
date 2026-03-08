@@ -31,6 +31,20 @@ func NewApp(sourceDir string) *App {
 	}
 }
 
+// spinOrRun runs a shell command. In verbose mode it streams output directly to the
+// terminal; otherwise it shows a spinner with the given title.
+func (a *App) spinOrRun(title, cmd string) error {
+	if Verbose {
+		fmt.Println(dimStyle.Render(fmt.Sprintf("  $ %s", cmd)))
+		return runShell(cmd)
+	}
+	var err error
+	_ = spinner.New().Title(title).Action(func() {
+		_, err = runShellSilent(cmd)
+	}).Run()
+	return err
+}
+
 func (a *App) Run() error {
 	// ── Step 1: Welcome ────────────────────────────────────────────
 	a.osInfo = detectOS()
@@ -630,36 +644,39 @@ func (a *App) stepInstallPackages() error {
 	var brewNames, caskNames, aptNames, dnfNames []string
 	var alreadyInstalled []Package
 
-	_ = spinner.New().
-		Title("Checking installed packages...").
-		Action(func() {
-			for _, pkg := range toInstall {
-				method := pkg.Packages[a.osInfo.Target]
-				if !method.IsSystemMethod() {
-					continue
-				}
-				if a.installer.IsInstalled(pkg.Name, method) {
-					alreadyInstalled = append(alreadyInstalled, pkg)
-					a.results = append(a.results, InstallResult{Name: pkg.Name, Method: method.MethodName(), Status: "ok"})
-					continue
-				}
-				switch method.MethodName() {
-				case "brew":
-					brewFormulas = append(brewFormulas, method.Brew)
-					brewNames = append(brewNames, pkg.Name)
-				case "cask":
-					casks = append(casks, method.Cask)
-					caskNames = append(caskNames, pkg.Name)
-				case "apt":
-					aptPkgs = append(aptPkgs, method.Apt)
-					aptNames = append(aptNames, pkg.Name)
-				case "dnf":
-					dnfPkgs = append(dnfPkgs, method.Dnf)
-					dnfNames = append(dnfNames, pkg.Name)
-				}
+	checkInstalled := func() {
+		for _, pkg := range toInstall {
+			method := pkg.Packages[a.osInfo.Target]
+			if !method.IsSystemMethod() {
+				continue
 			}
-		}).
-		Run()
+			debugLog("checking if installed: %s", pkg.Name)
+			if a.installer.IsInstalled(pkg.Name, method) {
+				alreadyInstalled = append(alreadyInstalled, pkg)
+				a.results = append(a.results, InstallResult{Name: pkg.Name, Method: method.MethodName(), Status: "ok"})
+				continue
+			}
+			switch method.MethodName() {
+			case "brew":
+				brewFormulas = append(brewFormulas, method.Brew)
+				brewNames = append(brewNames, pkg.Name)
+			case "cask":
+				casks = append(casks, method.Cask)
+				caskNames = append(caskNames, pkg.Name)
+			case "apt":
+				aptPkgs = append(aptPkgs, method.Apt)
+				aptNames = append(aptNames, pkg.Name)
+			case "dnf":
+				dnfPkgs = append(dnfPkgs, method.Dnf)
+				dnfNames = append(dnfNames, pkg.Name)
+			}
+		}
+	}
+	if Verbose {
+		checkInstalled()
+	} else {
+		_ = spinner.New().Title("Checking installed packages...").Action(checkInstalled).Run()
+	}
 
 	for _, pkg := range alreadyInstalled {
 		fmt.Println(statusOK(pkg.Name))
@@ -668,16 +685,11 @@ func (a *App) stepInstallPackages() error {
 	// Install brew formulas individually so one failure doesn't cascade
 	for i, formula := range brewFormulas {
 		name := brewNames[i]
-		var installErr error
-		_ = spinner.New().
-			Title(fmt.Sprintf("Installing %s...", name)).
-			Action(func() {
-				_, installErr = runShellSilent(fmt.Sprintf("brew install %s", formula))
-			}).
-			Run()
+		debugLog("installing brew formula: %s", formula)
+		installErr := a.spinOrRun(fmt.Sprintf("Installing %s...", name), fmt.Sprintf("brew install %s", formula))
 		if installErr != nil {
 			fmt.Println(statusFail(name))
-			a.results = append(a.results, InstallResult{Name: name, Method: "brew", Status: "fail"})
+			a.results = append(a.results, InstallResult{Name: name, Method: "brew", Status: "fail", Error: installErr.Error()})
 		} else {
 			fmt.Println(statusDone(name))
 			a.results = append(a.results, InstallResult{Name: name, Method: "brew", Status: "done"})
@@ -687,16 +699,11 @@ func (a *App) stepInstallPackages() error {
 	// Install casks individually so one failure doesn't cascade
 	for i, cask := range casks {
 		name := caskNames[i]
-		var installErr error
-		_ = spinner.New().
-			Title(fmt.Sprintf("Installing %s...", name)).
-			Action(func() {
-				_, installErr = runShellSilent(fmt.Sprintf("brew install --cask %s", cask))
-			}).
-			Run()
+		debugLog("installing cask: %s", cask)
+		installErr := a.spinOrRun(fmt.Sprintf("Installing %s...", name), fmt.Sprintf("brew install --cask %s", cask))
 		if installErr != nil {
 			fmt.Println(statusFail(name))
-			a.results = append(a.results, InstallResult{Name: name, Method: "cask", Status: "fail"})
+			a.results = append(a.results, InstallResult{Name: name, Method: "cask", Status: "fail", Error: installErr.Error()})
 		} else {
 			fmt.Println(statusDone(name))
 			a.results = append(a.results, InstallResult{Name: name, Method: "cask", Status: "done"})

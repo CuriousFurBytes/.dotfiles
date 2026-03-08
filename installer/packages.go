@@ -37,6 +37,7 @@ type InstallMethod struct {
 type SnapSpec struct {
 	Name    string `json:"name"`
 	Classic bool   `json:"classic,omitempty"`
+	Channel string `json:"channel,omitempty"`
 }
 
 func (s *SnapSpec) UnmarshalJSON(data []byte) error {
@@ -50,6 +51,7 @@ func (s *SnapSpec) UnmarshalJSON(data []byte) error {
 	type snapObj struct {
 		Name    string `json:"name"`
 		Classic bool   `json:"classic,omitempty"`
+		Channel string `json:"channel,omitempty"`
 	}
 	var obj snapObj
 	if err := json.Unmarshal(data, &obj); err != nil {
@@ -57,6 +59,7 @@ func (s *SnapSpec) UnmarshalJSON(data []byte) error {
 	}
 	s.Name = obj.Name
 	s.Classic = obj.Classic
+	s.Channel = obj.Channel
 	return nil
 }
 
@@ -150,10 +153,10 @@ var categoryMap = map[string]string{
 
 	// GUI Applications
 	"zen-browser": "GUI Applications", "claude": "GUI Applications",
-	"claude-code": "GUI Applications", "raycast": "GUI Applications",
+	"claude-code": "GUI Applications",
 	"obsidian": "GUI Applications", "thunderbird": "GUI Applications",
-	"gimp": "GUI Applications", "flameshot": "GUI Applications",
-	"protonvpn": "GUI Applications",
+	"gimp": "GUI Applications", "flameshot": "GUI Applications", "screenvivid": "GUI Applications",
+	"wox": "GUI Applications", "protonvpn": "GUI Applications",
 	"localsend": "GUI Applications", "httpie-desktop": "GUI Applications",
 	"ente-auth": "GUI Applications", "proton-pass": "GUI Applications",
 	"alt-tab": "GUI Applications", "logi-options-plus": "GUI Applications",

@@ -24,9 +24,13 @@
   - [x] Configure bat theme
 - [x] Configure gh
 - ~~Configure television~~ (uninstalled)
-- [ ] Configure raycast (if possible)
+- [x] Remove Raycast
+- [x] Install Wox launcher (macOS + Linux)
 - [x] Configure iPython
+    - [ ] Theming
 - [x] Configure gh-dash
+- [ ] Configure yazi
+- [ ] Configure Wox
 
 ### Configure rclone
 - [ ] Add settings for Proton Drive
@@ -54,3 +58,8 @@
 
 - [ ] Install and configure restic
   - [ ] Install and configure backrest
+
+## Apps
+
+- [ ] Configure Flameshot
+- [ ] Audit installed apps: check if used, open-source, and cross-OS compatible

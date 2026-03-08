@@ -1,6 +1,13 @@
 #!/bin/bash
 set -e
 
+VERBOSE_FLAG=""
+for arg in "$@"; do
+    if [[ "$arg" == "--verbose" || "$arg" == "-v" ]]; then
+        VERBOSE_FLAG="--verbose"
+    fi
+done
+
 # ── Colors ──────────────────────────────────────────────────────────
 BOLD='\033[1m'
 BLUE='\033[0;34m'
@@ -203,4 +210,4 @@ echo ""
 info "Launching installer TUI..."
 echo ""
 
-exec "$INSTALLER_BIN" --source "$SCRIPT_DIR"
+exec "$INSTALLER_BIN" --source "$SCRIPT_DIR" $VERBOSE_FLAG

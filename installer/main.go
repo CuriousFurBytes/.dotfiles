@@ -7,9 +7,15 @@ import (
 	"path/filepath"
 )
 
+// Verbose enables debug output when true (set via --verbose flag)
+var Verbose bool
+
 func main() {
 	sourceDir := flag.String("source", "", "Path to chezmoi source directory (containing packages.json)")
+	verbose := flag.Bool("verbose", false, "Show detailed command output and debug logs")
 	flag.Parse()
+
+	Verbose = *verbose
 
 	// Default source dir: the parent of the installer directory
 	if *sourceDir == "" {

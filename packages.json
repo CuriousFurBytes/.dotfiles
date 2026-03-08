@@ -1,5 +1,5 @@
 {
-    "_brew_taps": ["sinelaw/fresh", "protonpass/tap"],
+    "_brew_taps": ["sinelaw/fresh", "protonpass/tap", "wox-launcher/wox"],
     "git": {
         "description": "Distributed version control system",
         "packages": {
@@ -501,12 +501,7 @@
             "darwin": { "cask": "claude-code" }
         }
     },
-    "raycast": {
-        "description": "Productivity launcher for macOS",
-        "packages": {
-            "darwin": { "cask": "raycast" }
-        }
-    },
+
     "alt-tab": {
         "description": "Windows-style alt-tab for macOS",
         "packages": {
@@ -809,13 +804,77 @@
             "pop_os": { "apt": "gimp" }
         }
     },
+
+    "cap": {
+        "description": "Screen recording software",
+        "packages": {
+            "darwin": { "cask": "cap" }
+        }
+    },
+    "screenvivid": {
+        "description": "Screen recorder with built-in video editor",
+        "packages": {
+            "darwin": {
+                "manual": {
+                    "repo": "tamnguyenvan/screenvivid",
+                    "type": "dmg",
+                    "asset_pattern": "apple-silicon.dmg",
+                    "check_command": "screenvivid"
+                }
+            },
+            "ubuntu": {
+                "manual": {
+                    "repo": "tamnguyenvan/screenvivid",
+                    "type": "deb",
+                    "asset_pattern": "amd64.deb"
+                }
+            },
+            "pop_os": {
+                "manual": {
+                    "repo": "tamnguyenvan/screenvivid",
+                    "type": "deb",
+                    "asset_pattern": "amd64.deb"
+                }
+            }
+        }
+    },
     "flameshot": {
-        "description": "Powerful yet simple screenshot tool",
+        "description": "Powerful yet simple to use screenshot software",
         "packages": {
             "darwin": { "cask": "flameshot" },
             "ubuntu": { "apt": "flameshot" },
             "fedora": { "dnf": "flameshot" },
             "pop_os": { "apt": "flameshot" }
+        }
+    },
+    "wox": {
+        "description": "Cross-platform launcher with plugins, calculator, clipboard history and theming",
+        "packages": {
+            "darwin": { "brew": "wox-launcher/wox/wox" },
+            "ubuntu": {
+                "manual": {
+                    "repo": "Wox-launcher/Wox",
+                    "type": "appimage",
+                    "asset_pattern": "linux-amd64.AppImage",
+                    "check_command": "wox"
+                }
+            },
+            "fedora": {
+                "manual": {
+                    "repo": "Wox-launcher/Wox",
+                    "type": "appimage",
+                    "asset_pattern": "linux-amd64.AppImage",
+                    "check_command": "wox"
+                }
+            },
+            "pop_os": {
+                "manual": {
+                    "repo": "Wox-launcher/Wox",
+                    "type": "appimage",
+                    "asset_pattern": "linux-amd64.AppImage",
+                    "check_command": "wox"
+                }
+            }
         }
     },
     "pure-prompt": {
