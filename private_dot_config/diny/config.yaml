@@ -4,7 +4,7 @@
 # UI theme for the CLI
 # Dark: catppuccin, tokyo, nord, dracula, gruvbox-dark, onedark, monokai, solarized-dark, everforest-dark, flexoki-dark
 # Light: solarized-light, github-light, gruvbox-light, flexoki-light
-theme: catppuccin
+theme: rose_pine
 
 # AI generation settings
 # Controls how diny generates commit messages, timelines, and changelogs
