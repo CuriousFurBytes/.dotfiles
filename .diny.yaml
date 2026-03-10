@@ -1,0 +1,42 @@
+# Diny Project Configuration (Versioned)
+# This file can be committed to version control and shared with your team
+# It overlays on top of global config (~/.config/diny/config.yaml)
+# Only specify the settings you want to override from the global config
+# Learn more: https://github.com/dinoDanic/diny
+
+# UI theme (catppuccin, tokyonight, nord, dracula, gruvbox, etc.)
+# theme: catppuccin
+
+# Commit configuration
+# commit:
+#   # Use conventional commit format (feat, fix, docs, etc.)
+#   conventional: false
+#
+#   # Conventional commit types (only used if conventional: true)
+#   conventional_format: ['feat', 'fix', 'docs', 'chore', 'style', 'refactor', 'test', 'perf']
+#
+#   # Add emoji prefix to commits
+#   emoji: false
+#
+#   # Emoji mappings for each commit type (only used if emoji: true)
+#   emoji_map:
+#     feat: 🚀
+#     fix: 🐛
+#     docs: 📚
+#     chore: 🔧
+#     style: 💄
+#     refactor: ♻️
+#     test: ✅
+#     perf: ⚡
+#
+#   # Commit message tone: professional, casual, or friendly
+#   tone: casual
+#
+#   # Commit message length: short, normal, or long
+#   length: short
+#
+#   # Custom instructions for AI (e.g., "Include JIRA ticket from branch name")
+#   custom_instructions: ""
+#
+#   # Show/copy commit hash after committing
+#   hash_after_commit: false
