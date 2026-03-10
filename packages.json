@@ -877,35 +877,47 @@
             }
         }
     },
-    "pure-prompt": {
-        "description": "Pretty, minimal and fast ZSH prompt",
+    "starship": {
+        "description": "The minimal, blazing-fast, and infinitely customizable prompt for any shell",
         "packages": {
-            "darwin": {
-                "manual": {
-                    "url": "https://github.com/sindresorhus/pure.git",
-                    "type": "git_clone",
-                    "dest": "$HOME/.zsh/pure"
-                }
-            },
+            "darwin": { "brew": "starship" },
+            "ubuntu": { "brew": "starship" },
+            "fedora": { "brew": "starship" },
+            "pop_os": { "brew": "starship" }
+        }
+    },
+    "diny": {
+        "description": "AI-powered git commit messages and changelogs",
+        "packages": {
+            "darwin": { "go_tool": "github.com/CuriousFurBytes/diny@latest" },
+            "ubuntu": { "go_tool": "github.com/CuriousFurBytes/diny@latest" },
+            "fedora": { "go_tool": "github.com/CuriousFurBytes/diny@latest" },
+            "pop_os": { "go_tool": "github.com/CuriousFurBytes/diny@latest" }
+        }
+    },
+    "ollama": {
+        "description": "Run large language models locally",
+        "packages": {
+            "darwin": { "brew": "ollama" },
             "ubuntu": {
                 "manual": {
-                    "url": "https://github.com/sindresorhus/pure.git",
-                    "type": "git_clone",
-                    "dest": "$HOME/.zsh/pure"
+                    "url": "https://ollama.com/install.sh",
+                    "type": "script",
+                    "check_command": "ollama"
                 }
             },
             "fedora": {
                 "manual": {
-                    "url": "https://github.com/sindresorhus/pure.git",
-                    "type": "git_clone",
-                    "dest": "$HOME/.zsh/pure"
+                    "url": "https://ollama.com/install.sh",
+                    "type": "script",
+                    "check_command": "ollama"
                 }
             },
             "pop_os": {
                 "manual": {
-                    "url": "https://github.com/sindresorhus/pure.git",
-                    "type": "git_clone",
-                    "dest": "$HOME/.zsh/pure"
+                    "url": "https://ollama.com/install.sh",
+                    "type": "script",
+                    "check_command": "ollama"
                 }
             }
         }

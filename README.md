@@ -8,7 +8,7 @@ Personal dotfiles managed with [chezmoi](https://www.chezmoi.io/), with a Go-bas
 
 ## What's Included
 
-- **Shell** &mdash; Zsh with [Oh My Zsh](https://ohmyz.sh/), [Pure](https://github.com/sindresorhus/pure) prompt, syntax highlighting, autosuggestions
+- **Shell** &mdash; Zsh with [Oh My Zsh](https://ohmyz.sh/), [Starship](https://starship.rs/) prompt, syntax highlighting, autosuggestions
 - **Git** &mdash; Delta diffs, commit signing via Proton Pass SSH keys
 - **SSH** &mdash; [Proton Pass SSH Agent](https://protonpass.github.io/pass-cli/) as a system service (launchd / systemd)
 - **Editors** &mdash; Helix, Neovim, VS Code, Zed

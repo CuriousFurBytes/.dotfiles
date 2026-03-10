@@ -1,0 +1,82 @@
+#!/bin/bash
+set -e
+
+if ! command -v ollama &> /dev/null; then
+    echo "Ollama not installed, skipping setup"
+    exit 0
+fi
+
+{{ if eq .chezmoi.os "darwin" }}
+# macOS: Register a LaunchAgent so ollama serve auto-starts at login
+PLIST_DIR="{{ .chezmoi.homeDir }}/Library/LaunchAgents"
+PLIST_PATH="$PLIST_DIR/com.ollama.server.plist"
+OLLAMA_BIN="$(command -v ollama)"
+
+mkdir -p "$PLIST_DIR"
+
+cat > "$PLIST_PATH" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.ollama.server</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>$OLLAMA_BIN</string>
+        <string>serve</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>{{ .chezmoi.homeDir }}/.local/state/ollama.log</string>
+    <key>StandardErrorPath</key>
+    <string>{{ .chezmoi.homeDir }}/.local/state/ollama.log</string>
+</dict>
+</plist>
+EOF
+
+mkdir -p "{{ .chezmoi.homeDir }}/.local/state"
+
+# Unload old version if present, then load
+launchctl bootout "gui/$(id -u)/com.ollama.server" 2>/dev/null || true
+launchctl bootstrap "gui/$(id -u)" "$PLIST_PATH"
+echo "✓ Ollama registered with launchd (runs at login)"
+
+{{ else if eq .chezmoi.os "linux" }}
+# Linux: The install.sh already creates /etc/systemd/system/ollama.service
+# Ensure it is enabled and running
+if ! systemctl is-enabled --quiet ollama 2>/dev/null; then
+    sudo systemctl enable ollama
+    echo "✓ Ollama systemd service enabled"
+else
+    echo "✓ Ollama systemd service already enabled"
+fi
+
+if ! systemctl is-active --quiet ollama 2>/dev/null; then
+    sudo systemctl start ollama
+    echo "✓ Ollama service started"
+else
+    echo "✓ Ollama already running"
+fi
+{{ end }}
+
+# Wait for ollama to be ready
+echo "Waiting for Ollama to be ready..."
+for i in $(seq 1 30); do
+    if ollama list &>/dev/null 2>&1; then
+        break
+    fi
+    sleep 1
+done
+
+# Pull llama3 model
+if ollama list 2>/dev/null | grep -q "^llama3"; then
+    echo "✓ llama3 already downloaded"
+else
+    echo "Pulling llama3 model (this may take a while)..."
+    ollama pull llama3
+    echo "✓ llama3 downloaded"
+fi

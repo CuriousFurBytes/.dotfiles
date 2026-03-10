@@ -1,0 +1,78 @@
+# Diny Configuration
+# Learn more: https://github.com/dinoDanic/diny
+
+# UI theme for the CLI
+# Dark: catppuccin, tokyo, nord, dracula, gruvbox-dark, onedark, monokai, solarized-dark, everforest-dark, flexoki-dark
+# Light: solarized-light, github-light, gruvbox-light, flexoki-light
+theme: catppuccin
+
+# AI generation settings
+# Controls how diny generates commit messages, timelines, and changelogs
+ai:
+    # Generation mode:
+    #   - remote: Use the diny cloud server (default, zero-config)
+    #   - local: Use a local AI server like Ollama (all external requests blocked)
+    #   - custom: Use a custom OpenAI-compatible API with your own API key
+    mode: cli
+    command: "claude -p --output-format text --model {model}"
+    model: ""
+
+    # Local AI server URL (required when mode: local)
+    # Example: http://localhost:11434 (Ollama default)
+    # local_url: ""
+
+    # Custom API URL (required when mode: custom)
+    # Example: https://api.openai.com/v1/chat/completions
+    # api_url: ""
+
+    # API key for custom API (required when mode: custom)
+    # api_key: ""
+
+    # Model name for local or custom mode (optional)
+    # Examples: llama3, gpt-4, claude-sonnet-4-20250514
+    # model: ""
+
+commit:
+    # Use conventional commit format: type(scope): subject
+    conventional: true
+
+    # Available commit types for conventional format
+    conventional_format:
+        ["feat", "fix", "docs", "chore", "style", "refactor", "test", "perf"]
+
+    # Include emoji at the start of commit messages
+    emoji: false
+
+    # Emojis for each commit type (used when emoji: true)
+    # Only types listed in conventional_format will be used
+    emoji_map:
+        feat: 🚀
+        fix: 🐛
+        docs: 📚
+        style: 🎨
+        refactor: ♻️
+        test: ✅
+        chore: 🔧
+        perf: ⚡
+
+    # Commit message tone
+    # Options:
+    #   - professional: Formal and precise
+    #   - casual: Relaxed and conversational
+    #   - friendly: Warm and approachable
+    tone: casual
+
+    # Commit message length and structure
+    # Options:
+    #   - short: Subject only, 1-2 sentences max, ≤60 chars, imperative verb first. No bullets.
+    #   - normal: Subject ≤70 chars (imperative). If needed, add 1-3 terse bullets for WHY/impact.
+    #   - long: Subject ≤80 chars (imperative). Then 2-6 terse bullets for context/impact.
+    length: normal
+
+    # Custom instructions for the AI model (optional)
+    # Add any extra guidance for generating commit messages
+    # Example: "Include JIRA ticket from branch name", "Write like a pirate, arrr!"
+    custom_instructions: ""
+
+    # Show and copy commit hash to clipboard after committing
+    hash_after_commit: false

@@ -1,0 +1,16 @@
+name = "Rosé Pine"
+is_dark = true
+
+primary_foreground = "#c4a7e7"   # iris
+primary_background = "#191724"   # base
+
+success_foreground = "#9ccfd8"   # foam
+success_background = "#1f1d2e"   # surface
+
+error_foreground = "#eb6f92"     # love
+error_background = "#26233a"     # overlay
+
+warning_foreground = "#f6c177"   # gold
+warning_background = "#26233a"   # overlay
+
+muted_foreground = "#6e6a86"     # muted

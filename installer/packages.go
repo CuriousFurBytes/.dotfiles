@@ -163,7 +163,7 @@ var categoryMap = map[string]string{
 
 	// Shell & Prompt
 	"oh-my-zsh": "Shell & Prompt", "zsh-autosuggestions": "Shell & Prompt",
-	"zsh-syntax-highlighting": "Shell & Prompt", "pure-prompt": "Shell & Prompt",
+	"zsh-syntax-highlighting": "Shell & Prompt", "starship": "Shell & Prompt",
 
 	// Utilities
 	"rclone": "Utilities", "rclone-ui": "Utilities", "topgrade": "Utilities", "httpie": "Utilities",
@@ -180,12 +180,15 @@ var categoryMap = map[string]string{
 
 	// Proton
 	"proton-pass-cli": "Proton",
+
+	// AI Tools
+	"ollama": "AI Tools", "diny": "AI Tools",
 }
 
 var categoryOrder = []string{
 	"System Tools", "Editors", "Terminal Tools", "Development",
 	"GUI Applications", "Shell & Prompt", "GitHub", "Containers",
-	"Proton", "Utilities",
+	"Proton", "Utilities", "AI Tools",
 }
 
 func categorizePackages(pkgs []Package) []PackageCategory {
