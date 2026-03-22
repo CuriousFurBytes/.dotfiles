@@ -877,13 +877,37 @@
             }
         }
     },
-    "starship": {
-        "description": "The minimal, blazing-fast, and infinitely customizable prompt for any shell",
+    "pure-prompt": {
+        "description": "Pretty, minimal and fast ZSH prompt",
         "packages": {
-            "darwin": { "brew": "starship" },
-            "ubuntu": { "brew": "starship" },
-            "fedora": { "brew": "starship" },
-            "pop_os": { "brew": "starship" }
+            "darwin": {
+                "manual": {
+                    "url": "https://github.com/sindresorhus/pure.git",
+                    "type": "git_clone",
+                    "dest": "$HOME/.zsh/pure"
+                }
+            },
+            "ubuntu": {
+                "manual": {
+                    "url": "https://github.com/sindresorhus/pure.git",
+                    "type": "git_clone",
+                    "dest": "$HOME/.zsh/pure"
+                }
+            },
+            "fedora": {
+                "manual": {
+                    "url": "https://github.com/sindresorhus/pure.git",
+                    "type": "git_clone",
+                    "dest": "$HOME/.zsh/pure"
+                }
+            },
+            "pop_os": {
+                "manual": {
+                    "url": "https://github.com/sindresorhus/pure.git",
+                    "type": "git_clone",
+                    "dest": "$HOME/.zsh/pure"
+                }
+            }
         }
     },
     "diny": {

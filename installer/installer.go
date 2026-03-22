@@ -218,6 +218,10 @@ func (pi *PackageInstaller) IsInstalled(name string, method InstallMethod) bool 
 }
 
 func (pi *PackageInstaller) isManualInstalled(name string, manual *ManualSpec) bool {
+	// git_clone always runs so it can pull the latest version
+	if manual.Type == "git_clone" {
+		return false
+	}
 	if manual.CheckCommand != "" {
 		return commandExists(manual.CheckCommand)
 	}
@@ -329,6 +333,9 @@ func (pi *PackageInstaller) installManual(name string, manual *ManualSpec) error
 	case "git_clone":
 		expanded, _ := runShellSilent(fmt.Sprintf("echo %s", manual.Dest))
 		dest := strings.TrimSpace(expanded)
+		if info, err := os.Stat(dest); err == nil && info.IsDir() {
+			return pi.run(fmt.Sprintf("git -C %s pull --ff-only", dest))
+		}
 		os.MkdirAll(filepath.Dir(dest), 0o755)
 		return pi.run(fmt.Sprintf("git clone %s %s", manual.URL, dest))
 	case "dmg":

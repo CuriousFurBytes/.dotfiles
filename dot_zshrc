@@ -52,10 +52,7 @@ export PATH="$HOME/go/bin:$PATH"
 
 # Proton Pass SSH Agent
 if command -v pass-cli &> /dev/null; then
-    PROTON_AGENT_SOCK="$HOME/.ssh/proton-pass-agent.sock"
-    if [ -S "$PROTON_AGENT_SOCK" ]; then
-        export SSH_AUTH_SOCK="$PROTON_AGENT_SOCK"
-    fi
+    export SSH_AUTH_SOCK="$HOME/.ssh/proton-pass-agent.sock"
 fi
 
 # NPM
@@ -71,8 +68,21 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-# Starship
-eval "$(starship init zsh)"
+# Pure
+fpath+=("$HOME/.zsh/pure")
+autoload -U promptinit; promptinit
+prompt pure
+zstyle ':prompt:pure:prompt:success'  color '#31748f'  # pine
+zstyle ':prompt:pure:prompt:error'    color '#eb6f92'  # love
+zstyle ':prompt:pure:path'            color '#ebbcba'  # rose
+zstyle ':prompt:pure:git:branch'      color '#c4a7e7'  # iris
+zstyle ':prompt:pure:git:dirty'       color '#f6c177'  # gold
+zstyle ':prompt:pure:git:arrow'       color '#9ccfd8'  # foam
+zstyle ':prompt:pure:git:stash'       color '#9ccfd8'  # foam
+zstyle ':prompt:pure:execution_time'  color '#f6c177'  # gold
+zstyle ':prompt:pure:virtualenv'      color '#6e6a86'  # muted
+zstyle ':prompt:pure:user'            color '#908caa'  # subtle
+zstyle ':prompt:pure:host'            color '#908caa'  # subtle
 
 # Adds alias commands
 source ~/.common_aliases

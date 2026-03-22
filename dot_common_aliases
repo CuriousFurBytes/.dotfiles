@@ -13,6 +13,17 @@ alias go-linux="go run github.com/jtolio/tinyemu-go/temubox/example@2c8151233c2d
 alias git-clean='git branch | grep -vE "^\*main|develop" | xargs git branch -d'
 alias pp="pass-cli $@"
 
+function ssh-agent-restart() {
+    if [[ "$(uname)" == "Darwin" ]]; then
+        launchctl unload ~/Library/LaunchAgents/me.proton.pass.ssh-agent.plist
+        launchctl load ~/Library/LaunchAgents/me.proton.pass.ssh-agent.plist
+    else
+        systemctl --user stop proton-pass-ssh-agent
+        systemctl --user start proton-pass-ssh-agent
+    fi
+    export SSH_AUTH_SOCK="$HOME/.ssh/proton-pass-agent.sock"
+}
+
 function dsa() {
     docker stop $(docker ps -a -q)
     docker rm $(docker ps -a -q)

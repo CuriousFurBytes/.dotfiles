@@ -4,3 +4,9 @@ promptToReturnFromSubprocess: false
 git:
     pagers:
         - externalDiffCommand: difft --color=always
+customCommands:
+    - key: C
+      description: "Commit \U0001F995"
+      command: diny commit
+      context: files
+      output: terminal

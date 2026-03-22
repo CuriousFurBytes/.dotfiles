@@ -163,7 +163,7 @@ var categoryMap = map[string]string{
 
 	// Shell & Prompt
 	"oh-my-zsh": "Shell & Prompt", "zsh-autosuggestions": "Shell & Prompt",
-	"zsh-syntax-highlighting": "Shell & Prompt", "starship": "Shell & Prompt",
+	"zsh-syntax-highlighting": "Shell & Prompt", "pure-prompt": "Shell & Prompt",
 
 	// Utilities
 	"rclone": "Utilities", "rclone-ui": "Utilities", "topgrade": "Utilities", "httpie": "Utilities",

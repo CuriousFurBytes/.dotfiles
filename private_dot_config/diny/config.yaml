@@ -15,7 +15,7 @@ ai:
     #   - custom: Use a custom OpenAI-compatible API with your own API key
     mode: cli
     command: "claude -p --output-format text --model {model}"
-    model: ""
+    model: "claude-haiku-4-5-20251001"
 
     # Local AI server URL (required when mode: local)
     # Example: http://localhost:11434 (Ollama default)
