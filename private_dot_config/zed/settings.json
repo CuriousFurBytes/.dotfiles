@@ -7,6 +7,17 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+    "agent_servers": {
+        "cursor": {
+            "type": "registry",
+        },
+        "github-copilot-cli": {
+            "type": "registry",
+        },
+        "claude-acp": {
+            "type": "registry",
+        },
+    },
     "context_servers": {
         "mcp-server-context7": {
             "enabled": true,
