@@ -7,6 +7,6 @@ git:
 customCommands:
     - key: C
       description: "Commit \U0001F995"
-      command: diny commit
+      command: gitscribe commit
       context: files
       output: terminal
