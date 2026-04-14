@@ -629,6 +629,15 @@
             "pop_os": { "uv_tool": "djlint" }
         }
     },
+    "gitscribe": {
+        "description": "AI-powered git commit message generator",
+        "packages": {
+            "darwin": { "uv_tool": "gitscribe", "uv_tool_from": "git+https://github.com/freeoss-space/gitscribe" },
+            "ubuntu": { "uv_tool": "gitscribe", "uv_tool_from": "git+https://github.com/freeoss-space/gitscribe" },
+            "fedora": { "uv_tool": "gitscribe", "uv_tool_from": "git+https://github.com/freeoss-space/gitscribe" },
+            "pop_os": { "uv_tool": "gitscribe", "uv_tool_from": "git+https://github.com/freeoss-space/gitscribe" }
+        }
+    },
     "gama": {
         "description": "GitHub Actions manager in the terminal",
         "packages": {

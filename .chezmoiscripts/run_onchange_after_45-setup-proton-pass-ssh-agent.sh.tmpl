@@ -6,42 +6,38 @@ if ! command -v pass-cli &> /dev/null; then
     exit 0
 fi
 
-{{ if eq .chezmoi.os "darwin" }}
-PLIST_SRC="{{ .chezmoi.homeDir }}/.config/proton-pass/ssh-agent.plist"
-PLIST_DST="{{ .chezmoi.homeDir }}/Library/LaunchAgents/me.proton.pass.ssh-agent.plist"
+# Verify authentication
+if ! pass-cli vault list &> /dev/null; then
+    echo "⚠️  pass-cli not authenticated, skipping SSH agent setup"
+    exit 0
+fi
 
-mkdir -p "{{ .chezmoi.homeDir }}/Library/LaunchAgents"
+SOCKET_PATH="{{ .chezmoi.homeDir }}/.ssh/proton-pass-agent.sock"
+LOG_FILE="{{ .chezmoi.homeDir }}/.local/state/proton-pass-ssh-agent.log"
+
+mkdir -p "{{ .chezmoi.homeDir }}/.ssh"
 mkdir -p "{{ .chezmoi.homeDir }}/.local/state"
 
-# Unload old version if present
+{{ if eq .chezmoi.os "darwin" -}}
+# Clean up legacy launchd service if present
 launchctl bootout "gui/$(id -u)/me.proton.pass.ssh-agent" 2>/dev/null || true
+rm -f "{{ .chezmoi.homeDir }}/Library/LaunchAgents/me.proton.pass.ssh-agent.plist"
+{{ else if eq .chezmoi.os "linux" -}}
+# Clean up legacy systemd service if present
+systemctl --user disable --now proton-pass-ssh-agent.service 2>/dev/null || true
+rm -f "{{ .chezmoi.homeDir }}/.config/systemd/user/proton-pass-ssh-agent.service"
+systemctl --user daemon-reload 2>/dev/null || true
+{{ end -}}
 
-cp "$PLIST_SRC" "$PLIST_DST"
+# Stop existing daemon if running
+pass-cli ssh-agent daemon stop 2>/dev/null || true
 
-launchctl bootstrap "gui/$(id -u)" "$PLIST_DST"
-echo "✓ Proton Pass SSH Agent registered with launchd (runs at login)"
+# Start the daemon
+pass-cli ssh-agent daemon start \
+    --vault-name SSH \
+    --socket-path "$SOCKET_PATH" \
+    --log-file "$LOG_FILE"
 
-{{ else if eq .chezmoi.os "linux" }}
-SYSTEMD_DIR="{{ .chezmoi.homeDir }}/.config/systemd/user"
-mkdir -p "$SYSTEMD_DIR"
-mkdir -p "{{ .chezmoi.homeDir }}/.local/state"
-
-cat > "$SYSTEMD_DIR/proton-pass-ssh-agent.service" << 'EOF'
-[Unit]
-Description=Proton Pass SSH Agent
-After=network-online.target
-
-[Service]
-Type=simple
-ExecStart={{ lookPath "pass-cli" }} ssh-agent start --vault-name SSH --socket-path %h/.ssh/proton-pass-agent.sock
-Restart=on-failure
-RestartSec=5
-
-[Install]
-WantedBy=default.target
-EOF
-
-systemctl --user daemon-reload
-systemctl --user enable --now proton-pass-ssh-agent.service
-echo "✓ Proton Pass SSH Agent registered with systemd (runs at login)"
-{{ end }}
+echo "✓ Proton Pass SSH Agent daemon started"
+echo "  Socket: $SOCKET_PATH"
+echo "  Log: $LOG_FILE"

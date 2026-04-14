@@ -281,7 +281,11 @@ func (pi *PackageInstaller) Install(pkg Package) InstallResult {
 	case "dnf":
 		err = pi.run(fmt.Sprintf("sudo dnf install -y %s", method.Dnf))
 	case "uv_tool":
-		err = pi.run(fmt.Sprintf("uv tool install %s", method.UvTool))
+		if method.UvToolFrom != "" {
+			err = pi.run(fmt.Sprintf("uv tool install %s --from %s", method.UvTool, method.UvToolFrom))
+		} else {
+			err = pi.run(fmt.Sprintf("uv tool install %s", method.UvTool))
+		}
 	case "cargo":
 		err = pi.run(fmt.Sprintf("cargo install %s", method.Cargo))
 	case "go_tool":

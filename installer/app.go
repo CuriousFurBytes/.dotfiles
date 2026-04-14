@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -296,7 +295,6 @@ func (a *App) stepProtonPassSSHAgent() error {
 		return nil
 	}
 
-	// Verify authentication before trying
 	if _, err := runShellSilent("pass-cli vault list"); err != nil {
 		fmt.Println(statusSkip("pass-cli not authenticated"))
 		return nil
@@ -304,7 +302,7 @@ func (a *App) stepProtonPassSSHAgent() error {
 
 	confirmed, err := ConfirmStep(
 		"Start Proton Pass SSH Agent?",
-		"This will start pass-cli as an SSH agent, loading keys from the \"SSH\" vault.\nThe agent socket will be at ~/.ssh/proton-pass-agent.sock",
+		"This will start pass-cli as an SSH agent daemon, loading keys from the \"SSH\" vault.\nThe agent socket will be at ~/.ssh/proton-pass-agent.sock",
 	)
 	if err != nil {
 		return err
@@ -314,101 +312,29 @@ func (a *App) stepProtonPassSSHAgent() error {
 		return nil
 	}
 
-	// Ensure directories exist
 	home := os.Getenv("HOME")
 	os.MkdirAll(filepath.Join(home, ".ssh"), 0o700)
 	os.MkdirAll(filepath.Join(home, ".local", "state"), 0o755)
 
+	logFile := filepath.Join(home, ".local", "state", "proton-pass-ssh-agent.log")
+
 	var agentErr error
-
-	if a.osInfo.Target == "darwin" {
-		// Register as launchd service
-		plistDir := filepath.Join(home, "Library", "LaunchAgents")
-		os.MkdirAll(plistDir, 0o755)
-		plistPath := filepath.Join(plistDir, "me.proton.pass.ssh-agent.plist")
-
-		passCliPath, _ := exec.LookPath("pass-cli")
-
-		plist := fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>Label</key>
-    <string>me.proton.pass.ssh-agent</string>
-    <key>ProgramArguments</key>
-    <array>
-        <string>%s</string>
-        <string>ssh-agent</string>
-        <string>start</string>
-        <string>--vault-name</string>
-        <string>SSH</string>
-        <string>--socket-path</string>
-        <string>%s</string>
-    </array>
-    <key>RunAtLoad</key>
-    <true/>
-    <key>KeepAlive</key>
-    <true/>
-    <key>StandardOutPath</key>
-    <string>%s/.local/state/proton-pass-ssh-agent.log</string>
-    <key>StandardErrorPath</key>
-    <string>%s/.local/state/proton-pass-ssh-agent.log</string>
-</dict>
-</plist>`, passCliPath, socketPath, home, home)
-
-		_ = spinner.New().
-			Title("Registering Proton Pass SSH Agent with launchd...").
-			Action(func() {
-				if err := os.WriteFile(plistPath, []byte(plist), 0o644); err != nil {
-					agentErr = err
-					return
-				}
-				// Unload old version if present
-				runShellSilent(fmt.Sprintf(`launchctl bootout "gui/$(id -u)/me.proton.pass.ssh-agent"`))
-				_, agentErr = runShellSilent(fmt.Sprintf(`launchctl bootstrap "gui/$(id -u)" "%s"`, plistPath))
-			}).
-			Run()
-	} else {
-		// Register as systemd user service
-		systemdDir := filepath.Join(home, ".config", "systemd", "user")
-		os.MkdirAll(systemdDir, 0o755)
-
-		passCliPath, _ := exec.LookPath("pass-cli")
-
-		unit := fmt.Sprintf(`[Unit]
-Description=Proton Pass SSH Agent
-After=network-online.target
-
-[Service]
-Type=simple
-ExecStart=%s ssh-agent start --vault-name SSH --socket-path %s
-Restart=on-failure
-RestartSec=5
-
-[Install]
-WantedBy=default.target
-`, passCliPath, socketPath)
-
-		_ = spinner.New().
-			Title("Registering Proton Pass SSH Agent with systemd...").
-			Action(func() {
-				unitPath := filepath.Join(systemdDir, "proton-pass-ssh-agent.service")
-				if err := os.WriteFile(unitPath, []byte(unit), 0o644); err != nil {
-					agentErr = err
-					return
-				}
-				runShellSilent("systemctl --user daemon-reload")
-				_, agentErr = runShellSilent("systemctl --user enable --now proton-pass-ssh-agent.service")
-			}).
-			Run()
-	}
+	_ = spinner.New().
+		Title("Starting Proton Pass SSH Agent daemon...").
+		Action(func() {
+			runShellSilent("pass-cli ssh-agent daemon stop")
+			_, agentErr = runShellSilent(fmt.Sprintf(
+				"pass-cli ssh-agent daemon start --vault-name SSH --socket-path %s --log-file %s",
+				socketPath, logFile,
+			))
+		}).
+		Run()
 
 	if agentErr != nil {
 		fmt.Println(statusFail(fmt.Sprintf("proton-pass ssh-agent: %v", agentErr)))
-		return nil // non-fatal
+		return nil
 	}
 
-	// Wait for the socket to appear
 	for i := 0; i < 15; i++ {
 		if _, err := os.Stat(socketPath); err == nil {
 			break
@@ -417,9 +343,8 @@ WantedBy=default.target
 	}
 
 	os.Setenv("SSH_AUTH_SOCK", socketPath)
-	fmt.Println(statusDone("proton-pass ssh-agent (registered as system service)"))
+	fmt.Println(statusDone("proton-pass ssh-agent daemon"))
 	fmt.Println(dimStyle.Render(fmt.Sprintf("    SSH_AUTH_SOCK=%s", socketPath)))
-	fmt.Println(dimStyle.Render("    Starts automatically at login"))
 
 	return nil
 }

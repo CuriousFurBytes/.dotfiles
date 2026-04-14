@@ -23,6 +23,7 @@ type InstallMethod struct {
 	Apt         string       `json:"apt,omitempty"`
 	Dnf         string       `json:"dnf,omitempty"`
 	UvTool      string       `json:"uv_tool,omitempty"`
+	UvToolFrom  string       `json:"uv_tool_from,omitempty"`
 	Cargo       string       `json:"cargo,omitempty"`
 	GoTool      string       `json:"go_tool,omitempty"`
 	Snap        *SnapSpec    `json:"snap,omitempty"`
@@ -148,7 +149,7 @@ var categoryMap = map[string]string{
 	"go": "Development", "uv": "Development", "python3-pip": "Development",
 	"pre-commit": "Development", "biome": "Development", "ipython": "Development",
 	"jupyter": "Development", "just": "Development", "act": "Development",
-	"rumdl": "Development", "djlint": "Development", "harlequin": "Development",
+	"rumdl": "Development", "djlint": "Development", "gitscribe": "Development", "harlequin": "Development",
 	"euporie": "Development",
 
 	// GUI Applications
