@@ -1,0 +1,32 @@
+{
+  "ai": {
+    "backend": "cli",
+    "api": {
+      "url": "",
+      "token": "",
+      "model": ""
+    },
+    "cli": {
+      "command": "claude --output-format text --model {model} -p",
+      "model": "claude-haiku-4-5-20251001"
+    }
+  },
+  "theme": {
+    "primary": "cyan",
+    "secondary": "magenta",
+    "accent": "green",
+    "error": "red",
+    "warning": "yellow"
+  },
+  "commit": {
+    "style": "professional",
+    "format": "conventional",
+    "body_length": "short"
+  },
+  "pr": {
+    "style": "professional"
+  },
+  "gh": {
+    "command": "gh pr create --title {title} --body {body}"
+  }
+}
