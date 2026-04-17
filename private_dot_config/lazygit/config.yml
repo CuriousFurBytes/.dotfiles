@@ -6,7 +6,7 @@ git:
         - externalDiffCommand: difft --color=always
 customCommands:
     - key: C
-      description: "Commit \U0001F995"
+      description: "AI commit"
       command: gitscribe commit
       context: files
       output: terminal
