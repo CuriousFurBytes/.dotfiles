@@ -12,18 +12,38 @@ sync changes back.
 - `~/.local/share/sandbox/overlays/<sandbox>/upper` &mdash; per-sandbox overlay write layer
 - `~/.local/state/sandbox/<sandbox>.json` &mdash; per-sandbox metadata
 
-## Prerequisites (Fedora)
+## Prerequisites
+
+Every dependency is declared in `packages.json` and picked up by this repo's
+installer. If you ran `chezmoi apply`, the tools below were already installed
+and `.chezmoiscripts/run_onchange_after_56-setup-sandbox.sh.tmpl` did the
+per-OS setup.
+
+| OS | What gets installed | krun (VM isolation)? |
+|----|--------------------|------------------------|
+| **Fedora**        | `podman`, `crun-krun`, `rsync`, `fuse-overlayfs`, `slirp4netns` | yes, native |
+| **Ubuntu / Pop!_OS** | `podman`, `rsync`, `fuse-overlayfs`, `slirp4netns` | no &mdash; falls back to `crun`* |
+| **macOS**         | `podman` (via brew), `rsync` | n/a &mdash; the whole podman runtime is already a VM |
+
+*On Ubuntu, `crun-krun` is not in the default apt repos. `sandbox` logs a
+warning and uses `crun` (regular rootless containers, shared host kernel). To
+get real VM isolation, build `crun-krun` from
+<https://github.com/containers/crun/tree/main/krun> and drop the binary into
+`~/.local/bin/` or `/usr/local/bin/`.
+
+### Manual install (if you don't use this dotfiles repo)
 
 ```bash
+# Fedora
 sudo dnf install -y podman crun-krun rsync fuse-overlayfs slirp4netns
-# Optional but useful for per-user subuid/subgid:
-#   man subuid / subgid - Fedora configures these by default for your user.
-```
 
-On Ubuntu 24.04 the krun runtime is shipped as the `crun-krun` snap in recent
-releases or can be built from <https://github.com/containers/crun/tree/main/krun>.
-If `crun-krun` isn't available the scripts fall back to `crun` with a warning
-and you get regular rootless container isolation (no separate kernel).
+# Ubuntu / Pop!_OS
+sudo apt install -y podman rsync fuse-overlayfs slirp4netns
+
+# macOS
+brew install podman rsync
+podman machine init --now   # one-time: start the Linux VM podman uses
+```
 
 ## First-time setup
 

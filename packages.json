@@ -99,6 +99,37 @@
             "pop_os": { "apt": "podman" }
         }
     },
+    "rsync": {
+        "description": "Fast incremental file transfer (used by `sandbox sync`)",
+        "packages": {
+            "darwin": { "brew": "rsync" },
+            "ubuntu": { "apt": "rsync" },
+            "fedora": { "dnf": "rsync" },
+            "pop_os": { "apt": "rsync" }
+        }
+    },
+    "fuse-overlayfs": {
+        "description": "Rootless overlay filesystem for podman (sandbox overlay mounts)",
+        "packages": {
+            "ubuntu": { "apt": "fuse-overlayfs" },
+            "fedora": { "dnf": "fuse-overlayfs" },
+            "pop_os": { "apt": "fuse-overlayfs" }
+        }
+    },
+    "slirp4netns": {
+        "description": "User-mode networking for rootless podman (sandbox networking)",
+        "packages": {
+            "ubuntu": { "apt": "slirp4netns" },
+            "fedora": { "dnf": "slirp4netns" },
+            "pop_os": { "apt": "slirp4netns" }
+        }
+    },
+    "crun-krun": {
+        "description": "krun OCI runtime - runs each sandbox in its own microVM kernel",
+        "packages": {
+            "fedora": { "dnf": "crun-krun" }
+        }
+    },
     "fzf": {
         "description": "Command-line fuzzy finder",
         "packages": {
