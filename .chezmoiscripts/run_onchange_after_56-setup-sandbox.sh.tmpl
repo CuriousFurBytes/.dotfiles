@@ -1,0 +1,85 @@
+#!/bin/bash
+# Post-install setup for the `sandbox` wrapper.
+# Runs after packages.json has finished installing. Idempotent.
+#
+# - macOS: initialises and starts `podman machine` if it isn't already.
+# - Linux: verifies rootless prerequisites (subuid/subgid, fuse-overlayfs,
+#          slirp4netns) and confirms krun availability (Fedora) or warns
+#          that the sandbox will fall back to crun (Ubuntu / Pop!_OS).
+# - All  : ensures the sandbox state/overlay dirs exist.
+
+set -e
+
+if ! command -v podman &>/dev/null; then
+    echo "[sandbox-setup] podman not installed, skipping"
+    exit 0
+fi
+
+STATE_DIR="{{ .chezmoi.homeDir }}/.local/state/sandbox"
+OVERLAY_DIR="{{ .chezmoi.homeDir }}/.local/share/sandbox/overlays"
+mkdir -p "$STATE_DIR" "$OVERLAY_DIR"
+
+{{ if eq .chezmoi.os "darwin" }}
+# ---------- macOS ----------
+# On macOS podman runs inside a managed Linux VM (podman machine). krun-style
+# per-container VMs don't apply here - the whole engine is already a VM -
+# so `sandbox` will fall back to crun with a warning. That's expected.
+
+if ! podman machine list --format '{{`{{.Name}}`}}' 2>/dev/null | grep -q .; then
+    echo "[sandbox-setup] initialising podman machine (first-time setup)..."
+    podman machine init --now
+    echo "[sandbox-setup] podman machine ready"
+elif ! podman machine list --format '{{`{{.Running}}`}}' 2>/dev/null | grep -q true; then
+    echo "[sandbox-setup] starting podman machine..."
+    podman machine start || true
+else
+    echo "[sandbox-setup] podman machine already running"
+fi
+
+if ! command -v rsync &>/dev/null; then
+    echo "[sandbox-setup] warn: rsync missing; 'sandbox sync' will not work until it is installed"
+fi
+
+{{ else if eq .chezmoi.os "linux" }}
+# ---------- Linux ----------
+user="$(id -un)"
+missing=()
+
+for bin in fuse-overlayfs slirp4netns rsync; do
+    command -v "$bin" &>/dev/null || missing+=("$bin")
+done
+
+if ! grep -q "^${user}:" /etc/subuid 2>/dev/null; then
+    missing+=("subuid-entry")
+fi
+if ! grep -q "^${user}:" /etc/subgid 2>/dev/null; then
+    missing+=("subgid-entry")
+fi
+
+if [[ ${#missing[@]} -gt 0 ]]; then
+    echo "[sandbox-setup] warn: rootless podman prerequisites missing: ${missing[*]}"
+    echo "                 see ~/.local/share/sandbox/README.md for fixes"
+fi
+
+# Runtime detection
+if podman info --format '{{`{{range $k,$v := .Host.OCIRuntime}}{{$k}} {{end}}`}}' 2>/dev/null | grep -qw krun \
+   || command -v krun &>/dev/null \
+   || command -v crun-krun &>/dev/null; then
+    echo "[sandbox-setup] ✓ krun available - sandboxes will get per-container VM isolation"
+else
+{{- if eq .chezmoi.osRelease.ID "fedora" }}
+    echo "[sandbox-setup] warn: krun not found. Install with:  sudo dnf install crun-krun"
+{{- else }}
+    echo "[sandbox-setup] info: krun not in default repos on this distro; 'sandbox' will use crun."
+    echo "                 To build krun from source:  https://github.com/containers/crun/tree/main/krun"
+{{- end }}
+fi
+
+# Enable user-level podman socket so VS Code Dev Containers / docker-compose
+# style tooling can attach. No-op if already enabled.
+if command -v systemctl &>/dev/null && systemctl --user list-unit-files podman.socket &>/dev/null; then
+    systemctl --user enable --now podman.socket 2>/dev/null || true
+fi
+{{ end }}
+
+echo "[sandbox-setup] ready. Next: run 'sandbox rebuild' to build the base image and authenticate tools."

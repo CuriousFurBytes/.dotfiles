@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# sbx - short alias for 'sandbox' with shortcuts for common in-sandbox tools.
+#
+# sbx <sandbox-subcommand> [args]  # forwards to `sandbox` directly
+# sbx claude   [args]              # => sandbox run claude   [args]
+# sbx copilot  [args]              # => sandbox run copilot  [args]
+# sbx codex    [args]              # => sandbox run codex    [args]
+# sbx lazygit  [args]              # => sandbox run lazygit  [args]
+# sbx commit   [args]              # => sandbox run gitscribe commit [args]
+# sbx uv       [args]              # => sandbox run uv       [args]
+# sbx git      [args]              # => sandbox run git      [args]
+
+set -euo pipefail
+
+# Real subcommands handled by `sandbox`. Anything else that isn't an option
+# flag is treated as a tool name and wrapped in `sandbox run <tool>`.
+SANDBOX_SUBCMDS=(
+    create sh shell run list ls rm remove delete
+    prune sync id path name build rebuild help
+)
+
+sub="${1:-}"
+
+if [[ -z "$sub" || "$sub" == -* ]]; then
+    exec sandbox ${sub:+"$sub"}
+fi
+
+for s in "${SANDBOX_SUBCMDS[@]}"; do
+    if [[ "$sub" == "$s" ]]; then
+        exec sandbox "$@"
+    fi
+done
+
+shift
+case "$sub" in
+    commit)
+        exec sandbox run gitscribe commit "$@"
+        ;;
+    *)
+        exec sandbox run "$sub" "$@"
+        ;;
+esac
