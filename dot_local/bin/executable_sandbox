@@ -1,0 +1,320 @@
+#!/usr/bin/env bash
+# sandbox - podman-backed per-project sandboxes with krun isolation
+#
+# Usage:
+#   sandbox create                 Create a sandbox for $PWD
+#   sandbox sh                     Enter an interactive shell
+#   sandbox run <cmd...>           Run a command inside the sandbox
+#   sandbox list                   List all sandboxes
+#   sandbox prune                  Remove every sandbox container + state
+#   sandbox rm                     Remove the sandbox for $PWD
+#   sandbox sync                   Rsync the overlay upperdir back to the host
+#   sandbox id                     Print the sandbox id for $PWD
+#   sandbox path                   Print the container name for $PWD
+#   sandbox rebuild                Interactive base-image rebuild (see README)
+#
+# Env:
+#   SANDBOX_IMAGE   Base image reference (default: localhost/sandbox-base:latest)
+#   SANDBOX_RUNTIME OCI runtime (default: krun, falls back to crun if missing)
+#   SANDBOX_NET     --network value (default: slirp4netns:enable_ipv6=true)
+#   SANDBOX_MEMORY  --memory value (default: 4g)
+#   SANDBOX_CPUS    --cpus value   (default: 4)
+
+set -euo pipefail
+
+SANDBOX_IMAGE="${SANDBOX_IMAGE:-localhost/sandbox-base:latest}"
+SANDBOX_RUNTIME_PREF="${SANDBOX_RUNTIME:-krun}"
+SANDBOX_NET="${SANDBOX_NET:-slirp4netns:enable_ipv6=true}"
+SANDBOX_MEMORY="${SANDBOX_MEMORY:-4g}"
+SANDBOX_CPUS="${SANDBOX_CPUS:-4}"
+
+XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+SANDBOX_STATE="$XDG_STATE_HOME/sandbox"
+SANDBOX_DATA="$XDG_DATA_HOME/sandbox"
+SANDBOX_OVERLAYS="$SANDBOX_DATA/overlays"
+CONTAINERFILE="$SANDBOX_DATA/Containerfile"
+
+mkdir -p "$SANDBOX_STATE" "$SANDBOX_OVERLAYS"
+
+# ---------- helpers ----------
+
+die() { printf 'sandbox: %s\n' "$*" >&2; exit 1; }
+info() { printf '\033[0;34m[sandbox]\033[0m %s\n' "$*" >&2; }
+ok()   { printf '\033[0;32m[sandbox]\033[0m %s\n' "$*" >&2; }
+warn() { printf '\033[0;33m[sandbox]\033[0m %s\n' "$*" >&2; }
+
+require_podman() {
+    command -v podman >/dev/null || die "podman not found. Install podman first."
+}
+
+# Pick a runtime: prefer krun for VM isolation, fall back to crun.
+pick_runtime() {
+    if [[ "$SANDBOX_RUNTIME_PREF" == "krun" ]]; then
+        if podman info --format '{{range $k,$v := .Host.OCIRuntime}}{{$k}} {{end}}' 2>/dev/null | grep -qw krun \
+            || command -v krun >/dev/null 2>&1 \
+            || command -v crun-krun >/dev/null 2>&1; then
+            printf 'krun'
+            return
+        fi
+        warn "krun runtime not available, falling back to crun (no VM isolation)"
+    fi
+    printf 'crun'
+}
+
+# Sandbox id derived from absolute path: sbx-<sanitized-basename>-<hash>
+sandbox_id() {
+    local dir="${1:-$PWD}"
+    local abs; abs="$(realpath -- "$dir")"
+    local hash; hash="$(printf '%s' "$abs" | sha256sum | cut -c1-10)"
+    local base; base="$(basename -- "$abs")"
+    base="${base//[^a-zA-Z0-9_-]/-}"
+    base="${base:0:40}"
+    printf 'sbx-%s-%s' "$base" "$hash"
+}
+
+meta_file() { printf '%s/%s.json' "$SANDBOX_STATE" "$1"; }
+overlay_dir() { printf '%s/%s' "$SANDBOX_OVERLAYS" "$1"; }
+
+container_exists() { podman container exists "$1"; }
+
+container_running() {
+    [[ "$(podman container inspect --format '{{.State.Running}}' "$1" 2>/dev/null || echo false)" == "true" ]]
+}
+
+# Ensure the container exists and is running for this folder.
+ensure_running() {
+    local name="$1"
+    container_exists "$name" || die "no sandbox for $PWD. Run 'sandbox create' first."
+    container_running "$name" || {
+        info "starting $name"
+        podman start "$name" >/dev/null
+    }
+}
+
+# Ensure the base image exists; offer to build it if not.
+ensure_image() {
+    if ! podman image exists "$SANDBOX_IMAGE"; then
+        warn "base image $SANDBOX_IMAGE not found."
+        if [[ -t 0 && -t 1 ]]; then
+            read -rp "Build it from $CONTAINERFILE now? [Y/n] " ans
+            case "${ans:-y}" in
+                [nN]*) die "aborted; run 'sandbox rebuild' to create the base image." ;;
+            esac
+            cmd_build_base
+        else
+            die "base image missing; run 'sandbox rebuild' to create it."
+        fi
+    fi
+}
+
+# ---------- commands ----------
+
+cmd_create() {
+    require_podman
+    ensure_image
+    local name; name="$(sandbox_id)"
+    local abs;  abs="$(realpath -- "$PWD")"
+
+    if container_exists "$name"; then
+        die "sandbox already exists for $abs (container: $name)"
+    fi
+
+    local upper work
+    upper="$(overlay_dir "$name")/upper"
+    work="$(overlay_dir "$name")/work"
+    mkdir -p "$upper" "$work"
+
+    local runtime; runtime="$(pick_runtime)"
+    info "creating $name (runtime=$runtime, image=$SANDBOX_IMAGE)"
+
+    # Overlay mount: host folder is the lower layer (read-through), writes go
+    # to upper/ which lives in our state dir and survives container restarts.
+    podman run -d \
+        --name "$name" \
+        --runtime "$runtime" \
+        --hostname "sbx" \
+        --network "$SANDBOX_NET" \
+        --memory "$SANDBOX_MEMORY" --cpus "$SANDBOX_CPUS" \
+        --userns=keep-id \
+        --security-opt label=disable \
+        --mount "type=overlay,source=$abs,destination=/workspace,upperdir=$upper,workdir=$work" \
+        -w /workspace \
+        --label sandbox.host_path="$abs" \
+        --label sandbox.id="$name" \
+        "$SANDBOX_IMAGE" sleep infinity >/dev/null
+
+    printf '{"name":"%s","host_path":"%s","image":"%s","runtime":"%s","upper":"%s","created":"%s"}\n' \
+        "$name" "$abs" "$SANDBOX_IMAGE" "$runtime" "$upper" "$(date -Iseconds)" \
+        > "$(meta_file "$name")"
+
+    ok "sandbox $name ready at /workspace (host: $abs)"
+}
+
+cmd_sh() {
+    require_podman
+    local name; name="$(sandbox_id)"
+    ensure_running "$name"
+    exec podman exec -it \
+        -e TERM="${TERM:-xterm-256color}" \
+        -e COLORTERM="${COLORTERM:-}" \
+        "$name" /bin/bash -l
+}
+
+cmd_run() {
+    require_podman
+    local name; name="$(sandbox_id)"
+    ensure_running "$name"
+    [[ $# -gt 0 ]] || die "usage: sandbox run <cmd...>"
+    local tty_flag=""
+    [[ -t 0 && -t 1 ]] && tty_flag="-it"
+    exec podman exec $tty_flag \
+        -e TERM="${TERM:-xterm-256color}" \
+        -e COLORTERM="${COLORTERM:-}" \
+        "$name" "$@"
+}
+
+cmd_list() {
+    require_podman
+    printf '%-50s %-10s %s\n' "NAME" "STATE" "HOST PATH"
+    podman ps -a --filter "label=sandbox.id" \
+        --format '{{.Names}}\t{{.State}}\t{{index .Labels "sandbox.host_path"}}' \
+        | awk -F'\t' '{ printf "%-50s %-10s %s\n", $1, $2, $3 }'
+}
+
+cmd_rm() {
+    require_podman
+    local name; name="$(sandbox_id)"
+    container_exists "$name" || die "no sandbox for $PWD"
+    info "removing $name"
+    podman rm -f "$name" >/dev/null
+    rm -rf -- "$(overlay_dir "$name")" "$(meta_file "$name")"
+    ok "removed $name"
+}
+
+cmd_prune() {
+    require_podman
+    local names
+    names="$(podman ps -a --filter 'label=sandbox.id' --format '{{.Names}}')"
+    if [[ -z "$names" ]]; then
+        info "no sandboxes to prune"
+        return
+    fi
+    echo "$names" | while read -r n; do
+        [[ -z "$n" ]] && continue
+        info "removing $n"
+        podman rm -f "$n" >/dev/null || true
+    done
+    rm -rf -- "$SANDBOX_OVERLAYS"/* "$SANDBOX_STATE"/*.json 2>/dev/null || true
+    ok "pruned"
+}
+
+cmd_sync() {
+    require_podman
+    local name; name="$(sandbox_id)"
+    container_exists "$name" || die "no sandbox for $PWD"
+    local abs; abs="$(realpath -- "$PWD")"
+    local upper; upper="$(overlay_dir "$name")/upper"
+    [[ -d "$upper" ]] || die "overlay upperdir missing at $upper"
+
+    command -v rsync >/dev/null || die "rsync is required for 'sandbox sync'"
+    info "syncing sandbox changes -> $abs"
+    # Pause container so the overlay is consistent mid-sync.
+    local was_running=0
+    if container_running "$name"; then
+        was_running=1
+        podman pause "$name" >/dev/null
+    fi
+
+    # Copy only the upper layer contents (ignores overlay whiteouts/metadata
+    # that rsync can't meaningfully apply to the host).
+    rsync -aHAX --info=stats1,progress2 \
+          --exclude='.wh..wh.*' \
+          "$upper"/ "$abs"/
+
+    [[ "$was_running" -eq 1 ]] && podman unpause "$name" >/dev/null
+
+    ok "synced. Changes from sandbox are now in $abs"
+}
+
+cmd_id()   { printf '%s\n' "$(sandbox_id)"; }
+cmd_path() {
+    local name; name="$(sandbox_id)"
+    printf '%s\n' "$name"
+}
+
+# ---------- base image management ----------
+
+cmd_build_base() {
+    require_podman
+    [[ -f "$CONTAINERFILE" ]] || die "Containerfile not found at $CONTAINERFILE (run 'chezmoi apply')"
+    info "building $SANDBOX_IMAGE from $CONTAINERFILE"
+    podman build -f "$CONTAINERFILE" -t "$SANDBOX_IMAGE" "$SANDBOX_DATA"
+    ok "built $SANDBOX_IMAGE"
+}
+
+cmd_rebuild() {
+    require_podman
+    cmd_build_base
+
+    cat >&2 <<'EOF'
+
+Next: opening an interactive shell in a scratch container built from the fresh
+base image. Log into each tool you use (claude, codex, copilot, gh ...).
+When you exit the shell, the container's state will be committed back into the
+base image so future sandboxes start already authenticated.
+
+Tools you may want to authenticate:
+  gh auth login
+  claude          # will prompt for auth on first run
+  codex           # will prompt for auth on first run
+  copilot         # GitHub Copilot CLI - run once to log in
+
+Press Ctrl-D or type 'exit' when done.
+EOF
+
+    local tmp; tmp="sandbox-base-rebuild-$(date +%s)"
+    local runtime; runtime="$(pick_runtime)"
+    podman run --name "$tmp" \
+        --runtime "$runtime" \
+        --network "$SANDBOX_NET" \
+        -it \
+        -e TERM="${TERM:-xterm-256color}" \
+        "$SANDBOX_IMAGE" /bin/bash -l || true
+
+    info "committing $tmp -> $SANDBOX_IMAGE"
+    podman commit \
+        --change 'CMD ["/bin/bash"]' \
+        --change 'WORKDIR /workspace' \
+        "$tmp" "$SANDBOX_IMAGE" >/dev/null
+    podman rm "$tmp" >/dev/null
+    ok "updated $SANDBOX_IMAGE with authenticated tool state"
+}
+
+# ---------- dispatch ----------
+
+usage() {
+    sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'
+}
+
+main() {
+    local sub="${1:-}"
+    [[ $# -gt 0 ]] && shift || true
+    case "$sub" in
+        create)   cmd_create "$@" ;;
+        sh|shell) cmd_sh "$@" ;;
+        run)      cmd_run "$@" ;;
+        list|ls)  cmd_list "$@" ;;
+        rm|remove|delete) cmd_rm "$@" ;;
+        prune)    cmd_prune "$@" ;;
+        sync)     cmd_sync "$@" ;;
+        id)       cmd_id ;;
+        path|name) cmd_path ;;
+        build)    cmd_build_base ;;
+        rebuild)  cmd_rebuild ;;
+        ""|-h|--help|help) usage ;;
+        *) die "unknown subcommand: $sub (try 'sandbox help')" ;;
+    esac
+}
+
+main "$@"
