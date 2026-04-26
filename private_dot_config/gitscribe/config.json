@@ -7,8 +7,8 @@
       "model": ""
     },
     "cli": {
-      "command": "claude --output-format text --model {model} -p",
-      "model": "claude-haiku-4-5-20251001"
+      "command": "llama-cli --no-display-prompt -ngl 99 --log-disable -n 2048 -m {model} -p",
+      "model": "~/.local/share/models/qwen2.5-coder-7b-instruct-q4_k_m.gguf"
     }
   },
   "theme": {

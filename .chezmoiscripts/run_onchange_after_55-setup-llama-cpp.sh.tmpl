@@ -1,0 +1,78 @@
+#!/bin/bash
+set -e
+
+MODEL_DIR="{{ .chezmoi.homeDir }}/.local/share/models"
+MODEL_FILE="qwen2.5-coder-7b-instruct-q4_k_m.gguf"
+MODEL_PATH="$MODEL_DIR/$MODEL_FILE"
+HF_URL="https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/$MODEL_FILE"
+
+{{ if eq .chezmoi.os "linux" }}
+# Install llama.cpp from GitHub releases if not already present
+if ! command -v llama-cli &> /dev/null; then
+    echo "llama-cli not found, installing from GitHub releases..."
+
+    # Prefer CUDA build if nvidia-smi is available
+    ASSET_PATTERN="ubuntu-x64.zip"
+    if command -v nvidia-smi &> /dev/null && nvidia-smi &> /dev/null 2>&1; then
+        echo "CUDA GPU detected, attempting CUDA-enabled build..."
+        ASSET_PATTERN="ubuntu-cuda"
+    fi
+
+    RELEASE_URL=$(curl -fsSL "https://api.github.com/repos/ggml-org/llama.cpp/releases/latest" | \
+        grep "browser_download_url" | \
+        grep "$ASSET_PATTERN" | \
+        head -1 | \
+        cut -d'"' -f4)
+
+    if [ -z "$RELEASE_URL" ]; then
+        echo "Warning: could not resolve a llama.cpp release asset matching '$ASSET_PATTERN'"
+        echo "Install llama.cpp manually: https://github.com/ggml-org/llama.cpp/releases"
+        echo "For RTX 2060 CUDA support, build from source: cmake -DGGML_CUDA=ON .."
+        exit 0
+    fi
+
+    TMPDIR=$(mktemp -d)
+    trap 'rm -rf "$TMPDIR"' EXIT
+
+    ARCHIVE="$TMPDIR/llama.zip"
+    echo "Downloading $RELEASE_URL ..."
+    curl -fsSL --progress-bar -o "$ARCHIVE" "$RELEASE_URL"
+
+    mkdir -p "$TMPDIR/extracted"
+    unzip -o "$ARCHIVE" -d "$TMPDIR/extracted"
+
+    LLAMA_CLI_BIN=$(find "$TMPDIR/extracted" -name "llama-cli" -type f | head -1)
+    if [ -z "$LLAMA_CLI_BIN" ]; then
+        echo "Warning: llama-cli binary not found in downloaded archive"
+        echo "Install llama.cpp manually: https://github.com/ggml-org/llama.cpp/releases"
+        exit 0
+    fi
+
+    mkdir -p "{{ .chezmoi.homeDir }}/.local/bin"
+    cp "$LLAMA_CLI_BIN" "{{ .chezmoi.homeDir }}/.local/bin/llama-cli"
+    chmod +x "{{ .chezmoi.homeDir }}/.local/bin/llama-cli"
+    echo "✓ llama-cli installed to ~/.local/bin/llama-cli"
+fi
+{{ end }}
+
+# Download the Qwen2.5-Coder-7B-Instruct Q4_K_M model if not present
+if ! command -v llama-cli &> /dev/null; then
+    echo "llama-cli not found, skipping model download"
+    {{ if eq .chezmoi.os "darwin" }}
+    echo "Run: brew install llama.cpp"
+    {{ else }}
+    echo "Install llama.cpp from: https://github.com/ggml-org/llama.cpp/releases"
+    {{ end }}
+    exit 0
+fi
+
+mkdir -p "$MODEL_DIR"
+
+if [ -f "$MODEL_PATH" ]; then
+    echo "✓ Qwen2.5-Coder-7B-Instruct-Q4_K_M already present at $MODEL_PATH"
+else
+    echo "Downloading Qwen2.5-Coder-7B-Instruct-Q4_K_M (~4.4 GB)..."
+    echo "Source: $HF_URL"
+    curl -fsSL --progress-bar -o "$MODEL_PATH" "$HF_URL"
+    echo "✓ Model saved to $MODEL_PATH"
+fi
