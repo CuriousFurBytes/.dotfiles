@@ -1,17 +1,13 @@
 #!/bin/bash
 set -e
 
-MODEL_DIR="{{ .chezmoi.homeDir }}/.local/share/models"
-MODEL_FILE="qwen2.5-coder-7b-instruct-q4_k_m.gguf"
-MODEL_PATH="$MODEL_DIR/$MODEL_FILE"
-HF_URL="https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/$MODEL_FILE"
-
 {{ if eq .chezmoi.os "linux" }}
-# Install llama.cpp from GitHub releases if not already present
+# Install llama.cpp from GitHub releases if not already present.
+# On macOS, llama.cpp is installed via brew (see packages.json).
 if ! command -v llama-cli &> /dev/null; then
     echo "llama-cli not found, installing from GitHub releases..."
 
-    # Prefer CUDA build if nvidia-smi is available
+    # Prefer CUDA build when an NVIDIA GPU is present
     ASSET_PATTERN="ubuntu-x64.zip"
     if command -v nvidia-smi &> /dev/null && nvidia-smi &> /dev/null 2>&1; then
         echo "CUDA GPU detected, attempting CUDA-enabled build..."
@@ -34,12 +30,11 @@ if ! command -v llama-cli &> /dev/null; then
     TMPDIR=$(mktemp -d)
     trap 'rm -rf "$TMPDIR"' EXIT
 
-    ARCHIVE="$TMPDIR/llama.zip"
     echo "Downloading $RELEASE_URL ..."
-    curl -fsSL --progress-bar -o "$ARCHIVE" "$RELEASE_URL"
+    curl -fsSL --progress-bar -o "$TMPDIR/llama.zip" "$RELEASE_URL"
 
     mkdir -p "$TMPDIR/extracted"
-    unzip -o "$ARCHIVE" -d "$TMPDIR/extracted"
+    unzip -o "$TMPDIR/llama.zip" -d "$TMPDIR/extracted"
 
     LLAMA_CLI_BIN=$(find "$TMPDIR/extracted" -name "llama-cli" -type f | head -1)
     if [ -z "$LLAMA_CLI_BIN" ]; then
@@ -55,24 +50,6 @@ if ! command -v llama-cli &> /dev/null; then
 fi
 {{ end }}
 
-# Download the Qwen2.5-Coder-7B-Instruct Q4_K_M model if not present
-if ! command -v llama-cli &> /dev/null; then
-    echo "llama-cli not found, skipping model download"
-    {{ if eq .chezmoi.os "darwin" }}
-    echo "Run: brew install llama.cpp"
-    {{ else }}
-    echo "Install llama.cpp from: https://github.com/ggml-org/llama.cpp/releases"
-    {{ end }}
-    exit 0
-fi
-
-mkdir -p "$MODEL_DIR"
-
-if [ -f "$MODEL_PATH" ]; then
-    echo "✓ Qwen2.5-Coder-7B-Instruct-Q4_K_M already present at $MODEL_PATH"
-else
-    echo "Downloading Qwen2.5-Coder-7B-Instruct-Q4_K_M (~4.4 GB)..."
-    echo "Source: $HF_URL"
-    curl -fsSL --progress-bar -o "$MODEL_PATH" "$HF_URL"
-    echo "✓ Model saved to $MODEL_PATH"
-fi
+# The model (Qwen2.5-Coder-7B-Instruct-Q4_K_M) is fetched directly from
+# HuggingFace at runtime via llama-cli -hf, so no manual download is needed.
+echo "✓ llama.cpp ready (model will be cached by llama-cli on first use)"

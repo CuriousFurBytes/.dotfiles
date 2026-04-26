@@ -183,7 +183,7 @@ var categoryMap = map[string]string{
 	"proton-pass-cli": "Proton",
 
 	// AI Tools
-	"llama-cpp": "AI Tools", "diny": "AI Tools",
+	"llama-cpp": "AI Tools",
 }
 
 var categoryOrder = []string{

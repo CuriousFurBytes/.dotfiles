@@ -7,8 +7,8 @@
       "model": ""
     },
     "cli": {
-      "command": "llama-cli --no-display-prompt -ngl 99 --log-disable -n 2048 -m {model} -p",
-      "model": "~/.local/share/models/qwen2.5-coder-7b-instruct-q4_k_m.gguf"
+      "command": "llama-cli --no-display-prompt -ngl 99 --log-disable -n 2048 -hf {model} -p",
+      "model": "Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:qwen2.5-coder-7b-instruct-q4_k_m.gguf"
     }
   },
   "theme": {

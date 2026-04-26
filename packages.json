@@ -950,15 +950,6 @@
             }
         }
     },
-    "diny": {
-        "description": "AI-powered git commit messages and changelogs",
-        "packages": {
-            "darwin": { "go_tool": "github.com/CuriousFurBytes/diny@latest" },
-            "ubuntu": { "go_tool": "github.com/CuriousFurBytes/diny@latest" },
-            "fedora": { "go_tool": "github.com/CuriousFurBytes/diny@latest" },
-            "pop_os": { "go_tool": "github.com/CuriousFurBytes/diny@latest" }
-        }
-    },
     "llama-cpp": {
         "description": "Fast, lightweight LLM inference engine",
         "packages": {
