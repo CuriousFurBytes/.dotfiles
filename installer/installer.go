@@ -210,6 +210,18 @@ func (pi *PackageInstaller) IsInstalled(name string, method InstallMethod) bool 
 			toolName = toolName[idx+1:]
 		}
 		return commandExists(toolName)
+	case "npm_global":
+		installed := pi.cache.get("npm_global", func() map[string]bool {
+			out, _ := runShellSilent("npm list -g --depth=0 2>/dev/null")
+			return parseLines(out)
+		})
+		pkgName := method.NpmGlobal
+		for entry := range installed {
+			if strings.Contains(entry, pkgName) {
+				return true
+			}
+		}
+		return false
 	case "manual":
 		return pi.isManualInstalled(name, method.Manual)
 	}
@@ -311,6 +323,8 @@ func (pi *PackageInstaller) Install(pkg Package) InstallResult {
 	case "eget":
 		os.MkdirAll(filepath.Join(os.Getenv("HOME"), ".local", "bin"), 0o755)
 		err = pi.run(fmt.Sprintf("eget %s --to ~/.local/bin", method.Eget))
+	case "npm_global":
+		err = pi.run(fmt.Sprintf("npm install -g %s", method.NpmGlobal))
 	case "manual":
 		err = pi.installManual(pkg.Name, method.Manual)
 	default:

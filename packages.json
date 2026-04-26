@@ -529,7 +529,28 @@
     "claude-code": {
         "description": "Claude Code CLI tool",
         "packages": {
-            "darwin": { "cask": "claude-code" }
+            "darwin": { "cask": "claude-code" },
+            "ubuntu": { "npm_global": "@anthropic-ai/claude-code" },
+            "fedora": { "npm_global": "@anthropic-ai/claude-code" },
+            "pop_os": { "npm_global": "@anthropic-ai/claude-code" }
+        }
+    },
+    "codex-cli": {
+        "description": "OpenAI Codex CLI tool",
+        "packages": {
+            "darwin": { "npm_global": "@openai/codex" },
+            "ubuntu": { "npm_global": "@openai/codex" },
+            "fedora": { "npm_global": "@openai/codex" },
+            "pop_os": { "npm_global": "@openai/codex" }
+        }
+    },
+    "copilot-cli": {
+        "description": "GitHub Copilot CLI (gh extension)",
+        "packages": {
+            "darwin": { "gh_extension": "github/gh-copilot" },
+            "ubuntu": { "gh_extension": "github/gh-copilot" },
+            "fedora": { "gh_extension": "github/gh-copilot" },
+            "pop_os": { "gh_extension": "github/gh-copilot" }
         }
     },
 
