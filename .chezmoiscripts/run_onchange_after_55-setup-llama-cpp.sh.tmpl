@@ -1,0 +1,55 @@
+#!/bin/bash
+set -e
+
+{{ if eq .chezmoi.os "linux" }}
+# Install llama.cpp from GitHub releases if not already present.
+# On macOS, llama.cpp is installed via brew (see packages.json).
+if ! command -v llama-cli &> /dev/null; then
+    echo "llama-cli not found, installing from GitHub releases..."
+
+    # Prefer CUDA build when an NVIDIA GPU is present
+    ASSET_PATTERN="ubuntu-x64.zip"
+    if command -v nvidia-smi &> /dev/null && nvidia-smi &> /dev/null 2>&1; then
+        echo "CUDA GPU detected, attempting CUDA-enabled build..."
+        ASSET_PATTERN="ubuntu-cuda"
+    fi
+
+    RELEASE_URL=$(curl -fsSL "https://api.github.com/repos/ggml-org/llama.cpp/releases/latest" | \
+        grep "browser_download_url" | \
+        grep "$ASSET_PATTERN" | \
+        head -1 | \
+        cut -d'"' -f4)
+
+    if [ -z "$RELEASE_URL" ]; then
+        echo "Warning: could not resolve a llama.cpp release asset matching '$ASSET_PATTERN'"
+        echo "Install llama.cpp manually: https://github.com/ggml-org/llama.cpp/releases"
+        echo "For RTX 2060 CUDA support, build from source: cmake -DGGML_CUDA=ON .."
+        exit 0
+    fi
+
+    TMPDIR=$(mktemp -d)
+    trap 'rm -rf "$TMPDIR"' EXIT
+
+    echo "Downloading $RELEASE_URL ..."
+    curl -fsSL --progress-bar -o "$TMPDIR/llama.zip" "$RELEASE_URL"
+
+    mkdir -p "$TMPDIR/extracted"
+    unzip -o "$TMPDIR/llama.zip" -d "$TMPDIR/extracted"
+
+    LLAMA_CLI_BIN=$(find "$TMPDIR/extracted" -name "llama-cli" -type f | head -1)
+    if [ -z "$LLAMA_CLI_BIN" ]; then
+        echo "Warning: llama-cli binary not found in downloaded archive"
+        echo "Install llama.cpp manually: https://github.com/ggml-org/llama.cpp/releases"
+        exit 0
+    fi
+
+    mkdir -p "{{ .chezmoi.homeDir }}/.local/bin"
+    cp "$LLAMA_CLI_BIN" "{{ .chezmoi.homeDir }}/.local/bin/llama-cli"
+    chmod +x "{{ .chezmoi.homeDir }}/.local/bin/llama-cli"
+    echo "✓ llama-cli installed to ~/.local/bin/llama-cli"
+fi
+{{ end }}
+
+# The model (Qwen2.5-Coder-7B-Instruct-Q4_K_M) is fetched directly from
+# HuggingFace at runtime via llama-cli -hf, so no manual download is needed.
+echo "✓ llama.cpp ready (model will be cached by llama-cli on first use)"

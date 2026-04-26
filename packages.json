@@ -950,40 +950,10 @@
             }
         }
     },
-    "diny": {
-        "description": "AI-powered git commit messages and changelogs",
+    "llama-cpp": {
+        "description": "Fast, lightweight LLM inference engine",
         "packages": {
-            "darwin": { "go_tool": "github.com/CuriousFurBytes/diny@latest" },
-            "ubuntu": { "go_tool": "github.com/CuriousFurBytes/diny@latest" },
-            "fedora": { "go_tool": "github.com/CuriousFurBytes/diny@latest" },
-            "pop_os": { "go_tool": "github.com/CuriousFurBytes/diny@latest" }
-        }
-    },
-    "ollama": {
-        "description": "Run large language models locally",
-        "packages": {
-            "darwin": { "brew": "ollama" },
-            "ubuntu": {
-                "manual": {
-                    "url": "https://ollama.com/install.sh",
-                    "type": "script",
-                    "check_command": "ollama"
-                }
-            },
-            "fedora": {
-                "manual": {
-                    "url": "https://ollama.com/install.sh",
-                    "type": "script",
-                    "check_command": "ollama"
-                }
-            },
-            "pop_os": {
-                "manual": {
-                    "url": "https://ollama.com/install.sh",
-                    "type": "script",
-                    "check_command": "ollama"
-                }
-            }
+            "darwin": { "brew": "llama.cpp" }
         }
     }
 }
