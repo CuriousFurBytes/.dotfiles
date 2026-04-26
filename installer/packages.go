@@ -31,6 +31,7 @@ type InstallMethod struct {
 	Yay         string       `json:"yay,omitempty"`
 	GhExtension string       `json:"gh_extension,omitempty"`
 	Eget        string       `json:"eget,omitempty"`
+	NpmGlobal   string       `json:"npm_global,omitempty"`
 	Manual      *ManualSpec  `json:"manual,omitempty"`
 }
 
@@ -103,6 +104,8 @@ func (im InstallMethod) MethodName() string {
 		return "gh_extension"
 	case im.Eget != "":
 		return "eget"
+	case im.NpmGlobal != "":
+		return "npm_global"
 	case im.Manual != nil:
 		return "manual"
 	}
