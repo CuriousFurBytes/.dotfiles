@@ -1,0 +1,57 @@
+{
+  "ai": {
+    "backend": "cli",
+    "api": {
+      "url": "",
+      "token": "",
+      "model": ""
+    },
+    "cli": {
+      "command": "llm prompt --no-stream -m {model}",
+      "model": ""
+    }
+  },
+  "theme": {
+    "primary": "cyan",
+    "secondary": "magenta",
+    "accent": "green",
+    "error": "red",
+    "warning": "yellow"
+  },
+  "commit": {
+    "style": "professional",
+    "format": "conventional",
+    "body_length": "short",
+    "model": ""
+  },
+  "pr": {
+    "style": "professional"
+  },
+  "gh": {
+    "command": "gh pr create --title {title} --body {body} --assign @me"
+  },
+  "platforms": {
+    "macos": {
+      "ai": {
+        "cli": {
+          "command": "llm prompt --no-stream -m {model}",
+          "model": "mlx-community/Mistral-7B-Instruct-v0.3-4bit"
+        }
+      },
+      "commit": {
+        "model": "mlx-community/Mistral-7B-Instruct-v0.3-4bit"
+      }
+    },
+    "linux": {
+      "ai": {
+        "cli": {
+          "command": "llm prompt --no-stream -m {model}",
+          "model": "qwen-coder-7b-instruct-gguf"
+        }
+      },
+      "commit": {
+        "model": "qwen-coder-7b-instruct-gguf"
+      }
+    }
+  }
+}
