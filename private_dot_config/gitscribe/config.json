@@ -7,8 +7,8 @@
       "model": ""
     },
     "cli": {
-      "command": "llm prompt --no-stream -m {model}",
-      "model": ""
+      "command": "claude -p --model {model}",
+      "model": "haiku"
     }
   },
   "theme": {
@@ -34,23 +34,23 @@
     "macos": {
       "ai": {
         "cli": {
-          "command": "llm prompt --no-stream -m {model}",
-          "model": "mlx-community/Mistral-7B-Instruct-v0.3-4bit"
+          "command": "claude -p --model {model}",
+          "model": "haiku"
         }
       },
       "commit": {
-        "model": "mlx-community/Mistral-7B-Instruct-v0.3-4bit"
+        "model": "haiku"
       }
     },
     "linux": {
       "ai": {
         "cli": {
-          "command": "llm prompt --no-stream -m {model}",
-          "model": "qwen-coder-7b-instruct-gguf"
+          "command": "claude -p --model {model}",
+          "model": "haiku"
         }
       },
       "commit": {
-        "model": "qwen-coder-7b-instruct-gguf"
+        "model": "haiku"
       }
     }
   }
