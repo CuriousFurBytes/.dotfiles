@@ -28,7 +28,7 @@
     "style": "professional"
   },
   "gh": {
-    "command": "gh pr create --title {title} --body {body} --assign @me"
+    "command": "gh pr create --title {title} --body {body} --assignee @me"
   },
   "platforms": {
     "macos": {
