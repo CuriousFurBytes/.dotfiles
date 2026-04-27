@@ -35,3 +35,23 @@ function dsa() {
 function removebg() {
   uvx --python 3.9 backgroundremover -i "$1" -o "$2"
 }
+
+function lcli() {
+    local model="$1"
+    shift
+
+    llama-completion \
+        --no-conversation \
+        --no-display-prompt \
+        --simple-io \
+        --no-warmup \
+        --no-perf \
+        --reasoning off \
+        --log-disable \
+        -ngl 99 \
+        -n 2048 \
+        -hf "$model" \
+        -r '<|im_end|>' \
+        -p $'<|im_start|>user\n'"$*"$'\n<|im_end|>\n<|im_start|>assistant\n' \
+        2>/dev/null
+}

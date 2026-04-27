@@ -690,6 +690,45 @@
             "pop_os": { "uv_tool": "gitscribe", "uv_tool_from": "git+https://github.com/freeoss-space/gitscribe" }
         }
     },
+    "llm": {
+        "description": "Command-line interface for LLMs with GGUF on Linux and GGUF plus MLX on macOS",
+        "packages": {
+            "darwin": {
+                "uv_tool": "llm",
+                "check_shell": "llm plugins | rg 'llm-gguf' >/dev/null && llm plugins | rg 'llm-mlx' >/dev/null && llm models | rg 'qwen-coder-7b-instruct-gguf|qwen-coder' >/dev/null && llm models | rg 'mlx-community/Mistral-7B-Instruct-v0.3-4bit' >/dev/null",
+                "uv_tool_post_install": [
+                    "llm install llm-gguf",
+                    "llm install llm-mlx",
+                    "llm gguf download-model https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf --alias qwen-coder-7b-instruct-gguf --alias qwen-coder",
+                    "llm mlx download-model mlx-community/Mistral-7B-Instruct-v0.3-4bit"
+                ]
+            },
+            "ubuntu": {
+                "uv_tool": "llm",
+                "check_shell": "llm plugins | rg 'llm-gguf' >/dev/null && llm models | rg 'qwen-coder-7b-instruct-gguf|qwen-coder' >/dev/null",
+                "uv_tool_post_install": [
+                    "llm install llm-gguf",
+                    "llm gguf download-model https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf --alias qwen-coder-7b-instruct-gguf --alias qwen-coder"
+                ]
+            },
+            "fedora": {
+                "uv_tool": "llm",
+                "check_shell": "llm plugins | rg 'llm-gguf' >/dev/null && llm models | rg 'qwen-coder-7b-instruct-gguf|qwen-coder' >/dev/null",
+                "uv_tool_post_install": [
+                    "llm install llm-gguf",
+                    "llm gguf download-model https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf --alias qwen-coder-7b-instruct-gguf --alias qwen-coder"
+                ]
+            },
+            "pop_os": {
+                "uv_tool": "llm",
+                "check_shell": "llm plugins | rg 'llm-gguf' >/dev/null && llm models | rg 'qwen-coder-7b-instruct-gguf|qwen-coder' >/dev/null",
+                "uv_tool_post_install": [
+                    "llm install llm-gguf",
+                    "llm gguf download-model https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf --alias qwen-coder-7b-instruct-gguf --alias qwen-coder"
+                ]
+            }
+        }
+    },
     "gama": {
         "description": "GitHub Actions manager in the terminal",
         "packages": {

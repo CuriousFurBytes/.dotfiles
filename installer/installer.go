@@ -104,6 +104,11 @@ func (pi *PackageInstaller) runCapture(cmd string) (string, error) {
 
 // IsInstalled checks if a package is already installed
 func (pi *PackageInstaller) IsInstalled(name string, method InstallMethod) bool {
+	if method.CheckShell != "" {
+		_, err := runShellSilent(method.CheckShell)
+		return err == nil
+	}
+
 	m := method.MethodName()
 	switch m {
 	case "brew":
@@ -237,6 +242,10 @@ func (pi *PackageInstaller) isManualInstalled(name string, manual *ManualSpec) b
 	if manual.CheckCommand != "" {
 		return commandExists(manual.CheckCommand)
 	}
+	if manual.CheckShell != "" {
+		_, err := runShellSilent(manual.CheckShell)
+		return err == nil
+	}
 	if manual.CheckDir != "" {
 		expanded, _ := runShellSilent(fmt.Sprintf("echo %s", manual.CheckDir))
 		expanded = strings.TrimSpace(expanded)
@@ -297,6 +306,14 @@ func (pi *PackageInstaller) Install(pkg Package) InstallResult {
 			err = pi.run(fmt.Sprintf("uv tool install %s --from %s", method.UvTool, method.UvToolFrom))
 		} else {
 			err = pi.run(fmt.Sprintf("uv tool install %s", method.UvTool))
+		}
+		if err == nil {
+			for _, cmd := range method.UvToolPostInstall {
+				err = pi.run(cmd)
+				if err != nil {
+					break
+				}
+			}
 		}
 	case "cargo":
 		err = pi.run(fmt.Sprintf("cargo install %s", method.Cargo))

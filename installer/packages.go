@@ -18,21 +18,23 @@ type Package struct {
 // InstallMethod represents how to install a package on a specific OS.
 // Only one field will be set.
 type InstallMethod struct {
-	Brew        string       `json:"brew,omitempty"`
-	Cask        string       `json:"cask,omitempty"`
-	Apt         string       `json:"apt,omitempty"`
-	Dnf         string       `json:"dnf,omitempty"`
-	UvTool      string       `json:"uv_tool,omitempty"`
-	UvToolFrom  string       `json:"uv_tool_from,omitempty"`
-	Cargo       string       `json:"cargo,omitempty"`
-	GoTool      string       `json:"go_tool,omitempty"`
-	Snap        *SnapSpec    `json:"snap,omitempty"`
-	Flatpak     string       `json:"flatpak,omitempty"`
-	Yay         string       `json:"yay,omitempty"`
-	GhExtension string       `json:"gh_extension,omitempty"`
-	Eget        string       `json:"eget,omitempty"`
-	NpmGlobal   string       `json:"npm_global,omitempty"`
-	Manual      *ManualSpec  `json:"manual,omitempty"`
+	Brew              string      `json:"brew,omitempty"`
+	Cask              string      `json:"cask,omitempty"`
+	Apt               string      `json:"apt,omitempty"`
+	Dnf               string      `json:"dnf,omitempty"`
+	UvTool            string      `json:"uv_tool,omitempty"`
+	UvToolFrom        string      `json:"uv_tool_from,omitempty"`
+	UvToolPostInstall []string    `json:"uv_tool_post_install,omitempty"`
+	CheckShell        string      `json:"check_shell,omitempty"`
+	Cargo             string      `json:"cargo,omitempty"`
+	GoTool            string      `json:"go_tool,omitempty"`
+	Snap              *SnapSpec   `json:"snap,omitempty"`
+	Flatpak           string      `json:"flatpak,omitempty"`
+	Yay               string      `json:"yay,omitempty"`
+	GhExtension       string      `json:"gh_extension,omitempty"`
+	Eget              string      `json:"eget,omitempty"`
+	NpmGlobal         string      `json:"npm_global,omitempty"`
+	Manual            *ManualSpec `json:"manual,omitempty"`
 }
 
 // SnapSpec handles snap packages which can be a string or object
@@ -68,11 +70,12 @@ func (s *SnapSpec) UnmarshalJSON(data []byte) error {
 // ManualSpec for manual installation (script, git_clone, dmg, deb, appimage)
 type ManualSpec struct {
 	URL          string `json:"url,omitempty"`
-	Repo         string `json:"repo,omitempty"`         // GitHub repo "owner/name" for gh release download
+	Repo         string `json:"repo,omitempty"`          // GitHub repo "owner/name" for gh release download
 	AssetPattern string `json:"asset_pattern,omitempty"` // suffix to match release asset filename
-	Type         string `json:"type"`                   // "script", "git_clone", "dmg", "deb", "rpm", "appimage"
+	Type         string `json:"type"`                    // "script", "git_clone", "dmg", "deb", "rpm", "appimage"
 	Dest         string `json:"dest,omitempty"`
 	CheckCommand string `json:"check_command,omitempty"`
+	CheckShell   string `json:"check_shell,omitempty"`
 	CheckDir     string `json:"check_dir,omitempty"`
 	Args         string `json:"args,omitempty"`
 }
@@ -158,7 +161,7 @@ var categoryMap = map[string]string{
 	// GUI Applications
 	"zen-browser": "GUI Applications", "claude": "GUI Applications",
 	"claude-code": "GUI Applications",
-	"obsidian": "GUI Applications", "thunderbird": "GUI Applications",
+	"obsidian":    "GUI Applications", "thunderbird": "GUI Applications",
 	"gimp": "GUI Applications", "flameshot": "GUI Applications", "screenvivid": "GUI Applications",
 	"wox": "GUI Applications", "protonvpn": "GUI Applications",
 	"localsend": "GUI Applications", "httpie-desktop": "GUI Applications",
@@ -186,7 +189,7 @@ var categoryMap = map[string]string{
 	"proton-pass-cli": "Proton",
 
 	// AI Tools
-	"llama-cpp": "AI Tools",
+	"llama-cpp": "AI Tools", "llm": "AI Tools",
 }
 
 var categoryOrder = []string{
