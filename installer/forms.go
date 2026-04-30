@@ -2,47 +2,55 @@ package main
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/charmbracelet/huh"
 )
 
-// BuildPackageSelectionForm creates a multi-page Huh form for package selection.
-// Each category gets its own page (group) with a MultiSelect.
+// BuildPackageSelectionForm creates a single-page Huh form for package selection.
+// All packages are shown together and sorted alphabetically by name.
 // All packages are selected by default.
 func BuildPackageSelectionForm(categories []PackageCategory, selected map[string]*[]string) *huh.Form {
-	var groups []*huh.Group
+	allPackages := flattenPackagesAlphabetical(categories)
+	var options []huh.Option[string]
+	vals := make([]string, len(allPackages))
 
-	// Welcome note as first group
-	groups = append(groups, huh.NewGroup(
-		huh.NewNote().
-			Title("Package Selection").
-			Description("Select the packages you want to install.\nAll packages are selected by default — deselect any you don't need.\n\nUse ↑/↓ to navigate, space to toggle, enter to confirm."),
-	))
-
-	for _, cat := range categories {
-		var options []huh.Option[string]
-		for _, pkg := range cat.Packages {
-			label := fmt.Sprintf("%s — %s", pkg.Name, pkg.Description)
-			options = append(options, huh.NewOption(label, pkg.Name).Selected(true))
-		}
-
-		vals := make([]string, len(cat.Packages))
-		for i, pkg := range cat.Packages {
-			vals[i] = pkg.Name
-		}
-		selected[cat.Name] = &vals
-
-		groups = append(groups, huh.NewGroup(
-			huh.NewMultiSelect[string]().
-				Title(cat.Name).
-				Options(options...).
-				Value(selected[cat.Name]).
-				Height(min(len(options)+2, 20)).
-				Filterable(true),
-		))
+	for i, pkg := range allPackages {
+		label := fmt.Sprintf("%s — %s", pkg.Name, pkg.Description)
+		options = append(options, huh.NewOption(label, pkg.Name).Selected(true))
+		vals[i] = pkg.Name
 	}
 
-	return huh.NewForm(groups...)
+	selected["All Packages"] = &vals
+
+	return huh.NewForm(
+		huh.NewGroup(
+			huh.NewNote().
+				Title("Package Selection").
+				Description("Select the packages you want to install.\nAll packages are selected by default — deselect any you don't need.\n\nUse ↑/↓ to navigate, space to toggle, enter to confirm."),
+		),
+		huh.NewGroup(
+			huh.NewMultiSelect[string]().
+				Title("All Packages").
+				Options(options...).
+				Value(selected["All Packages"]).
+				Height(min(len(options)+2, 20)).
+				Filterable(true),
+		),
+	)
+}
+
+func flattenPackagesAlphabetical(categories []PackageCategory) []Package {
+	var all []Package
+	for _, cat := range categories {
+		all = append(all, cat.Packages...)
+	}
+
+	sort.Slice(all, func(i, j int) bool {
+		return all[i].Name < all[j].Name
+	})
+
+	return all
 }
 
 // ConfirmStep creates a simple confirm prompt for a step
