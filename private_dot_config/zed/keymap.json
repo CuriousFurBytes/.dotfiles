@@ -1,0 +1,18 @@
+[
+    {
+        "bindings": {
+            "secondary-G": [
+                "task::Spawn",
+                { "task_name": "gitscribe_commit", "reveal_target": "center" },
+            ],
+            "secondary-l secondary-g": [
+                "task::Spawn",
+                { "task_name": "lazygit", "reveal_target": "center" },
+            ],
+            "secondary-p secondary-r": [
+                "task::Spawn",
+                { "task_name": "gitscribe_pr", "reveal_target": "center" },
+            ],
+        },
+    },
+]

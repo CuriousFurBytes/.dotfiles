@@ -1,0 +1,26 @@
+[
+    {
+        "label": "gitscribe_commit",
+        "command": "gitscribe commit",
+        "hide": "on_success",
+        "reveal": "always",
+        "allow_concurrent_runs": true,
+        "use_new_terminal": true
+    },
+    {
+        "label": "lazygit",
+        "command": "lazygit",
+        "hide": "never",
+        "reveal": "always",
+        "allow_concurrent_runs": true,
+        "use_new_terminal": true
+    },
+    {
+        "label": "gitscribe_pr",
+        "command": "gitscribe pr",
+        "hide": "on_success",
+        "reveal": "always",
+        "allow_concurrent_runs": true,
+        "use_new_terminal": true
+    }
+]
