@@ -1,0 +1,13 @@
+[Unit]
+Description=Proton Pass SSH Agent Watcher
+Documentation=https://github.com/curiousfurbytes/.dotfiles
+After=default.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/pass-ssh-agent-watcher
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=default.target

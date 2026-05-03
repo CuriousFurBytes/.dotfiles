@@ -22,17 +22,11 @@ mkdir -p "{{ .chezmoi.homeDir }}/.local/state"
 # Clean up legacy launchd service if present
 launchctl bootout "gui/$(id -u)/me.proton.pass.ssh-agent" 2>/dev/null || true
 rm -f "{{ .chezmoi.homeDir }}/Library/LaunchAgents/me.proton.pass.ssh-agent.plist"
-{{ else if eq .chezmoi.os "linux" -}}
-# Clean up legacy systemd service if present
-systemctl --user disable --now proton-pass-ssh-agent.service 2>/dev/null || true
-rm -f "{{ .chezmoi.homeDir }}/.config/systemd/user/proton-pass-ssh-agent.service"
-systemctl --user daemon-reload 2>/dev/null || true
-{{ end -}}
 
-# Stop existing daemon if running
+# Stop any existing daemon before restarting
 pass-cli ssh-agent daemon stop 2>/dev/null || true
 
-# Start the daemon
+# Start the daemon directly on macOS (launchd KeepAlive handles restarts)
 pass-cli ssh-agent daemon start \
     --vault-name SSH \
     --socket-path "$SOCKET_PATH" \
@@ -41,3 +35,18 @@ pass-cli ssh-agent daemon start \
 echo "✓ Proton Pass SSH Agent daemon started"
 echo "  Socket: $SOCKET_PATH"
 echo "  Log: $LOG_FILE"
+{{ else if eq .chezmoi.os "linux" -}}
+# Clean up legacy systemd service if present
+systemctl --user disable --now proton-pass-ssh-agent.service 2>/dev/null || true
+rm -f "{{ .chezmoi.homeDir }}/.config/systemd/user/proton-pass-ssh-agent.service"
+systemctl --user daemon-reload 2>/dev/null || true
+
+# Enable and start the watcher service (it will start the daemon on first check)
+systemctl --user daemon-reload
+systemctl --user enable --now pass-ssh-agent-watcher.service
+
+echo "✓ Proton Pass SSH Agent watcher service enabled"
+echo "  Socket: $SOCKET_PATH"
+echo "  Log: $LOG_FILE"
+echo "  Watcher log: {{ .chezmoi.homeDir }}/.local/state/pass-ssh-agent-watcher.log"
+{{ end -}}
