@@ -1,0 +1,41 @@
+#!/bin/bash
+# Watches the pass-cli SSH agent daemon and restarts it when it stops.
+# Designed to run as a long-lived process managed by systemd or launchd.
+
+SOCKET_PATH="$HOME/.ssh/proton-pass-agent.sock"
+LOG_FILE="$HOME/.local/state/proton-pass-ssh-agent.log"
+WATCHER_LOG="$HOME/.local/state/pass-ssh-agent-watcher.log"
+CHECK_INTERVAL=5
+
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$WATCHER_LOG"
+}
+
+is_daemon_alive() {
+    # Socket must exist and accept connections (exit 0 = has keys, 1 = no keys but alive, 2 = dead)
+    [[ -S "$SOCKET_PATH" ]] && SSH_AUTH_SOCK="$SOCKET_PATH" ssh-add -l &>/dev/null
+    [[ $? -ne 2 ]]
+}
+
+start_daemon() {
+    pass-cli ssh-agent daemon stop 2>/dev/null || true
+    pass-cli ssh-agent daemon start \
+        --vault-name SSH \
+        --socket-path "$SOCKET_PATH" \
+        --log-file "$LOG_FILE"
+}
+
+mkdir -p "$(dirname "$WATCHER_LOG")"
+log "Watcher started (interval: ${CHECK_INTERVAL}s)"
+
+while true; do
+    if ! is_daemon_alive; then
+        log "Daemon not responding — restarting..."
+        if start_daemon; then
+            log "Daemon restarted successfully"
+        else
+            log "Failed to restart daemon (will retry in ${CHECK_INTERVAL}s)"
+        fi
+    fi
+    sleep "$CHECK_INTERVAL"
+done

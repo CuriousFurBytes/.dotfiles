@@ -16,11 +16,15 @@ alias awake="sudo pmset -a disablesleep 0"
 alias asleep="sudo pmset -a disablesleep 1"
 
 function ssh-agent-restart() {
-    pass-cli ssh-agent daemon stop 2>/dev/null || true
-    pass-cli ssh-agent daemon start \
-        --vault-name SSH \
-        --socket-path "$HOME/.ssh/proton-pass-agent.sock" \
-        --log-file "$HOME/.local/state/proton-pass-ssh-agent.log"
+    if systemctl --user is-active --quiet pass-ssh-agent-watcher.service 2>/dev/null; then
+        systemctl --user restart pass-ssh-agent-watcher.service
+    else
+        pass-cli ssh-agent daemon stop 2>/dev/null || true
+        pass-cli ssh-agent daemon start \
+            --vault-name SSH \
+            --socket-path "$HOME/.ssh/proton-pass-agent.sock" \
+            --log-file "$HOME/.local/state/proton-pass-ssh-agent.log"
+    fi
     export SSH_AUTH_SOCK="$HOME/.ssh/proton-pass-agent.sock"
 }
 
