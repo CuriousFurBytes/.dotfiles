@@ -4,6 +4,10 @@
     "autoUpdatesChannel": "stable",
     "showTurnDuration": true,
     "cleanupPeriodDays": 30,
+    "env": {
+        "DYLD_LIBRARY_PATH": "/opt/homebrew/lib",
+        "SHELL": "/opt/homebrew/bin/zsh"
+    },
     "permissions": {
         "defaultMode": "acceptEdits",
         "allow": [
@@ -26,5 +30,9 @@
     "attribution": {
         "commit": "",
         "pr": ""
+    },
+    "statusLine": {
+        "type": "command",
+        "command": "~/.claude/statusline-command.sh"
     }
 }
