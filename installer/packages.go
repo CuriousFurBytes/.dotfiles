@@ -152,7 +152,7 @@ var categoryMap = map[string]string{
 
 	// Development
 	"node": "Development", "npm": "Development", "nvm": "Development",
-	"go": "Development", "uv": "Development", "python3-pip": "Development",
+	"go": "Development", "uv": "Development", "python3-pip": "Development", "mise": "Development",
 	"pre-commit": "Development", "biome": "Development", "ipython": "Development",
 	"jupyter": "Development", "just": "Development", "act": "Development",
 	"rumdl": "Development", "djlint": "Development", "gitscribe": "Development", "harlequin": "Development",
@@ -163,7 +163,7 @@ var categoryMap = map[string]string{
 	"claude-code": "GUI Applications",
 	"obsidian":    "GUI Applications", "thunderbird": "GUI Applications",
 	"gimp": "GUI Applications", "flameshot": "GUI Applications", "screenvivid": "GUI Applications",
-	"wox": "GUI Applications", "protonvpn": "GUI Applications",
+	"asyar": "GUI Applications", "protonvpn": "GUI Applications",
 	"localsend": "GUI Applications", "httpie-desktop": "GUI Applications",
 	"ente-auth": "GUI Applications", "proton-pass": "GUI Applications",
 	"alt-tab": "GUI Applications", "logi-options-plus": "GUI Applications",

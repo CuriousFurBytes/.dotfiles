@@ -1,5 +1,5 @@
 {
-    "_brew_taps": ["sinelaw/fresh", "protonpass/tap", "wox-launcher/wox"],
+    "_brew_taps": ["sinelaw/fresh", "protonpass/tap"],
     "git": {
         "description": "Distributed version control system",
         "packages": {
@@ -908,32 +908,62 @@
             "pop_os": { "apt": "flameshot" }
         }
     },
-    "wox": {
-        "description": "Cross-platform launcher with plugins, calculator, clipboard history and theming",
+    "mise": {
+        "description": "Polyglot tool version manager (replaces asdf, nvm, pyenv, etc.)",
         "packages": {
-            "darwin": { "brew": "wox-launcher/wox/wox" },
+            "darwin": { "brew": "mise" },
             "ubuntu": {
                 "manual": {
-                    "repo": "Wox-launcher/Wox",
-                    "type": "appimage",
-                    "asset_pattern": "linux-amd64.AppImage",
-                    "check_command": "wox"
+                    "url": "https://mise.run",
+                    "type": "script",
+                    "check_command": "mise"
                 }
             },
             "fedora": {
                 "manual": {
-                    "repo": "Wox-launcher/Wox",
-                    "type": "appimage",
-                    "asset_pattern": "linux-amd64.AppImage",
-                    "check_command": "wox"
+                    "url": "https://mise.run",
+                    "type": "script",
+                    "check_command": "mise"
                 }
             },
             "pop_os": {
                 "manual": {
-                    "repo": "Wox-launcher/Wox",
-                    "type": "appimage",
-                    "asset_pattern": "linux-amd64.AppImage",
-                    "check_command": "wox"
+                    "url": "https://mise.run",
+                    "type": "script",
+                    "check_command": "mise"
+                }
+            }
+        }
+    },
+    "asyar": {
+        "description": "Open-source alternative to Raycast — extensible command launcher built with Tauri",
+        "packages": {
+            "darwin": {
+                "manual": {
+                    "url": "https://github.com/Xoshbin/asyar.git",
+                    "type": "git_clone",
+                    "dest": "$HOME/.local/share/asyar"
+                }
+            },
+            "ubuntu": {
+                "manual": {
+                    "url": "https://github.com/Xoshbin/asyar.git",
+                    "type": "git_clone",
+                    "dest": "$HOME/.local/share/asyar"
+                }
+            },
+            "fedora": {
+                "manual": {
+                    "url": "https://github.com/Xoshbin/asyar.git",
+                    "type": "git_clone",
+                    "dest": "$HOME/.local/share/asyar"
+                }
+            },
+            "pop_os": {
+                "manual": {
+                    "url": "https://github.com/Xoshbin/asyar.git",
+                    "type": "git_clone",
+                    "dest": "$HOME/.local/share/asyar"
                 }
             }
         }
