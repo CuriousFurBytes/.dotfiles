@@ -936,34 +936,37 @@
         }
     },
     "asyar": {
-        "description": "Open-source alternative to Raycast — extensible command launcher built with Tauri",
+        "description": "Local-first cross-platform open-source alternative to Raycast",
         "packages": {
             "darwin": {
                 "manual": {
-                    "url": "https://github.com/Xoshbin/asyar.git",
-                    "type": "git_clone",
-                    "dest": "$HOME/.local/share/asyar"
+                    "repo": "Xoshbin/asyar-launcher",
+                    "type": "dmg",
+                    "asset_pattern": "universal.dmg"
                 }
             },
             "ubuntu": {
                 "manual": {
-                    "url": "https://github.com/Xoshbin/asyar.git",
-                    "type": "git_clone",
-                    "dest": "$HOME/.local/share/asyar"
+                    "repo": "Xoshbin/asyar-launcher",
+                    "type": "appimage",
+                    "asset_pattern": "amd64.AppImage",
+                    "dest": "$HOME/.local/bin/asyar"
                 }
             },
             "fedora": {
                 "manual": {
-                    "url": "https://github.com/Xoshbin/asyar.git",
-                    "type": "git_clone",
-                    "dest": "$HOME/.local/share/asyar"
+                    "repo": "Xoshbin/asyar-launcher",
+                    "type": "appimage",
+                    "asset_pattern": "amd64.AppImage",
+                    "dest": "$HOME/.local/bin/asyar"
                 }
             },
             "pop_os": {
                 "manual": {
-                    "url": "https://github.com/Xoshbin/asyar.git",
-                    "type": "git_clone",
-                    "dest": "$HOME/.local/share/asyar"
+                    "repo": "Xoshbin/asyar-launcher",
+                    "type": "appimage",
+                    "asset_pattern": "amd64.AppImage",
+                    "dest": "$HOME/.local/bin/asyar"
                 }
             }
         }
