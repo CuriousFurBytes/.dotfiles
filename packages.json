@@ -971,6 +971,39 @@
             }
         }
     },
+    "asyar-coffee-extension": {
+        "description": "Sleep-prevention extension for Asyar (keeps display awake on demand)",
+        "packages": {
+            "darwin": {
+                "manual": {
+                    "url": "https://raw.githubusercontent.com/CuriousFurBytes/.dotfiles/main/scripts/install-asyar-coffee.sh",
+                    "type": "script",
+                    "check_dir": "$HOME/.config/Asyar/extensions/org.asyar.coffee"
+                }
+            },
+            "ubuntu": {
+                "manual": {
+                    "url": "https://raw.githubusercontent.com/CuriousFurBytes/.dotfiles/main/scripts/install-asyar-coffee.sh",
+                    "type": "script",
+                    "check_dir": "$HOME/.config/Asyar/extensions/org.asyar.coffee"
+                }
+            },
+            "fedora": {
+                "manual": {
+                    "url": "https://raw.githubusercontent.com/CuriousFurBytes/.dotfiles/main/scripts/install-asyar-coffee.sh",
+                    "type": "script",
+                    "check_dir": "$HOME/.config/Asyar/extensions/org.asyar.coffee"
+                }
+            },
+            "pop_os": {
+                "manual": {
+                    "url": "https://raw.githubusercontent.com/CuriousFurBytes/.dotfiles/main/scripts/install-asyar-coffee.sh",
+                    "type": "script",
+                    "check_dir": "$HOME/.config/Asyar/extensions/org.asyar.coffee"
+                }
+            }
+        }
+    },
     "pure-prompt": {
         "description": "Pretty, minimal and fast ZSH prompt",
         "packages": {

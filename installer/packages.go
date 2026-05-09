@@ -163,7 +163,7 @@ var categoryMap = map[string]string{
 	"claude-code": "GUI Applications",
 	"obsidian":    "GUI Applications", "thunderbird": "GUI Applications",
 	"gimp": "GUI Applications", "flameshot": "GUI Applications", "screenvivid": "GUI Applications",
-	"asyar": "GUI Applications", "protonvpn": "GUI Applications",
+	"asyar": "GUI Applications", "asyar-coffee-extension": "GUI Applications", "protonvpn": "GUI Applications",
 	"localsend": "GUI Applications", "httpie-desktop": "GUI Applications",
 	"ente-auth": "GUI Applications", "proton-pass": "GUI Applications",
 	"alt-tab": "GUI Applications", "logi-options-plus": "GUI Applications",
