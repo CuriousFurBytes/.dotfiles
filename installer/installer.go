@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -369,10 +368,10 @@ func (pi *PackageInstaller) installManual(name string, manual *ManualSpec) error
 		expanded, _ := runShellSilent(fmt.Sprintf("echo %s", manual.Dest))
 		dest := strings.TrimSpace(expanded)
 		if info, err := os.Stat(dest); err == nil && info.IsDir() {
-			return pi.run(fmt.Sprintf("git -C %s pull --ff-only", dest))
+			return pi.run(fmt.Sprintf("git -C '%s' pull --ff-only", dest))
 		}
 		os.MkdirAll(filepath.Dir(dest), 0o755)
-		return pi.run(fmt.Sprintf("git clone %s %s", manual.URL, dest))
+		return pi.run(fmt.Sprintf("git clone %s '%s'", manual.URL, dest))
 	case "dmg":
 		return pi.installDmg(manual)
 	case "zip":
@@ -426,19 +425,19 @@ func (pi *PackageInstaller) installDmg(manual *ManualSpec) error {
 	tmpFile := tmpF.Name()
 	tmpF.Close()
 	defer os.Remove(tmpFile)
-	if err := pi.run(fmt.Sprintf("curl -fsSL -o %s %s", tmpFile, url)); err != nil {
+	if err := pi.run(fmt.Sprintf("curl -fsSL -o '%s' '%s'", tmpFile, url)); err != nil {
 		return fmt.Errorf("download dmg: %w", err)
 	}
 	mountPoint, err := os.MkdirTemp("", "dmg-mount-*")
 	if err != nil {
 		return fmt.Errorf("create mount dir: %w", err)
 	}
-	if err := pi.run(fmt.Sprintf("hdiutil attach -nobrowse -mountpoint %s %s", mountPoint, tmpFile)); err != nil {
+	if err := pi.run(fmt.Sprintf("hdiutil attach -nobrowse -mountpoint '%s' '%s'", mountPoint, tmpFile)); err != nil {
 		os.RemoveAll(mountPoint)
 		return fmt.Errorf("mount dmg: %w", err)
 	}
 	defer func() {
-		pi.run(fmt.Sprintf("hdiutil detach -quiet %s", mountPoint)) //nolint:errcheck
+		pi.run(fmt.Sprintf("hdiutil detach -quiet '%s'", mountPoint)) //nolint:errcheck
 		os.RemoveAll(mountPoint)
 	}()
 
@@ -457,7 +456,7 @@ func (pi *PackageInstaller) installDmg(manual *ManualSpec) error {
 		return fmt.Errorf("no .app found in dmg")
 	}
 	dest := filepath.Join("/Applications", filepath.Base(appPath))
-	if err := pi.run(fmt.Sprintf("cp -R %s %s", appPath, dest)); err != nil {
+	if err := pi.run(fmt.Sprintf("cp -R '%s' '%s'", appPath, dest)); err != nil {
 		return fmt.Errorf("copy app: %w", err)
 	}
 	return nil
@@ -475,14 +474,15 @@ func (pi *PackageInstaller) installZip(manual *ManualSpec) error {
 	tmpFile := tmpF.Name()
 	tmpF.Close()
 	defer os.Remove(tmpFile)
-	if err := pi.run(fmt.Sprintf("curl -fsSL -o %s %s", tmpFile, url)); err != nil {
+	if err := pi.run(fmt.Sprintf("curl -fsSL -o '%s' '%s'", tmpFile, url)); err != nil {
 		return fmt.Errorf("download zip: %w", err)
 	}
-	tmpDir := filepath.Join(os.TempDir(), "zip-extract")
-	os.RemoveAll(tmpDir)
-	os.MkdirAll(tmpDir, 0o755)
+	tmpDir, err := os.MkdirTemp("", "zip-extract-*")
+	if err != nil {
+		return fmt.Errorf("create temp dir: %w", err)
+	}
 	defer os.RemoveAll(tmpDir)
-	if err := pi.run(fmt.Sprintf("unzip -o %s -d %s", tmpFile, tmpDir)); err != nil {
+	if err := pi.run(fmt.Sprintf("unzip -o '%s' -d '%s'", tmpFile, tmpDir)); err != nil {
 		return fmt.Errorf("extract zip: %w", err)
 	}
 	// Find .app bundle and copy to /Applications
@@ -490,7 +490,7 @@ func (pi *PackageInstaller) installZip(manual *ManualSpec) error {
 	for _, e := range entries {
 		if strings.HasSuffix(e.Name(), ".app") {
 			dest := filepath.Join("/Applications", e.Name())
-			if err := pi.run(fmt.Sprintf("cp -R %s %s", filepath.Join(tmpDir, e.Name()), dest)); err != nil {
+			if err := pi.run(fmt.Sprintf("cp -R '%s' '%s'", filepath.Join(tmpDir, e.Name()), dest)); err != nil {
 				return fmt.Errorf("copy app: %w", err)
 			}
 			return nil
@@ -511,14 +511,15 @@ func (pi *PackageInstaller) installTarGz(manual *ManualSpec) error {
 	tmpFile := tmpF.Name()
 	tmpF.Close()
 	defer os.Remove(tmpFile)
-	if err := pi.run(fmt.Sprintf("curl -fsSL -o %s %s", tmpFile, url)); err != nil {
+	if err := pi.run(fmt.Sprintf("curl -fsSL -o '%s' '%s'", tmpFile, url)); err != nil {
 		return fmt.Errorf("download tar.gz: %w", err)
 	}
-	tmpDir := filepath.Join(os.TempDir(), "targz-extract")
-	os.RemoveAll(tmpDir)
-	os.MkdirAll(tmpDir, 0o755)
+	tmpDir, err := os.MkdirTemp("", "targz-extract-*")
+	if err != nil {
+		return fmt.Errorf("create temp dir: %w", err)
+	}
 	defer os.RemoveAll(tmpDir)
-	if err := pi.run(fmt.Sprintf("tar -xzf %s -C %s", tmpFile, tmpDir)); err != nil {
+	if err := pi.run(fmt.Sprintf("tar -xzf '%s' -C '%s'", tmpFile, tmpDir)); err != nil {
 		return fmt.Errorf("extract tar.gz: %w", err)
 	}
 	// Find .app bundle and copy to /Applications
@@ -536,11 +537,11 @@ func (pi *PackageInstaller) installTarGz(manual *ManualSpec) error {
 		return fmt.Errorf("no .app found in tar.gz")
 	}
 	dest := filepath.Join("/Applications", filepath.Base(appName))
-	if err := pi.run(fmt.Sprintf("cp -R %s %s", appName, dest)); err != nil {
+	if err := pi.run(fmt.Sprintf("cp -R '%s' '%s'", appName, dest)); err != nil {
 		return fmt.Errorf("copy app: %w", err)
 	}
 	// Remove quarantine attribute so macOS Gatekeeper doesn't block it
-	_ = pi.run(fmt.Sprintf("xattr -cr %s", dest))
+	_ = pi.run(fmt.Sprintf("xattr -cr '%s'", dest))
 	return nil
 }
 
@@ -597,24 +598,6 @@ func (pi *PackageInstaller) installAppImage(manual *ManualSpec) error {
 	return pi.run(fmt.Sprintf("chmod +x %s", dest))
 }
 
-// BatchInstallBrew installs multiple brew formulas at once
-func (pi *PackageInstaller) BatchInstallBrew(formulas []string) error {
-	if len(formulas) == 0 {
-		return nil
-	}
-	_, err := runShellSilent(fmt.Sprintf("brew install %s", strings.Join(formulas, " ")))
-	return err
-}
-
-// BatchInstallCask installs multiple cask packages at once
-func (pi *PackageInstaller) BatchInstallCask(casks []string) error {
-	if len(casks) == 0 {
-		return nil
-	}
-	_, err := runShellSilent(fmt.Sprintf("brew install --cask %s", strings.Join(casks, " ")))
-	return err
-}
-
 // BatchInstallApt installs multiple apt packages at once
 func (pi *PackageInstaller) BatchInstallApt(pkgs []string) error {
 	if len(pkgs) == 0 {
@@ -633,24 +616,3 @@ func (pi *PackageInstaller) BatchInstallDnf(pkgs []string) error {
 	return err
 }
 
-// InstallBrewTaps taps all configured homebrew taps
-func (pi *PackageInstaller) InstallBrewTaps(taps []string) []InstallResult {
-	var results []InstallResult
-	for _, tap := range taps {
-		_, err := runShellSilent(fmt.Sprintf("brew tap %s", tap))
-		if err != nil {
-			results = append(results, InstallResult{Name: tap, Method: "tap", Status: "fail", Error: err.Error()})
-		} else {
-			results = append(results, InstallResult{Name: tap, Method: "tap", Status: "ok"})
-		}
-	}
-	return results
-}
-
-// InstallSingleTool installs a specific tool by running a command
-func InstallSingleTool(name string, installCmd string) error {
-	cmd := exec.Command("sh", "-c", installCmd)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
-}
