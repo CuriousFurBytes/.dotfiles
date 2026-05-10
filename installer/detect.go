@@ -72,19 +72,6 @@ func commandExists(name string) bool {
 	return err == nil
 }
 
-func runCmd(name string, args ...string) error {
-	cmd := exec.Command(name, args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
-}
-
-func runCmdSilent(name string, args ...string) (string, error) {
-	cmd := exec.Command(name, args...)
-	out, err := cmd.CombinedOutput()
-	return string(out), err
-}
-
 func runShell(command string) error {
 	cmd := exec.Command("sh", "-c", command)
 	cmd.Stdout = os.Stdout
