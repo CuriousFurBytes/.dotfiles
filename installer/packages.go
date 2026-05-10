@@ -261,7 +261,8 @@ func LoadPackages(sourceDir string) (*PackageCatalog, error) {
 			Packages    map[string]json.RawMessage `json:"packages"`
 		}
 		if err := json.Unmarshal(rawPkg, &entry); err != nil {
-			continue // skip malformed entries
+			debugLog("skipping malformed entry %q: %v", name, err)
+			continue
 		}
 		if entry.Packages == nil {
 			continue

@@ -21,6 +21,7 @@ type App struct {
 	installer *PackageInstaller
 	results   []InstallResult
 	selected  map[string]bool
+	packages  []Package
 }
 
 func NewApp(sourceDir string) *App {
@@ -60,8 +61,8 @@ func (a *App) Run() error {
 	}
 	a.catalog = catalog
 
-	targetPkgs := catalog.FilterForTarget(a.osInfo.Target)
-	categories := categorizePackages(targetPkgs)
+	a.packages = catalog.FilterForTarget(a.osInfo.Target)
+	categories := categorizePackages(a.packages)
 
 	selectedMap := make(map[string]*[]string)
 	form := BuildPackageSelectionForm(categories, selectedMap)
@@ -181,9 +182,7 @@ func (a *App) stepInstallProtonPass() error {
 				_ = spinner.New().
 					Title("Installing Proton Pass...").
 					Action(func() {
-						if !a.installer.IsInstalled("proton-pass", InstallMethod{Cask: "proton-pass"}) {
-							_, installErr = runShellSilent("brew install --cask proton-pass")
-						}
+						_, installErr = runShellSilent("brew install --cask proton-pass")
 					}).
 					Run()
 				if installErr != nil {
@@ -495,11 +494,9 @@ func (a *App) stepInstallGhDash() error {
 func (a *App) stepInstallPackages() error {
 	fmt.Println(sectionHeader("Package Installation"))
 
-	targetPkgs := a.catalog.FilterForTarget(a.osInfo.Target)
-
 	// Filter to only selected packages
 	var toInstall []Package
-	for _, pkg := range targetPkgs {
+	for _, pkg := range a.packages {
 		if a.selected[pkg.Name] {
 			toInstall = append(toInstall, pkg)
 		}

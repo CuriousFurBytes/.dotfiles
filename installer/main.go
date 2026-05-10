@@ -26,7 +26,7 @@ func main() {
 		// Fallback: try relative to current working directory
 		if *sourceDir == "" || !fileExists(filepath.Join(*sourceDir, "packages.json")) {
 			cwd, _ := os.Getwd()
-			*sourceDir = filepath.Dir(cwd)
+			*sourceDir = cwd
 		}
 		// Fallback: chezmoi source dir
 		if !fileExists(filepath.Join(*sourceDir, "packages.json")) {
