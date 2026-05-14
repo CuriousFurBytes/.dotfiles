@@ -12,8 +12,8 @@ alias jqr="jq -r"  # jq raw output
 alias go-linux="go run github.com/jtolio/tinyemu-go/temubox/example@2c8151233c2d"
 alias git-clean='git branch | grep -vE "^\*main|develop" | xargs git branch -d'
 alias pp="pass-cli $@"
-alias awake="sudo pmset -a disablesleep 0"
-alias asleep="sudo pmset -a disablesleep 1"
+alias awake="sudo pmset -a disablesleep 1"
+alias asleep="sudo pmset -a disablesleep 0"
 
 function ssh-agent-restart() {
     if systemctl --user is-active --quiet pass-ssh-agent-watcher.service 2>/dev/null; then
