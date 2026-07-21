@@ -1,5 +1,13 @@
 {
-    "_brew_taps": ["sinelaw/fresh", "protonpass/tap", "wox-launcher/wox"],
+    "_brew_taps": [
+        "TabularisDB/tabularis",
+        "berbicanes/apiark",
+        "lucasgelfond/zerobrew",
+        "michel-kraemer/zsh-patina",
+        "nkzw-tech/tap",
+        "sinelaw/fresh",
+        "protonpass/tap"
+    ],
     "git": {
         "description": "Distributed version control system",
         "packages": {
@@ -202,6 +210,69 @@
             "pop_os": { "snap": { "name": "lazydocker" } }
         }
     },
+    "worktrunk": {
+        "description": "Git worktree manager for parallel development workflows",
+        "packages": {
+            "darwin": { "brew": "worktrunk" },
+            "ubuntu": { "brew": "worktrunk" },
+            "fedora": { "brew": "worktrunk" },
+            "pop_os": { "brew": "worktrunk" }
+        }
+    },
+    "pkgx": {
+        "description": "Standalone package runner that can run tools on demand",
+        "packages": {
+            "darwin": { "brew": "pkgx" },
+            "ubuntu": {
+                "manual": {
+                    "type": "script",
+                    "url": "https://pkgx.sh",
+                    "check_command": "pkgx"
+                }
+            },
+            "fedora": {
+                "manual": {
+                    "type": "script",
+                    "url": "https://pkgx.sh",
+                    "check_command": "pkgx"
+                }
+            },
+            "pop_os": {
+                "manual": {
+                    "type": "script",
+                    "url": "https://pkgx.sh",
+                    "check_command": "pkgx"
+                }
+            }
+        }
+    },
+    "zerobrew": {
+        "description": "Experimental high-performance Homebrew-compatible package manager",
+        "packages": {
+            "darwin": { "brew": "lucasgelfond/zerobrew/zerobrew" },
+            "ubuntu": {
+                "manual": {
+                    "type": "script",
+                    "url": "https://zerobrew.rs/install",
+                    "check_command": "zb"
+                }
+            },
+            "fedora": {
+                "manual": {
+                    "type": "script",
+                    "url": "https://zerobrew.rs/install",
+                    "check_command": "zb"
+                }
+            },
+            "pop_os": {
+                "manual": {
+                    "type": "script",
+                    "url": "https://zerobrew.rs/install",
+                    "check_command": "zb"
+                }
+            }
+        }
+    },
     "rclone": {
         "description": "Command-line cloud storage sync tool",
         "packages": {
@@ -282,6 +353,15 @@
             }
         }
     },
+    "bun": {
+        "description": "JavaScript runtime, package manager, test runner, and bundler",
+        "packages": {
+            "darwin": { "brew": "bun" },
+            "ubuntu": { "brew": "bun" },
+            "fedora": { "brew": "bun" },
+            "pop_os": { "brew": "bun" }
+        }
+    },
     "go": {
         "description": "Go programming language",
         "packages": {
@@ -298,6 +378,24 @@
             "ubuntu": { "apt": "python3-uv" },
             "fedora": { "brew": "uv" },
             "pop_os": { "apt": "python3-uv" }
+        }
+    },
+    "mise": {
+        "description": "Polyglot runtime, environment, and task manager",
+        "packages": {
+            "darwin": { "brew": "mise" },
+            "ubuntu": { "brew": "mise" },
+            "fedora": { "brew": "mise" },
+            "pop_os": { "brew": "mise" }
+        }
+    },
+    "mergiraf": {
+        "description": "Syntax-aware merge driver for Git",
+        "packages": {
+            "darwin": { "cargo": "--locked mergiraf" },
+            "ubuntu": { "cargo": "--locked mergiraf" },
+            "fedora": { "cargo": "--locked mergiraf" },
+            "pop_os": { "cargo": "--locked mergiraf" }
         }
     },
     "gh": {
@@ -520,6 +618,52 @@
             "darwin": { "cask": "zen-browser" }
         }
     },
+    "apiark": {
+        "description": "Privacy-first local API client built with Tauri",
+        "packages": {
+            "darwin": { "cask": "apiark" },
+            "ubuntu": {
+                "manual": {
+                    "repo": "berbicanes/apiark",
+                    "type": "deb",
+                    "asset_pattern": "linux|amd64|.deb",
+                    "check_command": "apiark"
+                }
+            },
+            "fedora": {
+                "manual": {
+                    "repo": "berbicanes/apiark",
+                    "type": "rpm",
+                    "asset_pattern": "linux|x86_64|.rpm",
+                    "check_command": "apiark"
+                }
+            },
+            "pop_os": {
+                "manual": {
+                    "repo": "berbicanes/apiark",
+                    "type": "deb",
+                    "asset_pattern": "linux|amd64|.deb",
+                    "check_command": "apiark"
+                }
+            }
+        }
+    },
+    "tabularis": {
+        "description": "Lightweight developer-focused database management tool",
+        "packages": {
+            "darwin": { "cask": "tabularis" },
+            "ubuntu": { "snap": { "name": "tabularis" } },
+            "fedora": {
+                "manual": {
+                    "repo": "TabularisDB/tabularis",
+                    "type": "rpm",
+                    "asset_pattern": ".rpm",
+                    "check_command": "tabularis"
+                }
+            },
+            "pop_os": { "snap": { "name": "tabularis" } }
+        }
+    },
     "claude": {
         "description": "Claude desktop app by Anthropic",
         "packages": {
@@ -542,6 +686,125 @@
             "ubuntu": { "npm_global": "@openai/codex" },
             "fedora": { "npm_global": "@openai/codex" },
             "pop_os": { "npm_global": "@openai/codex" }
+        }
+    },
+    "proton-drive-cli": {
+        "description": "Official Proton Drive command-line interface",
+        "packages": {
+            "darwin": {
+                "manual": {
+                    "type": "shell",
+                    "command": "mkdir -p \"$HOME/.local/share\" \"$HOME/.local/bin\" && if [ -d \"$HOME/.local/share/proton-drive-sdk/.git\" ]; then git -C \"$HOME/.local/share/proton-drive-sdk\" pull --ff-only; else git clone https://github.com/ProtonDriveApps/sdk \"$HOME/.local/share/proton-drive-sdk\"; fi && cd \"$HOME/.local/share/proton-drive-sdk/js/cli\" && bun install && bun run build && install -m 0755 release/proton-drive \"$HOME/.local/bin/proton-drive\"",
+                    "check_command": "proton-drive"
+                }
+            },
+            "ubuntu": {
+                "manual": {
+                    "type": "shell",
+                    "command": "mkdir -p \"$HOME/.local/share\" \"$HOME/.local/bin\" && if [ -d \"$HOME/.local/share/proton-drive-sdk/.git\" ]; then git -C \"$HOME/.local/share/proton-drive-sdk\" pull --ff-only; else git clone https://github.com/ProtonDriveApps/sdk \"$HOME/.local/share/proton-drive-sdk\"; fi && cd \"$HOME/.local/share/proton-drive-sdk/js/cli\" && bun install && bun run build && install -m 0755 release/proton-drive \"$HOME/.local/bin/proton-drive\"",
+                    "check_command": "proton-drive"
+                }
+            },
+            "fedora": {
+                "manual": {
+                    "type": "shell",
+                    "command": "mkdir -p \"$HOME/.local/share\" \"$HOME/.local/bin\" && if [ -d \"$HOME/.local/share/proton-drive-sdk/.git\" ]; then git -C \"$HOME/.local/share/proton-drive-sdk\" pull --ff-only; else git clone https://github.com/ProtonDriveApps/sdk \"$HOME/.local/share/proton-drive-sdk\"; fi && cd \"$HOME/.local/share/proton-drive-sdk/js/cli\" && bun install && bun run build && install -m 0755 release/proton-drive \"$HOME/.local/bin/proton-drive\"",
+                    "check_command": "proton-drive"
+                }
+            },
+            "pop_os": {
+                "manual": {
+                    "type": "shell",
+                    "command": "mkdir -p \"$HOME/.local/share\" \"$HOME/.local/bin\" && if [ -d \"$HOME/.local/share/proton-drive-sdk/.git\" ]; then git -C \"$HOME/.local/share/proton-drive-sdk\" pull --ff-only; else git clone https://github.com/ProtonDriveApps/sdk \"$HOME/.local/share/proton-drive-sdk\"; fi && cd \"$HOME/.local/share/proton-drive-sdk/js/cli\" && bun install && bun run build && install -m 0755 release/proton-drive \"$HOME/.local/bin/proton-drive\"",
+                    "check_command": "proton-drive"
+                }
+            }
+        }
+    },
+    "paseo": {
+        "description": "CLI and daemon for orchestrating coding agents from anywhere",
+        "packages": {
+            "darwin": { "npm_global": "@getpaseo/cli" },
+            "ubuntu": { "npm_global": "@getpaseo/cli" },
+            "fedora": { "npm_global": "@getpaseo/cli" },
+            "pop_os": { "npm_global": "@getpaseo/cli" }
+        }
+    },
+    "paseo-desktop": {
+        "description": "Native desktop client for Paseo coding agent workflows",
+        "packages": {
+            "darwin": { "cask": "paseo" },
+            "ubuntu": {
+                "manual": {
+                    "type": "deb",
+                    "url": "https://github.com/getpaseo/paseo/releases/download/v0.1.93/Paseo-0.1.93-amd64.deb",
+                    "check_shell": "test -x /opt/Paseo/Paseo"
+                }
+            },
+            "fedora": {
+                "manual": {
+                    "type": "rpm",
+                    "url": "https://github.com/getpaseo/paseo/releases/download/v0.1.93/Paseo-0.1.93-x86_64.rpm",
+                    "check_shell": "test -x /opt/Paseo/Paseo"
+                }
+            },
+            "pop_os": {
+                "manual": {
+                    "type": "deb",
+                    "url": "https://github.com/getpaseo/paseo/releases/download/v0.1.93/Paseo-0.1.93-amd64.deb",
+                    "check_shell": "test -x /opt/Paseo/Paseo"
+                }
+            },
+            "linux": {
+                "manual": {
+                    "type": "appimage",
+                    "url": "https://github.com/getpaseo/paseo/releases/download/v0.1.93/Paseo-0.1.93-x86_64.AppImage",
+                    "dest": "$HOME/.local/bin/paseo-desktop.AppImage"
+                }
+            }
+        }
+    },
+    "codiff": {
+        "description": "Local native diff viewer for reviewing Git changes",
+        "packages": {
+            "darwin": { "cask": "nkzw-tech/tap/codiff" }
+        }
+    },
+    "caveman": {
+        "description": "AI coding agent skill/plugin that compresses assistant output",
+        "packages": {
+            "darwin": {
+                "manual": {
+                    "url": "https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.sh",
+                    "type": "script",
+                    "args": "--non-interactive",
+                    "check_shell": "test -s \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.caveman-active\" || test -f \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/caveman-activate.js\""
+                }
+            },
+            "ubuntu": {
+                "manual": {
+                    "url": "https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.sh",
+                    "type": "script",
+                    "args": "--non-interactive",
+                    "check_shell": "test -s \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.caveman-active\" || test -f \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/caveman-activate.js\""
+                }
+            },
+            "fedora": {
+                "manual": {
+                    "url": "https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.sh",
+                    "type": "script",
+                    "args": "--non-interactive",
+                    "check_shell": "test -s \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.caveman-active\" || test -f \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/caveman-activate.js\""
+                }
+            },
+            "pop_os": {
+                "manual": {
+                    "url": "https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.sh",
+                    "type": "script",
+                    "args": "--non-interactive",
+                    "check_shell": "test -s \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.caveman-active\" || test -f \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/caveman-activate.js\""
+                }
+            }
         }
     },
     "copilot-cli": {
@@ -753,107 +1016,77 @@
             "pop_os": { "eget": "alexhallam/tv" }
         }
     },
-    "oh-my-zsh": {
-        "description": "Framework for managing zsh configuration",
+    "rtk": {
+        "description": "CLI proxy that compresses terminal output for AI agents",
         "packages": {
             "darwin": {
                 "manual": {
-                    "url": "https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh",
+                    "url": "https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh",
                     "type": "script",
-                    "check_dir": "$HOME/.oh-my-zsh",
-                    "args": "--unattended"
+                    "check_shell": "command -v rtk >/dev/null 2>&1 && test -f \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/rtk-rewrite.sh\" && test -f \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/.rtk-hook.sha256\"",
+                    "post_install": ["rtk init -g"]
                 }
             },
             "ubuntu": {
                 "manual": {
-                    "url": "https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh",
+                    "url": "https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh",
                     "type": "script",
-                    "check_dir": "$HOME/.oh-my-zsh",
-                    "args": "--unattended"
+                    "check_shell": "command -v rtk >/dev/null 2>&1 && test -f \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/rtk-rewrite.sh\" && test -f \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/.rtk-hook.sha256\"",
+                    "post_install": ["rtk init -g"]
                 }
             },
             "fedora": {
                 "manual": {
-                    "url": "https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh",
+                    "url": "https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh",
                     "type": "script",
-                    "check_dir": "$HOME/.oh-my-zsh",
-                    "args": "--unattended"
+                    "check_shell": "command -v rtk >/dev/null 2>&1 && test -f \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/rtk-rewrite.sh\" && test -f \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/.rtk-hook.sha256\"",
+                    "post_install": ["rtk init -g"]
                 }
             },
             "pop_os": {
                 "manual": {
-                    "url": "https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh",
+                    "url": "https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh",
                     "type": "script",
-                    "check_dir": "$HOME/.oh-my-zsh",
-                    "args": "--unattended"
+                    "check_shell": "command -v rtk >/dev/null 2>&1 && test -f \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/rtk-rewrite.sh\" && test -f \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/.rtk-hook.sha256\"",
+                    "post_install": ["rtk init -g"]
                 }
             }
         }
     },
-    "zsh-autosuggestions": {
-        "description": "Fish-like autosuggestions for zsh",
+    "antidote": {
+        "description": "Fast zsh plugin manager",
         "packages": {
-            "darwin": {
-                "manual": {
-                    "url": "https://github.com/zsh-users/zsh-autosuggestions",
-                    "type": "git_clone",
-                    "dest": "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
-                }
-            },
+            "darwin": { "brew": "antidote" },
             "ubuntu": {
                 "manual": {
-                    "url": "https://github.com/zsh-users/zsh-autosuggestions",
+                    "url": "https://github.com/mattmc3/antidote.git",
                     "type": "git_clone",
-                    "dest": "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
+                    "dest": "$HOME/.antidote"
                 }
             },
             "fedora": {
                 "manual": {
-                    "url": "https://github.com/zsh-users/zsh-autosuggestions",
+                    "url": "https://github.com/mattmc3/antidote.git",
                     "type": "git_clone",
-                    "dest": "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
+                    "dest": "$HOME/.antidote"
                 }
             },
             "pop_os": {
                 "manual": {
-                    "url": "https://github.com/zsh-users/zsh-autosuggestions",
+                    "url": "https://github.com/mattmc3/antidote.git",
                     "type": "git_clone",
-                    "dest": "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
+                    "dest": "$HOME/.antidote"
                 }
             }
         }
     },
-    "zsh-syntax-highlighting": {
-        "description": "Fish-like syntax highlighting for zsh",
+    "zsh-patina": {
+        "description": "Fast Rust-backed zsh syntax highlighter",
         "packages": {
-            "darwin": {
-                "manual": {
-                    "url": "https://github.com/zsh-users/zsh-syntax-highlighting.git",
-                    "type": "git_clone",
-                    "dest": "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
-                }
-            },
-            "ubuntu": {
-                "manual": {
-                    "url": "https://github.com/zsh-users/zsh-syntax-highlighting.git",
-                    "type": "git_clone",
-                    "dest": "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
-                }
-            },
-            "fedora": {
-                "manual": {
-                    "url": "https://github.com/zsh-users/zsh-syntax-highlighting.git",
-                    "type": "git_clone",
-                    "dest": "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
-                }
-            },
-            "pop_os": {
-                "manual": {
-                    "url": "https://github.com/zsh-users/zsh-syntax-highlighting.git",
-                    "type": "git_clone",
-                    "dest": "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
-                }
-            }
+            "darwin": { "brew": "zsh-patina" },
+            "ubuntu": { "cargo": "--locked zsh-patina" },
+            "fedora": { "cargo": "--locked zsh-patina" },
+            "pop_os": { "cargo": "--locked zsh-patina" }
         }
     },
     "gimp": {
@@ -908,65 +1141,38 @@
             "pop_os": { "apt": "flameshot" }
         }
     },
-    "wox": {
-        "description": "Cross-platform launcher with plugins, calculator, clipboard history and theming",
-        "packages": {
-            "darwin": { "brew": "wox-launcher/wox/wox" },
-            "ubuntu": {
-                "manual": {
-                    "repo": "Wox-launcher/Wox",
-                    "type": "appimage",
-                    "asset_pattern": "linux-amd64.AppImage",
-                    "check_command": "wox"
-                }
-            },
-            "fedora": {
-                "manual": {
-                    "repo": "Wox-launcher/Wox",
-                    "type": "appimage",
-                    "asset_pattern": "linux-amd64.AppImage",
-                    "check_command": "wox"
-                }
-            },
-            "pop_os": {
-                "manual": {
-                    "repo": "Wox-launcher/Wox",
-                    "type": "appimage",
-                    "asset_pattern": "linux-amd64.AppImage",
-                    "check_command": "wox"
-                }
-            }
-        }
-    },
-    "pure-prompt": {
-        "description": "Pretty, minimal and fast ZSH prompt",
+    "asyar": {
+        "description": "Local-first cross-platform launcher and open-source Raycast alternative",
         "packages": {
             "darwin": {
                 "manual": {
-                    "url": "https://github.com/sindresorhus/pure.git",
-                    "type": "git_clone",
-                    "dest": "$HOME/.zsh/pure"
+                    "repo": "Xoshbin/asyar",
+                    "type": "dmg",
+                    "asset_pattern": "aarch64.dmg"
                 }
             },
             "ubuntu": {
                 "manual": {
-                    "url": "https://github.com/sindresorhus/pure.git",
-                    "type": "git_clone",
-                    "dest": "$HOME/.zsh/pure"
+                    "repo": "Xoshbin/asyar",
+                    "type": "appimage",
+                    "asset_pattern": "amd64.AppImage",
+                    "check_command": "asyar"
                 }
             },
             "fedora": {
                 "manual": {
-                    "url": "https://github.com/sindresorhus/pure.git",
-                    "type": "git_clone",
-                    "dest": "$HOME/.zsh/pure"
+                    "repo": "Xoshbin/asyar",
+                    "type": "appimage",
+                    "asset_pattern": "amd64.AppImage",
+                    "check_command": "asyar"
                 }
             },
             "pop_os": {
                 "manual": {
-                    "url": "https://github.com/sindresorhus/pure.git",
-                    "type": "git_clone",
-                    "dest": "$HOME/.zsh/pure"
+                    "repo": "Xoshbin/asyar",
+                    "type": "appimage",
+                    "asset_pattern": "amd64.AppImage",
+                    "check_command": "asyar"
                 }
             }
         }

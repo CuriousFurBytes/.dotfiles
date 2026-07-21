@@ -9,10 +9,12 @@
     editor = hx
     autocrlf = input
     excludesfile = ~/.gitignore_global
+    attributesfile = ~/.gitattributes
     pager = delta
 
 [interactive]
     diffFilter = delta --color-only
+    
 
 [delta]
     dark = true
@@ -43,7 +45,15 @@
 
 [merge]
     tool = nvimdiff
-    conflictStyle = zdiff3
+    conflictStyle = diff3
+
+[merge "mergiraf"]
+    name = mergiraf
+    driver = mergiraf merge --git %O %A %B -s %S -x %X -y %Y -p %P -l %L
+
+[rerere]
+    enabled = true
+    autoupdate = true
 
 [credential]
     helper = {{ if eq .chezmoi.os "darwin" }}osxkeychain{{ else }}store{{ end }}

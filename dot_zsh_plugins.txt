@@ -1,0 +1,8 @@
+# Prompt
+sindresorhus/pure kind:fpath
+
+# Completion
+zsh-users/zsh-completions kind:fpath path:src
+
+# Fish-like shell UX. Antidote's kind:defer keeps this off the critical path.
+zsh-users/zsh-autosuggestions kind:defer

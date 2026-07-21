@@ -12,6 +12,15 @@
     "outline_panel": { "dock": "right" },
     "collaboration_panel": { "dock": "right" },
     "agent_servers": {
+        "opencode": {
+            "type": "registry",
+        },
+        "mistral-vibe": {
+            "type": "registry",
+        },
+        "codex-acp": {
+            "type": "registry",
+        },
         "cursor": {
             "type": "registry",
         },
@@ -32,11 +41,21 @@
             "settings": {},
         },
     },
-    "ui_font_family": "Monaspace Krypton Frozen",
+    "ui_font_family": "MonaspiceAr Nerd Font Mono",
     "icon_theme": "Phosphor Icons Theme",
-    "buffer_font_family": "Monaspace Argon Frozen",
+    "buffer_font_family": "MonaspiceAr Nerd Font Mono",
     "buffer_font_features": {
-        "calt": true,
+        "liga": true,
+        "ss01": true,
+        "ss02": true,
+        "ss03": true,
+        "ss04": true,
+        "ss05": true,
+        "ss06": true,
+        "ss07": true,
+        "ss08": true,
+        "ss09": true,
+        "ss10": true,
     },
     "ui_font_size": 13.5,
     "buffer_font_size": 13.0,
@@ -198,6 +217,7 @@
             "provider": "copilot_chat",
             "model": "gemini-3-flash-preview",
         },
+        "commit_message_instructions": "Generate commit messages using Conventional Commits. Use a title in the form type(scope): summary or type: summary. Keep the title at or under 72 characters. After the title, add a blank line and a body with 3-5 bullet points. Each bullet must explain a concrete change or rationale and stay concise. Do not add footers unless they are required by the diff.",
         "default_model": {
             "provider": "anthropic",
             "model": "claude-sonnet-4-5-20250929",

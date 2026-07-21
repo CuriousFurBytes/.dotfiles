@@ -222,7 +222,9 @@ func (a *App) stepInstallProtonPass() error {
 		Title("Installing Proton Pass CLI...").
 		Action(func() {
 			if a.osInfo.Target == "darwin" {
-				runShellSilent("brew tap protonpass/tap")
+				if installErr = brewTapAndTrust("protonpass/tap"); installErr != nil {
+					return
+				}
 				_, installErr = runShellSilent("brew install protonpass/tap/pass-cli")
 			} else {
 				_, installErr = runShellSilent("curl -fsSL https://proton.me/download/pass-cli/install.sh | bash")
@@ -531,7 +533,7 @@ func (a *App) stepInstallPackages() error {
 			Title("Adding brew taps...").
 			Action(func() {
 				for _, tap := range a.catalog.BrewTaps {
-					if _, err := runShellSilent(fmt.Sprintf("brew tap %s", tap)); err != nil {
+					if err := brewTapAndTrust(tap); err != nil {
 						tapErr = err
 					}
 				}
@@ -611,7 +613,10 @@ func (a *App) stepInstallPackages() error {
 	for i, formula := range brewFormulas {
 		name := brewNames[i]
 		debugLog("installing brew formula: %s", formula)
-		installErr := a.spinOrRun(fmt.Sprintf("Installing %s...", name), fmt.Sprintf("brew install %s", formula))
+		installErr := brewTrustPackageRef(formula)
+		if installErr == nil {
+			installErr = a.spinOrRun(fmt.Sprintf("Installing %s...", name), fmt.Sprintf("brew install %s", formula))
+		}
 		if installErr != nil {
 			fmt.Println(statusFail(name))
 			a.results = append(a.results, InstallResult{Name: name, Method: "brew", Status: "fail", Error: installErr.Error()})
@@ -625,7 +630,10 @@ func (a *App) stepInstallPackages() error {
 	for i, cask := range casks {
 		name := caskNames[i]
 		debugLog("installing cask: %s", cask)
-		installErr := a.spinOrRun(fmt.Sprintf("Installing %s...", name), fmt.Sprintf("brew install --cask %s", cask))
+		installErr := brewTrustPackageRef(cask)
+		if installErr == nil {
+			installErr = a.spinOrRun(fmt.Sprintf("Installing %s...", name), fmt.Sprintf("brew install --cask %s", cask))
+		}
 		if installErr != nil {
 			fmt.Println(statusFail(name))
 			a.results = append(a.results, InstallResult{Name: name, Method: "cask", Status: "fail", Error: installErr.Error()})

@@ -7,9 +7,22 @@
 
 // Privacy & Security
 user_pref("browser.contentblocking.category", "strict");
+user_pref("beacon.enabled", false);
+user_pref("browser.send_pings", false);
+user_pref("captivedetect.canonicalURL", "");
+user_pref("datareporting.healthreport.uploadEnabled", false);
+user_pref("datareporting.policy.dataSubmissionEnabled", false);
+user_pref("datareporting.policy.dataSubmissionEnable", false);
+user_pref("dom.private-attribution.submission.enabled", false);
+user_pref("dom.serviceWorkers.enabled", false);
+user_pref("extensions.pocket.enabled", false);
+user_pref("extensions.ml.enabled", false);
+user_pref("geo.enabled", false);
+user_pref("network.IDN_show_punycode", true);
 user_pref("privacy.annotate_channels.strict_list.enabled", true);
 user_pref("privacy.bounceTrackingProtection.mode", 1);
 user_pref("privacy.fingerprintingProtection", true);
+user_pref("privacy.globalprivacycontrol.enabled", true);
 user_pref("privacy.globalprivacycontrol.was_ever_enabled", true);
 user_pref("privacy.query_stripping.enabled", true);
 user_pref("privacy.query_stripping.enabled.pbmode", true);
@@ -33,6 +46,7 @@ user_pref(
 // Network Performance & Privacy
 user_pref("network.dns.disablePrefetch", true);
 user_pref("network.http.speculative-parallel-limit", 0);
+user_pref("network.predictor.enabled", false);
 user_pref("network.prefetch-next", false);
 user_pref(
     "network.http.referer.disallowCrossSiteRelaxingDefault.top_navigation",
@@ -45,8 +59,21 @@ user_pref("browser.cache.memory.enable", true);
 
 // UI Preferences
 user_pref("browser.download.useDownloadDir", false); // Always ask where to save files
+user_pref("browser.newtabpage.activity-stream.showSponsoredCheckboxes", false);
+user_pref("browser.newtabpage.activity-stream.showWeather", false);
+user_pref("browser.places.interactions.enabled", false);
 user_pref("browser.preferences.experimental.hidden", true);
+user_pref("browser.startup.homepage", "about:blank");
+user_pref("browser.startup.page", 0);
 user_pref("browser.theme.toolbar-theme", 0);
+user_pref("browser.urlbar.clipboard.featureGate", false);
+user_pref("browser.urlbar.quicksuggest.enabled", false);
+user_pref("browser.urlbar.recentsearches.featureGate", false);
+user_pref("browser.urlbar.richSuggestions.featureGate", false);
+user_pref("browser.urlbar.suggest.quicksuggest.all", false);
+user_pref("browser.urlbar.trending.featureGate", false);
+user_pref("browser.urlbar.trimURLs", false);
+user_pref("browser.urlbar.weather.featureGate", false);
 user_pref("layout.css.prefers-color-scheme.content-override", 0);
 user_pref("layout.spellcheckDefault", 0);
 
@@ -56,13 +83,17 @@ user_pref("extensions.formautofill.creditCards.enabled", false);
 user_pref("signon.rememberSignons", false);
 
 // Search
-user_pref("browser.search.suggest.enabled", true);
+user_pref("browser.search.suggest.enabled", false);
 user_pref("browser.search.separatePrivateDefault", false);
 
 // Experimental Features
 user_pref("layout.css.scroll-driven-animations.enabled", true); // Enable CSS scroll-driven animations
-user_pref("browser.ml.enable", true); // Machine Learning features
-user_pref("pdfjs.enableAltText", true); // PDF alt text
+user_pref("browser.ml.chat.enabled", false);
+user_pref("browser.ml.enable", false);
+user_pref("browser.ml.linkPreview.enabled", false);
+user_pref("browser.tabs.group.smart.userEnabled", false);
+user_pref("browser.tabs.groups.smart.enabled", false);
+user_pref("pdfjs.enableAltText", false);
 
 // Enable userChrome.css and userContent.css
 user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);

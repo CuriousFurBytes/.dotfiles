@@ -69,15 +69,17 @@ func (s *SnapSpec) UnmarshalJSON(data []byte) error {
 
 // ManualSpec for manual installation (script, git_clone, dmg, deb, appimage)
 type ManualSpec struct {
-	URL          string `json:"url,omitempty"`
-	Repo         string `json:"repo,omitempty"`          // GitHub repo "owner/name" for gh release download
-	AssetPattern string `json:"asset_pattern,omitempty"` // suffix to match release asset filename
-	Type         string `json:"type"`                    // "script", "git_clone", "dmg", "deb", "rpm", "appimage"
-	Dest         string `json:"dest,omitempty"`
-	CheckCommand string `json:"check_command,omitempty"`
-	CheckShell   string `json:"check_shell,omitempty"`
-	CheckDir     string `json:"check_dir,omitempty"`
-	Args         string `json:"args,omitempty"`
+	URL          string   `json:"url,omitempty"`
+	Repo         string   `json:"repo,omitempty"`          // GitHub repo "owner/name" for gh release download
+	AssetPattern string   `json:"asset_pattern,omitempty"` // suffix to match release asset filename
+	Type         string   `json:"type"`                    // "script", "git_clone", "dmg", "deb", "rpm", "appimage"
+	Command      string   `json:"command,omitempty"`
+	Dest         string   `json:"dest,omitempty"`
+	CheckCommand string   `json:"check_command,omitempty"`
+	CheckShell   string   `json:"check_shell,omitempty"`
+	CheckDir     string   `json:"check_dir,omitempty"`
+	Args         string   `json:"args,omitempty"`
+	PostInstall  []string `json:"post_install,omitempty"`
 }
 
 // MethodName returns the install method name for this InstallMethod
@@ -148,29 +150,32 @@ var categoryMap = map[string]string{
 	"fzf": "Terminal Tools", "eza": "Terminal Tools", "bottom": "Terminal Tools",
 	"zoxide": "Terminal Tools", "zellij": "Terminal Tools", "lazygit": "Terminal Tools",
 	"lazydocker": "Terminal Tools", "glow": "Terminal Tools", "television": "Terminal Tools",
-	"difftastic": "Terminal Tools", "ghostty": "Terminal Tools",
+	"difftastic": "Terminal Tools", "ghostty": "Terminal Tools", "worktrunk": "Terminal Tools",
+	"pkgx": "Terminal Tools", "zerobrew": "Terminal Tools",
 
 	// Development
 	"node": "Development", "npm": "Development", "nvm": "Development",
 	"go": "Development", "uv": "Development", "python3-pip": "Development",
+	"bun": "Development", "mise": "Development", "proton-drive-cli": "Development",
 	"pre-commit": "Development", "biome": "Development", "ipython": "Development",
 	"jupyter": "Development", "just": "Development", "act": "Development",
 	"rumdl": "Development", "djlint": "Development", "gitscribe": "Development", "harlequin": "Development",
-	"euporie": "Development",
+	"euporie": "Development", "mergiraf": "Development", "paseo": "Development", "codiff": "Development",
+	"paseo-desktop": "GUI Applications",
 
 	// GUI Applications
 	"zen-browser": "GUI Applications", "claude": "GUI Applications",
 	"claude-code": "GUI Applications",
 	"obsidian":    "GUI Applications", "thunderbird": "GUI Applications",
 	"gimp": "GUI Applications", "flameshot": "GUI Applications", "screenvivid": "GUI Applications",
-	"wox": "GUI Applications", "protonvpn": "GUI Applications",
+	"asyar": "GUI Applications", "protonvpn": "GUI Applications",
 	"localsend": "GUI Applications", "httpie-desktop": "GUI Applications",
 	"ente-auth": "GUI Applications", "proton-pass": "GUI Applications",
-	"alt-tab": "GUI Applications", "logi-options-plus": "GUI Applications",
+	"alt-tab": "GUI Applications", "logi-options-plus": "GUI Applications", "apiark": "GUI Applications",
+	"tabularis": "GUI Applications",
 
 	// Shell & Prompt
-	"oh-my-zsh": "Shell & Prompt", "zsh-autosuggestions": "Shell & Prompt",
-	"zsh-syntax-highlighting": "Shell & Prompt", "pure-prompt": "Shell & Prompt",
+	"antidote": "Shell & Prompt", "zsh-patina": "Shell & Prompt",
 
 	// Utilities
 	"rclone": "Utilities", "rclone-ui": "Utilities", "topgrade": "Utilities", "httpie": "Utilities",
@@ -189,7 +194,7 @@ var categoryMap = map[string]string{
 	"proton-pass-cli": "Proton",
 
 	// AI Tools
-	"llama-cpp": "AI Tools",
+	"caveman": "AI Tools", "llama-cpp": "AI Tools", "rtk": "AI Tools",
 }
 
 var categoryOrder = []string{

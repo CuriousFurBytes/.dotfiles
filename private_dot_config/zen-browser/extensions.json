@@ -6,6 +6,11 @@
             "url": "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi"
         },
         {
+            "name": "Cookie AutoDelete",
+            "id": "{b86e4813-687a-43e6-ab65-0bde4ab75758}",
+            "url": "https://addons.mozilla.org/firefox/downloads/latest/cookie-autodelete/latest.xpi"
+        },
+        {
             "name": "Dark Reader",
             "id": "addon@darkreader.org",
             "url": "https://addons.mozilla.org/firefox/downloads/latest/darkreader/latest.xpi"

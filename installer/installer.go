@@ -60,6 +60,58 @@ func parseFirstWord(output string) map[string]bool {
 	return m
 }
 
+var brewTrustCheck struct {
+	once      sync.Once
+	supported bool
+}
+
+func shellQuote(s string) string {
+	return "'" + strings.ReplaceAll(s, "'", "'\"'\"'") + "'"
+}
+
+func brewSupportsTrust() bool {
+	brewTrustCheck.once.Do(func() {
+		_, err := runShellSilent("brew help trust >/dev/null 2>&1")
+		brewTrustCheck.supported = err == nil
+	})
+	return brewTrustCheck.supported
+}
+
+func brewTapFromPackageRef(ref string) (string, bool) {
+	parts := strings.Split(ref, "/")
+	if len(parts) < 3 {
+		return "", false
+	}
+
+	tap := parts[0] + "/" + parts[1]
+	if strings.HasPrefix(tap, "homebrew/") {
+		return "", false
+	}
+	return tap, true
+}
+
+func brewTapAndTrust(tap string) error {
+	if tap == "" {
+		return nil
+	}
+	if _, err := runShellSilent(fmt.Sprintf("brew tap %s", shellQuote(tap))); err != nil {
+		return err
+	}
+	if !brewSupportsTrust() {
+		return nil
+	}
+	_, err := runShellSilent(fmt.Sprintf("brew trust %s", shellQuote(tap)))
+	return err
+}
+
+func brewTrustPackageRef(ref string) error {
+	tap, ok := brewTapFromPackageRef(ref)
+	if !ok {
+		return nil
+	}
+	return brewTapAndTrust(tap)
+}
+
 // PackageInstaller handles all package installation logic
 type PackageInstaller struct {
 	target string
@@ -136,7 +188,11 @@ func (pi *PackageInstaller) IsInstalled(name string, method InstallMethod) bool 
 			}
 			return result
 		})
-		return installed[method.Cask]
+		cask := method.Cask
+		if idx := strings.LastIndex(cask, "/"); idx >= 0 {
+			cask = cask[idx+1:]
+		}
+		return installed[cask] || installed[method.Cask]
 	case "apt":
 		installed := pi.cache.get("apt", func() map[string]bool {
 			out, _ := runShellSilent("dpkg-query -W -f='${Package}\n' 2>/dev/null")
@@ -166,7 +222,14 @@ func (pi *PackageInstaller) IsInstalled(name string, method InstallMethod) bool 
 			out, _ := runShellSilent("cargo install --list")
 			return parseFirstWord(out)
 		})
-		return installed[method.Cargo]
+		cargoPkg := method.Cargo
+		for _, field := range strings.Fields(method.Cargo) {
+			if !strings.HasPrefix(field, "-") {
+				cargoPkg = field
+				break
+			}
+		}
+		return installed[cargoPkg] || installed[method.Cargo]
 	case "go_tool":
 		binName := method.GoTool
 		if idx := strings.LastIndex(binName, "/"); idx >= 0 {
@@ -294,8 +357,14 @@ func (pi *PackageInstaller) Install(pkg Package) InstallResult {
 	var err error
 	switch methodName {
 	case "brew":
+		if err = brewTrustPackageRef(method.Brew); err != nil {
+			break
+		}
 		err = pi.run(fmt.Sprintf("brew install %s", method.Brew))
 	case "cask":
+		if err = brewTrustPackageRef(method.Cask); err != nil {
+			break
+		}
 		err = pi.run(fmt.Sprintf("brew install --cask %s", method.Cask))
 	case "apt":
 		err = pi.run(fmt.Sprintf("sudo apt install -y %s", method.Apt))
@@ -355,6 +424,7 @@ func (pi *PackageInstaller) Install(pkg Package) InstallResult {
 }
 
 func (pi *PackageInstaller) installManual(name string, manual *ManualSpec) error {
+	var err error
 	switch manual.Type {
 	case "script":
 		args := manual.Args
@@ -364,29 +434,42 @@ func (pi *PackageInstaller) installManual(name string, manual *ManualSpec) error
 		} else {
 			cmd = fmt.Sprintf("curl -fsSL %s | bash", manual.URL)
 		}
-		return pi.run(cmd)
+		err = pi.run(cmd)
+	case "shell":
+		err = pi.run(manual.Command)
 	case "git_clone":
 		expanded, _ := runShellSilent(fmt.Sprintf("echo %s", manual.Dest))
 		dest := strings.TrimSpace(expanded)
 		if info, err := os.Stat(dest); err == nil && info.IsDir() {
-			return pi.run(fmt.Sprintf("git -C %s pull --ff-only", dest))
+			err = pi.run(fmt.Sprintf("git -C %s pull --ff-only", dest))
+			break
 		}
 		os.MkdirAll(filepath.Dir(dest), 0o755)
-		return pi.run(fmt.Sprintf("git clone %s %s", manual.URL, dest))
+		err = pi.run(fmt.Sprintf("git clone %s %s", manual.URL, dest))
 	case "dmg":
-		return pi.installDmg(manual)
+		err = pi.installDmg(manual)
 	case "zip":
-		return pi.installZip(manual)
+		err = pi.installZip(manual)
 	case "tar_gz":
-		return pi.installTarGz(manual)
+		err = pi.installTarGz(manual)
 	case "deb":
-		return pi.installDeb(manual)
+		err = pi.installDeb(manual)
 	case "rpm":
-		return pi.installRpm(manual)
+		err = pi.installRpm(manual)
 	case "appimage":
-		return pi.installAppImage(manual)
+		err = pi.installAppImage(manual)
+	default:
+		return fmt.Errorf("unknown manual type: %s", manual.Type)
 	}
-	return fmt.Errorf("unknown manual type: %s", manual.Type)
+	if err != nil {
+		return err
+	}
+	for _, cmd := range manual.PostInstall {
+		if err := pi.run(cmd); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // resolveGhAssetURL returns the download URL for a GitHub release asset matching
@@ -414,8 +497,23 @@ func resolveGhAssetURL(repo, assetPattern string) (string, error) {
 	return url, nil
 }
 
+func resolveManualURL(manual *ManualSpec) (string, error) {
+	if manual.URL != "" {
+		out, err := runShellSilent(fmt.Sprintf("printf '%%s' %s", shellQuote(manual.URL)))
+		if err != nil {
+			return "", fmt.Errorf("expand manual url: %w", err)
+		}
+		url := strings.TrimSpace(out)
+		if url == "" {
+			return "", fmt.Errorf("manual url is empty")
+		}
+		return url, nil
+	}
+	return resolveGhAssetURL(manual.Repo, manual.AssetPattern)
+}
+
 func (pi *PackageInstaller) installDmg(manual *ManualSpec) error {
-	url, err := resolveGhAssetURL(manual.Repo, manual.AssetPattern)
+	url, err := resolveManualURL(manual)
 	if err != nil {
 		return err
 	}
@@ -464,7 +562,7 @@ func (pi *PackageInstaller) installDmg(manual *ManualSpec) error {
 }
 
 func (pi *PackageInstaller) installZip(manual *ManualSpec) error {
-	url, err := resolveGhAssetURL(manual.Repo, manual.AssetPattern)
+	url, err := resolveManualURL(manual)
 	if err != nil {
 		return err
 	}
@@ -500,7 +598,7 @@ func (pi *PackageInstaller) installZip(manual *ManualSpec) error {
 }
 
 func (pi *PackageInstaller) installTarGz(manual *ManualSpec) error {
-	url, err := resolveGhAssetURL(manual.Repo, manual.AssetPattern)
+	url, err := resolveManualURL(manual)
 	if err != nil {
 		return err
 	}
@@ -545,7 +643,7 @@ func (pi *PackageInstaller) installTarGz(manual *ManualSpec) error {
 }
 
 func (pi *PackageInstaller) installDeb(manual *ManualSpec) error {
-	url, err := resolveGhAssetURL(manual.Repo, manual.AssetPattern)
+	url, err := resolveManualURL(manual)
 	if err != nil {
 		return err
 	}
@@ -563,7 +661,7 @@ func (pi *PackageInstaller) installDeb(manual *ManualSpec) error {
 }
 
 func (pi *PackageInstaller) installRpm(manual *ManualSpec) error {
-	url, err := resolveGhAssetURL(manual.Repo, manual.AssetPattern)
+	url, err := resolveManualURL(manual)
 	if err != nil {
 		return err
 	}
@@ -581,7 +679,7 @@ func (pi *PackageInstaller) installRpm(manual *ManualSpec) error {
 }
 
 func (pi *PackageInstaller) installAppImage(manual *ManualSpec) error {
-	url, err := resolveGhAssetURL(manual.Repo, manual.AssetPattern)
+	url, err := resolveManualURL(manual)
 	if err != nil {
 		return err
 	}
@@ -637,7 +735,7 @@ func (pi *PackageInstaller) BatchInstallDnf(pkgs []string) error {
 func (pi *PackageInstaller) InstallBrewTaps(taps []string) []InstallResult {
 	var results []InstallResult
 	for _, tap := range taps {
-		_, err := runShellSilent(fmt.Sprintf("brew tap %s", tap))
+		err := brewTapAndTrust(tap)
 		if err != nil {
 			results = append(results, InstallResult{Name: tap, Method: "tap", Status: "fail", Error: err.Error()})
 		} else {
