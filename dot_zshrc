@@ -263,7 +263,11 @@ pnpm() {
 
 # zsh-patina should activate at the end so it sees the final ZLE setup.
 if (( $+commands[zsh-patina] )); then
-    eval "$(zsh-patina activate)"
+    if (( $+functions[zsh-defer] )); then
+        zsh-defer -c 'eval "$(command zsh-patina activate)"'
+    else
+        eval "$(zsh-patina activate)"
+    fi
 fi
 
 true
