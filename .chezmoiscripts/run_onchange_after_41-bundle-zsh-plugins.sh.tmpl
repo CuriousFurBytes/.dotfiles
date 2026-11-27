@@ -1,0 +1,22 @@
+#!/bin/zsh
+# hash: {{ include "dot_zsh_plugins.txt" | sha256sum }}
+set -e
+
+ZSH_PLUGINS_TXT="${HOME}/.zsh_plugins.txt"
+ZSH_PLUGINS_ZSH="${HOME}/.zsh_plugins.zsh"
+
+{{ if eq .chezmoi.os "darwin" }}
+ANTIDOTE_ZSH="$(brew --prefix)/share/antidote/antidote.zsh"
+{{ else }}
+ANTIDOTE_ZSH="${HOME}/.antidote/antidote.zsh"
+{{ end }}
+
+if [[ ! -f "${ANTIDOTE_ZSH}" ]]; then
+    echo "antidote not found, skipping plugin bundle"
+    exit 0
+fi
+
+echo "Bundling zsh plugins..."
+source "${ANTIDOTE_ZSH}"
+antidote bundle < "${ZSH_PLUGINS_TXT}" > "${ZSH_PLUGINS_ZSH}"
+echo "✓ Wrote ${ZSH_PLUGINS_ZSH}"
